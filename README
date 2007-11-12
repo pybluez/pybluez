@@ -1,0 +1,71 @@
+PyBluez
+
+Python extension module allowing access to system Bluetooth resources.
+
+http://org.csail.mit.edu/pybluez
+
+BUILD REQUIREMENTS:
+
+  GNU/Linux:
+     - Python 2.3 or Python 2.4
+     - Python distutils (standard in most Python distros, separate package
+                         python-dev in Debian)
+     - BlueZ libraries and header files
+
+  Windows XP:
+    - Microsoft Windows XP SP1
+    - Microsoft Visual Studio
+    - Microsoft Windows Platform SDK
+    - Widcomm BTW development kit 5.0 or later (Optional)
+    - Python 2.3 or more recent version
+
+
+INSTALLATION:
+  from a command shell:
+
+  # python setup.py install
+
+DOCUMENTATION:
+  from a command shell:
+
+  # doc/gendoc
+
+  API documentation will then be located at doc/bluetooth.html and
+  doc/_bluetooth.html for low-level access
+
+EXAMPLES:
+  GNU/Linux and Windows XP:
+
+  # examples/simple/inquiry.py
+  # examples/simple/sdp-browse.py
+  # examples/simple/rfcomm-server.py
+  # examples/simple/rfcomm-client.py
+
+  GNU/Linux only:
+
+  # exmaples/simple/l2capserver.py
+  # exmaples/simple/l2capclient.py
+  # examples/simple/asynchronous-inquiry.py
+  # examples/bluezchat   (requires PyGTK)
+
+  # examples/advanced/inquiry-with-rssi.py
+  # examples/l2-unreliable-server.py
+  # examples/l2-unreliable-client.py
+
+CONTACT:
+  Albert Huang <albert@csail.mit.edu>
+
+LICENSE:
+
+  PyBluez is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2 of the License, or (at your option) any later
+  version.
+  
+  PyBluez is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+  A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License along with
+  PyBluez; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
+  Fifth Floor, Boston, MA  02110-1301  USA

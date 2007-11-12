@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# XXX there's gotta be a better way to do this... 
+# why doesn't pydoc -w [path] work?
+
+gendocdir=`dirname $0`
+cwd=`pwd`
+for d in $gendocdir/../build/lib*/ 
+do
+    cd $d
+    pydoc -w bluetooth >> /dev/null
+    pydoc -w _bluetooth >> /dev/null
+    mv -f bluetooth.html ../../doc/bluetooth.html
+    mv -f _bluetooth.html ../../doc/_bluetooth.html
+    break
+done
+
+echo "documentation written to $gendocdir/bluetooth.html"

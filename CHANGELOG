@@ -1,0 +1,182 @@
+PyBluez CHANGELOG file
+
+this file contains a list of changes through the different versions of PyBluez.
+
+changes from 0.13 to 0.14 (Nov 12, 2007)
+----------------------------------------
+GNU/Linux:
+    fix device class parsing bug in inquiry-with-rssi (Pepe Aracil)
+
+changes from 0.12 to 0.13 (August 30, 2007)
+-------------------------------------------
+GNU/Linux:
+    Oops, stupid bug introduced from last bugfix
+
+changes from 0.11 to 0.12 (August 29, 2007)
+-------------------------------------------
+GNU/Linux:
+    fixed _checkaddr bug (reported by Giovanni)
+
+changes from 0.10 to 0.11 (August 25, 2007)
+-------------------------------------------
+win32:
+    fixed bug preventing MSBT stack from loading when Widcomm not present
+
+changes from 0.9.2 to 0.10 (August 10, 2007)
+--------------------------------------------
+win32:
+    better searching for Platform SDK path (René Müller)
+    proper Py_{BEGIN,END}_ALLOW_THREADS (René Müller)
+
+    added experimental Broadcom/Widcomm support.  All the basics should be
+    supported:
+        RFCOMM sockets
+        L2CAP sockets
+        Device Discovery, Name Lookup
+        SDP search on remote devices
+        SDP advertisement (RFCOMM, L2CAP)
+
+    Widcomm stack notes:
+        1. BluetoothSocket.accept () always returns 0 for the port, 
+           as the RFCOMM channel/L2CAP PSM of the client device is not exposed
+           by the Widcomm API
+        2. Not all fields of advertise_service are supported.  The following
+           parameters are currently not supported:
+               description, protocols
+        3. The following methods of BluetoothSocket are not supported:
+              gettimeout, dup, makefile, settimeout
+        4. The following parameters to discover_devices are not supported:
+               duration, flush_cache (cache always flushes)
+        5. The timeout parameter of lookup_name is not supported
+        6. Once a listening socket has accepted a connection, it is not put
+           back into listening mode.  The original listening socket essentially
+           becomes useless.
+        7. SDP search/browse operations on the local host are not yet supported
+        
+GNU/Linux:
+    fix segfault on trying to SDP advertise when sdpd not running 
+        (reported by Eric Butler)
+
+
+changes from 0.9.1 to 0.9.2 (Dec 29, 2006)
+------------------------------------------
+GNU/Linux:
+    fixed endian-ness error in L2CAP psm field.  only affects big-endian 
+    machines.
+
+
+changes from 0.9 to 0.9.1 (Sep 14, 2006)
+----------------------------------------
+GNU/Linux:
+    fixed missing #include that prevents PyBluez from compiling with
+    newer version of BlueZ (reported by Priyank Gosalia)
+
+
+changes from 0.8 to 0.9 (Sep 9, 2006)
+----------------------------------------
+added protocols optional parameter to advertise_service (bluez: Bea Lam)
+refactor:  merged bluez/bluetooth.py and msbt/bluetooth.py
+
+GNU/Linux:
+  added _bluetooth.hci_devid (Mikael Lindqvist)
+  added _bluetooth.SCO_OPTIONS constant
+  added Py_{BEGIN,END}_ALLOW_THREADS guards around sdp_connect
+          (spotted by Rostislav Belov)
+win32:
+  send() now returns the number of bytes sent (spotted by Keith O'Hara)
+  sdp search no longer raises an exception when no records are found and no 
+      other error occurred.
+
+
+changes from 0.7.1 to 0.8 (July 31, 2006)
+----------------------------------------
+win32:
+  added settimeout, gettimeout, setblocking methods (David Conolly)
+GNU/Linux:
+  fixed DeviceDiscoverer device class byte swap bug (spotted by Bea Lam)
+
+
+changes from 0.7 to 0.7.1 (May 13, 2006)
+---------------------------------------
+win32:
+  discover_devices() no longer raises an IOError when no devices are detected
+  lookup_name() sort of works (consistently on some machines, 
+                               not at all on others)
+  advertise_service() fully supported
+
+
+changes from 0.6.1 to 0.7 (May 5, 2006)
+---------------------------------------
+- fixed some docstring errors
+- added lookup_names parameter to discover_devices()  If set to True,
+  discover_devices() returns a list of (address, name) pairs.  If set to False
+  (default), returns a list of addresses
+- added constant PORT_ANY.  bind to port PORT_ANY for dynamic port 
+  assignment.  
+  get_available_port() is now deprecated.
+- added support for Microsoft Windows Bluetooth API.  This comes standard on
+  Windows XP SP1, and Windows Vista.  The following features are supported:
+    RFCOMM sockets (bind, listen, connect, accept, send, recv, close,
+            getsockname, fileno)
+    discover_devices()
+    find_service()
+    advertise_service()  - with limitations.  See code for details
+  The following features are not yet supported in Windows XP:
+    DeviceDiscoverer class
+    lookup_name()
+
+
+changes from 0.6 to 0.6.1 (Feb 24, 2006)
+----------------------------------------
+fixed UUID parsing again (byte swap error)
+added parsing of 32-bit reserved UUIDs
+fixed rfcomm-client and rfcomm-server examples to use the same UUID
+addded service-id to find_service result
+
+
+changes from 0.5 to 0.6 (Feb 18, 2006)
+--------------------------------------
+fixed examples/basic/l2-mtu.py [sock -> client_sock]
+fixed hci_send_req [keywords bug]
+fixed UUID parsing (Cezar S Espinola)
+
+
+changes from 0.4 to 0.5 (Dec 16, 2005)
+--------------------------------------
+added service-classes and profiles keys to find_service result
+added service class list and profile list support to 
+    advertise_service (Elvis Pf zenreuter)
+fixed do_search response_list (Richard Moore)
+BluetoothError now inherits from IOError (Elvis Pfützenreuter)
+added CHANGELOG
+added COPYING
+
+
+changes from 0.3 to 0.4 (Nov 9, 2005)
+-------------------------------------
+fixed DeviceDiscoverer name request parsing (Alastair Tre)
+fixed set_l2cap_mtu bluetooth module error (simo salminen)
+
+
+changes from 0.2 to 0.3 (Sep 20, 2005)
+--------------------------------------
+fixed invalid free() in bt_hci_inquiry (ted wright)
+fixed endian error for RFCOMM sockets (Ted Wright)
+no longer using SDP_RECORD_PERSIST
+
+
+changes from 0.1 to 0.2 (Apr 4, 2005)
+-------------------------------------
+Support for SDP service advertisement and searching added. 
+Support for easy asynchronous device discovery added (DeviceDiscoverer). 
+fixed hci_send_req.  added a bunch of constants for ioctl on hci sockets
+renamed most things from bluez* to bt* or bluetooth*
+changed module name from bluez to _bluetooth
+changed bluezsocket to btsocket
+New API is incompatible with 0.1. 
+
+
+version 0.1 (Dec 16, 2004)
+--------------------------
+Support for HCI, L2CAP, and RFCOMM sockets.
+No support for OBEX or SDP. 
