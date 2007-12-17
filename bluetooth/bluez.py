@@ -16,7 +16,7 @@ del _constants
 def discover_devices (duration=8, flush_cache=True, lookup_names=False):
     sock = _gethcisock ()
     try:
-        results = _bt.hci_inquiry (sock, duration=8, flush_cache=True)
+        results = _bt.hci_inquiry (sock, duration=duration, flush_cache=True)
     except _bt.error:
         sock.close ()
         raise BluetoothError ("error communicating with local "
