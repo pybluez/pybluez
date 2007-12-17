@@ -2,6 +2,11 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
+changes from 0.14 to 0.15
+--------------------------
+GNU/Linux:
+    don't hardcode duration in discover_devices() to 8 (Gustavo Chain)
+
 changes from 0.13 to 0.14 (Nov 12, 2007)
 ----------------------------------------
 GNU/Linux:
