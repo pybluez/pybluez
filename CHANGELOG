@@ -6,6 +6,8 @@ changes from 0.14 to 0.15
 --------------------------
 GNU/Linux:
     don't hardcode duration in discover_devices() to 8 (Gustavo Chain)
+win32:
+    search for wbtapi.dll before trying to import widcomm
 
 changes from 0.13 to 0.14 (Nov 12, 2007)
 ----------------------------------------
