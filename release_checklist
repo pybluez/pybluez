@@ -1,0 +1,11 @@
+1. update CHANGELOG
+2. bump version number in setup.py
+3. check out a clean copy of the repository
+   svn co http://pybluez.googlecode.com/svn/trunk pybluez
+3. run python setup.py sdist
+4. test installer
+5. upload tarball to google code.
+6. make sure outstanding changes are committed to SVN
+7. create a tag
+   svn copy https://pybluez.googlecode.com/svn/trunk https://pybluez.googlecode.com/svn/tags/pybluez_x_y_z
+8. update webpage
