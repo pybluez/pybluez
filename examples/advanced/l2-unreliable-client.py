@@ -3,7 +3,7 @@ import fcntl
 import struct
 import array
 import bluetooth
-import _bluetooth as bt   # low level bluetooth wrappers.
+import bluetooth._bluetooth as bt   # low level bluetooth wrappers.
 
 def __get_acl_conn_handle(sock, addr):
     hci_fd = sock.fileno()

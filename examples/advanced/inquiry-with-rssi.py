@@ -4,7 +4,7 @@
 import os
 import sys
 import struct
-import _bluetooth as bluez
+import bluetooth._bluetooth as bluez
 
 def printpacket(pkt):
     for c in pkt:

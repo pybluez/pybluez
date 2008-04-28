@@ -1,7 +1,7 @@
 import os
 import sys
 import struct
-import _bluetooth as _bt
+import bluetooth._bluetooth as _bt
 
 def read_local_bdaddr(hci_sock):
     old_filter = hci_sock.getsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, 14)
