@@ -238,6 +238,7 @@ class BluetoothSocket:
             self.gettimeout      = self.rfcomm_gettimeout
             self.dup             = self.rfcomm_dup
             self.makefile        = self.rfcomm_makefile
+            self.fileno          = self.rfcomm_fileno
             self.__make_cobjects = self.__rfcomm_make_cobjects
             self._advertise_service = self.__rfcomm_advertise_service
 
@@ -263,6 +264,7 @@ class BluetoothSocket:
             self.gettimeout      = self.l2cap_gettimeout
             self.dup             = self.l2cap_dup
             self.makefile        = self.l2cap_makefile
+            self.fileno          = self.l2cap_fileno
             self.__make_cobjects = self.__l2cap_make_cobjects
             self._advertise_service = self.__l2cap_advertise_service
 

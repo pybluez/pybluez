@@ -25,14 +25,6 @@ INSTALLATION:
 
   # python setup.py install
 
-DOCUMENTATION:
-  from a command shell:
-
-  # doc/gendoc
-
-  API documentation will then be located at doc/bluetooth.html and
-  doc/_bluetooth.html for low-level access
-
 EXAMPLES:
   GNU/Linux and Windows XP:
 
