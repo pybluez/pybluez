@@ -8,9 +8,6 @@ def _dbg(*args):
     sys.stderr.write("\n")
 
 if sys.platform == "win32":
-    import _msbt 
-    _msbt.initwinsock ()
-
     _dbg("trying widcomm")
     have_widcomm = False
     dll = "wbtapi.dll"

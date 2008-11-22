@@ -1,6 +1,8 @@
 from btcommon import *
 import _msbt as bt
 
+bt.initwinsock ()
+
 # ============== SDP service registration and unregistration ============
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False):
