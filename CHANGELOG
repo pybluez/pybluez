@@ -5,6 +5,8 @@ this file contains a list of changes through the different versions of PyBluez.
 changes from 0.15 to 0.16
 -------------------------
   fix variable naming in example/simple/inquiry.py (M. Harris Bhatti)
+windows:
+    only import msbt if widcomm fails
 
 changes from 0.14 to 0.15 (Jan 21, 2008)
 ----------------------------------------
