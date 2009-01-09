@@ -37,7 +37,7 @@ assign_scn_value (PyObject *s, PyObject *args)
     GUID uuid = { 0 };
     PyWidcomm::str2uuid (uuid_str, &uuid);
 
-    printf ("AssignScnValue\n");
+//    printf ("AssignScnValue\n");
     BOOL result = self->rfcommif->AssignScnValue (&uuid, scn, service_name);
 
     if (result) {
