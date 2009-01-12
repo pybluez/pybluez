@@ -104,8 +104,7 @@ typedef struct {
 void
 WCRfCommPort::OnEventReceived (UINT32 event_code)
 {
-    fprintf (stderr, "%s:%d event %u received\n", __FILE__, __LINE__, 
-            event_code);
+    dbg ("%s:%d event %u received\n", __FILE__, __LINE__, event_code);
 
     event_received_msg_t msg;
     msg.msg_type = EVENT_RECEIVED;

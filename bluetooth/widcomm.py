@@ -8,6 +8,7 @@ import _widcomm
 DEFAULT_MTU = 672
 
 def dbg (*args):
+    return
     sys.stdout.write (*args)
     sys.stdout.write ("\n")
 
