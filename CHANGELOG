@@ -2,11 +2,16 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
-changes from 0.15 to 0.16
--------------------------
+changes from 0.15 to 0.16 (Feb 5, 2009
+--------------------------------------
   fix variable naming in example/simple/inquiry.py (M. Harris Bhatti)
 windows:
     only import msbt if widcomm fails
+    fix memory error in MSBT stack
+    widcomm comment out debugging statements
+
+GNU/Linux:
+    fix examples to import bluetooth._bluetooth
 
 changes from 0.14 to 0.15 (Jan 21, 2008)
 ----------------------------------------
