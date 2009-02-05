@@ -26,7 +26,7 @@ static void Err_SetFromWSALastError(PyObject *exc)
 	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL, WSAGetLastError(), 0, (LPTSTR) &lpMsgBuf, 0, NULL );
     PyErr_SetString( exc, lpMsgBuf );
-	free(lpMsgBuf);
+	LocalFree(lpMsgBuf);
 }
 
 
