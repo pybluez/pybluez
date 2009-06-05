@@ -278,10 +278,17 @@ class DeviceDiscoverer:
     DeviceDiscoverer and override device_discovered () and
     inquiry_complete ()
     """
-    def __init__ (self):
+    def __init__ (self, device_id=-1):
+        """
+        __init__ (device_id=-1)
+
+        device_id - The ID of the Bluetooth adapter that will be used
+                    for discovery.
+        """
         self.sock = None
         self.is_inquiring = False
         self.lookup_names = False
+        self.device_id = device_id
 
         self.names_to_find = {}
         self.names_found = {}
@@ -317,7 +324,7 @@ class DeviceDiscoverer:
 
         self.lookup_names = lookup_names
 
-        self.sock = _gethcisock ()
+        self.sock = _gethcisock (self.device_id)
         flt = _bt.hci_filter_new ()
         _bt.hci_filter_all_events (flt)
         _bt.hci_filter_set_ptype (flt, _bt.HCI_EVENT_PKT)
