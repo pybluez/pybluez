@@ -328,7 +328,6 @@ class DeviceDiscoverer:
             raise BluetoothError ("problem with local bluetooth device.")
 
         # send the inquiry command
-        duration = 4
         max_responses = 255
         cmd_pkt = struct.pack ("BBBBB", 0x33, 0x8b, 0x9e, \
                 duration, max_responses)
