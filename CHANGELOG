@@ -2,8 +2,16 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
-changes from 0.15 to 0.16 (Feb 5, 2009
---------------------------------------
+changes from 0.16 to 0.17 (Oct 15, 2009)
+----------------------------------------
+
+GNU/Linux:
+    bugfix for linux 2.6.30+ zero out struct sockaddr
+    DeviceDiscoverer may specify bluetooth device_id (roelhuybrechts)
+    DeviceDiscoverer do not override duration parameter (roelhuybrechts)
+
+changes from 0.15 to 0.16 (Feb 5, 2009)
+---------------------------------------
   fix variable naming in example/simple/inquiry.py (M. Harris Bhatti)
 windows:
     only import msbt if widcomm fails
