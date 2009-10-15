@@ -251,6 +251,7 @@ static int
 getsockaddrarg(PySocketSockObject *s, PyObject *args,
 	       struct sockaddr *addr_ret, int *len_ret)
 {
+    memset(addr_ret, 0, sizeof(struct sockaddr));
     addr_ret->sa_family = AF_BLUETOOTH;
 
     switch( s->sock_proto )
