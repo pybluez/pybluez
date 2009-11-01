@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <Python.h>
+#include <tchar.h>
 
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>

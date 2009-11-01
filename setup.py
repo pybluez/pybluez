@@ -10,8 +10,9 @@ mods = []
 if sys.platform == 'win32':
     XP2_PSDK_PATH = os.path.join(os.getenv('ProgramFiles'), r"Microsoft Platform SDK for Windows XP SP2")
     S03_PSDK_PATH = os.path.join(os.getenv('ProgramFiles'), r"Microsoft Platform SDK")
+    S08_PSDK_PATH = os.path.join(os.getenv('ProgramFiles'), r"Microsoft SDKs\\Windows\\v6.0A")
     PSDK_PATH = None
-    for p in [ XP2_PSDK_PATH, S03_PSDK_PATH ]:
+    for p in [ XP2_PSDK_PATH, S03_PSDK_PATH, S08_PSDK_PATH ]:
         if os.path.exists(p):
             PSDK_PATH = p
             break
@@ -33,7 +34,7 @@ if sys.platform == 'win32':
                 define_macros = [ ('_BTWLIB', None) ],
                 library_dirs = [ "%s\\Release" % WC_BASE,
                                  "%s\\Lib" % PSDK_PATH, ],
-                libraries = [ "WidcommSdklib", "ws2_32", "version", "user32", "Advapi32", "Winspool", "ole32" ],
+                libraries = [ "WidcommSdklib", "ws2_32", "version", "user32", "Advapi32", "Winspool", "ole32", "oleaut32" ],
                 sources = [ "widcomm\\_widcomm.cpp", 
                             "widcomm\\inquirer.cpp",
                             "widcomm\\rfcommport.cpp",
