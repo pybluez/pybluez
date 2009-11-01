@@ -680,7 +680,7 @@ string of that length; otherwise it is an integer.");
 static PyObject *
 sock_bind(PySocketSockObject *s, PyObject *addro)
 {
-	struct sockaddr addr;
+	struct sockaddr addr = { 0 };
 	int addrlen;
 	int res;
 
@@ -771,7 +771,7 @@ internal_connect(PySocketSockObject *s, struct sockaddr *addr, int addrlen,
 static PyObject *
 sock_connect(PySocketSockObject *s, PyObject *addro)
 {
-	struct sockaddr addr;
+	struct sockaddr addr = { 0 };
 	int addrlen;
 	int res;
 	int timeout;
@@ -806,7 +806,7 @@ For SCO sockets, the address is just the host.");
 static PyObject *
 sock_connect_ex(PySocketSockObject *s, PyObject *addro)
 {
-	struct sockaddr addr;
+	struct sockaddr addr = { 0 };
 	int addrlen;
 	int res;
 	int timeout;
@@ -1194,7 +1194,7 @@ sock_sendto(PySocketSockObject *s, PyObject *args)
 {
 	PyObject *addro;
 	char *buf;
-	struct sockaddr addr;
+	struct sockaddr addr = { 0 };
 	int addrlen, len, n = 0, flags, timeout;
 
 	flags = 0;
