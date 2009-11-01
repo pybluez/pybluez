@@ -10,6 +10,7 @@ recursive-include bluez *.h
 recursive-include msbt *.c
 recursive-include widcomm *.cpp
 recursive-include widcomm *.hpp
+recursive-include widcomm *.h
 recursive-include osx *.c
 recursive-include osx *.h
 
