@@ -2,6 +2,14 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
+changes from 0.17 to 0.18 (Nov 25, 2009)
+----------------------------------------
+
+windows:
+    support Visual C++ 2008 Express Edition for Python 2.6 (this should
+    add support for Windows Vista and Windows 7) (Lukas Hetzenecker)
+    include widcomm/util.h in source distribution
+
 changes from 0.16 to 0.17 (Oct 15, 2009)
 ----------------------------------------
 
