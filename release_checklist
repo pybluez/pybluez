@@ -6,6 +6,4 @@
 4. test installer
 5. upload tarball to google code.
 6. make sure outstanding changes are committed to SVN
-7. create a tag
-   svn copy https://pybluez.googlecode.com/svn/trunk https://pybluez.googlecode.com/svn/tags/pybluez_x_y_z
-8. update webpage
+7. update webpage
