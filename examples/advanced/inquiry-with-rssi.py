@@ -108,8 +108,16 @@ def device_inquiry_with_with_rssi(sock):
                 print "uh oh..."
                 printpacket(pkt[3:7])
                 done = True
+        elif event == bluez.EVT_INQUIRY_RESULT:
+            pkt = pkt[3:]
+            nrsp = struct.unpack("B", pkt[0])[0]
+            for i in range(nrsp):
+                addr = bluez.ba2str( pkt[1+6*i:1+6*i+6] )
+                results.append( ( addr, -1 ) )
+                print "[%s] (no RRSI)" % addr
         else:
             print "unrecognized packet type 0x%02x" % ptype
+	    print "event ", event
 
 
     # restore old filter
