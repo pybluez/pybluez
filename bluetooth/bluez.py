@@ -69,6 +69,30 @@ def set_packet_timeout (address, timeout):
     n = round (timeout / 0.625)
     _write_flush_timeout (address, n)
 
+def get_l2cap_options (sock):
+    """get_l2cap_options (sock, mtu)
+
+    Gets L2CAP options for the specified L2CAP socket.
+    Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+    """
+    # TODO this should be in the C module, because it depends
+    # directly on struct l2cap_options layout.
+    s = sock.getsockopt (SOL_L2CAP, L2CAP_OPTIONS, 12)
+    options = list( struct.unpack ("HHHBBBH", s))
+    return options
+
+def set_l2cap_options (sock, options):
+    """set_l2cap_options (sock, options)
+
+    Sets L2CAP options for the specified L2CAP socket.
+    The option list must be in the same format supplied by
+    get_l2cap_options().
+    """
+    # TODO this should be in the C module, because it depends
+    # directly on struct l2cap_options layout.
+    s = struct.pack ("HHHBBBH", *options)
+    sock.setsockopt (SOL_L2CAP, L2CAP_OPTIONS, s)
+
 def set_l2cap_mtu (sock, mtu):
     """set_l2cap_mtu (sock, mtu)
 
@@ -78,11 +102,9 @@ def set_l2cap_mtu (sock, mtu):
 
     mtu must be between 48 and 65535, inclusive.
     """
-    s = sock.getsockopt (SOL_L2CAP, L2CAP_OPTIONS, 7)
-    # XXX should these be "<HHHB"?
-    o,i,f,m = struct.unpack ("HHHB", s)
-    s = struct.pack ("HHHB", mtu, mtu, f, m)
-    sock.setsockopt (SOL_L2CAP, L2CAP_OPTIONS, s)
+    options = get_l2cap_options (sock)
+    options[0] = options[1] = mtu
+    set_l2cap_options (sock, options)
 
 def _get_available_port (protocol):
     """
@@ -138,6 +160,34 @@ class BluetoothSocket:
             addr, port = addrport
             if port == 0: addrport = (addr, _get_available_port (self._proto))
         return self._sock.bind (addrport)
+
+    def get_l2cap_options(self):
+        """get_l2cap_options (sock, mtu)
+
+        Gets L2CAP options for the specified L2CAP socket.
+        Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+        """
+        return get_l2cap_options(self)
+
+    def set_l2cap_options(self, options):
+        """set_l2cap_options (sock, options)
+
+        Sets L2CAP options for the specified L2CAP socket.
+        The option list must be in the same format supplied by
+        get_l2cap_options().
+        """
+        return set_l2cap_options(self, options)
+
+    def set_l2cap_mtu(self, mtu):
+        """set_l2cap_mtu (sock, mtu)
+
+        Adjusts the MTU for the specified L2CAP socket.  This method needs to be
+        invoked on both sides of the connection for it to work!  The default mtu
+        that all L2CAP connections start with is 672 bytes.
+
+        mtu must be between 48 and 65535, inclusive.
+        """
+	return set_l2cap_mtu(self, mtu)
 
     # import methods from the wraapped socket object
     _s = ("""def %s (self, *args, **kwargs): 
