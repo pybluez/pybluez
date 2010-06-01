@@ -1544,9 +1544,14 @@ Convert a 16-bit integer from bluetooth to host byte order.");
 
 
 static PyObject *
-bt_btohl(PyObject *self, PyObject *arg)
+bt_btohl(PyObject *self, PyObject *args)
 {
 	unsigned long x;
+	PyObject *arg;
+	
+	if (!PyArg_ParseTuple(args, "O:btohl", &arg)) {
+		return NULL;
+	}
 
 	if (PyInt_Check(arg)) {
 		x = PyInt_AS_LONG(arg);
@@ -1603,9 +1608,14 @@ Convert a 16-bit integer from host to bluetooth byte order.");
 
 
 static PyObject *
-bt_htobl(PyObject *self, PyObject *arg)
+bt_htobl(PyObject *self, PyObject *args)
 {
 	unsigned long x;
+	PyObject *arg;
+
+	if (!PyArg_ParseTuple(args, "O:htobl", &arg)) {
+		return NULL;
+	}
 
 	if (PyInt_Check(arg)) {
 		x = PyInt_AS_LONG(arg);
