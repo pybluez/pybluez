@@ -2195,6 +2195,38 @@ get the device id for the local device with specified address.\n\
 ");
 
 /*
+ * params:  (string) device address
+ * effect: -
+ * return: Device id
+ */
+static PyObject *
+bt_hci_get_route(PyObject *self, PyObject *args)
+{
+    char *devaddr=NULL;
+    bdaddr_t binaddr;
+    int devid;
+
+    if ( !PyArg_ParseTuple(args, "|s", &devaddr) )
+    {
+        return NULL;
+    }
+
+	if (devaddr) {
+    		str2ba(devaddr, &binaddr);
+		devid=hci_get_route(&binaddr);
+	} else {
+		devid=hci_get_route(NULL);
+	}
+
+    return Py_BuildValue("i" ,devid);
+}
+PyDoc_STRVAR( bt_hci_get_route_doc,
+"hci_get_route(address)\n\
+\n\
+get the device id through which remote specified addr can be reached.\n\
+");
+
+/*
  * -------------------
  *  End of HCI section
  * -------------------
@@ -2530,6 +2562,7 @@ stop advertising services associated with this socket\n\
 
 static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_devid, METH_VARARGS ),
+    DECL_BT_METHOD( hci_get_route, METH_VARARGS ),
     DECL_BT_METHOD( hci_open_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_close_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_send_cmd, METH_VARARGS ),
@@ -2725,6 +2758,9 @@ init_bluetooth(void)
 #endif
 #ifdef OCF_READ_CLOCK_OFFSET
     ADD_INT_CONST(m, OCF_READ_CLOCK_OFFSET);
+#endif
+#ifdef OCF_READ_CLOCK_OFFSET
+    ADD_INT_CONST(m, OCF_READ_CLOCK);
 #endif
 #ifdef OCF_HOLD_MODE
     ADD_INT_CONST(m, OCF_HOLD_MODE);
@@ -3201,6 +3237,12 @@ init_bluetooth(void)
     ADD_INT_CONST(m, L2CAP_ECHO_RSP	);
     ADD_INT_CONST(m, L2CAP_INFO_REQ	);
     ADD_INT_CONST(m, L2CAP_INFO_RSP	);
+
+    ADD_INT_CONST(m, L2CAP_MODE_BASIC);
+    ADD_INT_CONST(m, L2CAP_MODE_RETRANS);
+    ADD_INT_CONST(m, L2CAP_MODE_FLOWCTL);
+    ADD_INT_CONST(m, L2CAP_MODE_ERTM);
+    ADD_INT_CONST(m, L2CAP_MODE_STREAMING);
 
 #undef ADD_INT_CONST
 }
