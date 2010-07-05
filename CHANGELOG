@@ -2,6 +2,15 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
+changes from 0.18 to 0.19
+-------------------------
+
+GNU/Linux:
+    Added setl2capsecurity() method to BluetoothSocket
+    Fixed get_l2cap_options(), set_l2cap_options(), set_l2cap_mtu()
+    Added abovementioned functions as socket methods
+    Added BT_SECURITY_*, L2CAP_MODE_* constants
+
 changes from 0.17 to 0.18 (Nov 25, 2009)
 ----------------------------------------
 

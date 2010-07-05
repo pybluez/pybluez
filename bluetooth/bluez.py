@@ -200,7 +200,7 @@ class BluetoothSocket:
         'fileno', 'getpeername', 'getsockname', 'gettimeout',
         'getsockopt', 'listen', 'makefile', 'recv', 'recvfrom', 'sendall',
         'send', 'sendto', 'setblocking', 'setsockopt', 'settimeout', 
-        'shutdown'):
+        'shutdown', 'setl2capsecurity'):
         exec _s % (_m, _m, _m, _m)
     del _m, _s
 

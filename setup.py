@@ -62,7 +62,7 @@ elif sys.platform == 'darwin':
 
 
 setup (	name = 'PyBluez',
-       	version = '0.18',
+       	version = '0.19',
        	description = 'Bluetooth Python extension module',
        	author="Albert Huang",
      	author_email="ashuang@alum.mit.edu",

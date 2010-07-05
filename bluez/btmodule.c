@@ -674,6 +674,47 @@ Get a socket option.  See the Unix manual for level and option.\n\
 If a nonzero buffersize argument is given, the return value is a\n\
 string of that length; otherwise it is an integer.");
 
+static PyObject *
+sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
+{
+	int level;
+        struct bt_security sec;
+
+	if (! PyArg_ParseTuple(args, "i:setsockopt",
+			     &level))
+		return NULL;
+
+        memset(&sec, 0, sizeof(sec));
+        sec.level = level;
+
+        if (setsockopt(s->sock_fd, SOL_BLUETOOTH, BT_SECURITY, &sec,
+                                                        sizeof(sec)) == 0) {
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+
+        if (errno != ENOPROTOOPT)
+		return s->errorhandler();
+
+        int lm_map[] = {
+                0,
+                L2CAP_LM_AUTH,
+                L2CAP_LM_AUTH | L2CAP_LM_ENCRYPT,
+                L2CAP_LM_AUTH | L2CAP_LM_ENCRYPT | L2CAP_LM_SECURE,
+        }, opt = lm_map[level];
+
+        if (setsockopt(s->sock_fd, SOL_L2CAP, L2CAP_LM, &opt, sizeof(opt)) < 0)
+		return s->errorhandler();
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+PyDoc_STRVAR(setl2capsecurity_doc,
+"setl2capsecurity(BT_SECURITY_*) -> value\n\
+\n\
+Sets socket security. Levels are BT_SECURITY_SDP, LOW, MEDIUM\n\
+and HIGH.");
 
 /* s.bind(sockaddr) method */
 
@@ -1319,6 +1360,8 @@ static PyMethodDef sock_methods[] = {
 			gettimeout_doc},
 	{"setsockopt",	(PyCFunction)sock_setsockopt, METH_VARARGS,
 			setsockopt_doc},
+	{"setl2capsecurity",	(PyCFunction)sock_setl2capsecurity, METH_VARARGS,
+			setl2capsecurity_doc},
 	{"shutdown",	(PyCFunction)sock_shutdown, METH_O,
 			shutdown_doc},
 	{NULL,			NULL}		/* sentinel */
@@ -3243,6 +3286,12 @@ init_bluetooth(void)
     ADD_INT_CONST(m, L2CAP_MODE_FLOWCTL);
     ADD_INT_CONST(m, L2CAP_MODE_ERTM);
     ADD_INT_CONST(m, L2CAP_MODE_STREAMING);
+
+    ADD_INT_CONST(m, BT_SECURITY);
+    ADD_INT_CONST(m, BT_SECURITY_SDP);
+    ADD_INT_CONST(m, BT_SECURITY_LOW);
+    ADD_INT_CONST(m, BT_SECURITY_MEDIUM);
+    ADD_INT_CONST(m, BT_SECURITY_HIGH);
 
 #undef ADD_INT_CONST
 }
