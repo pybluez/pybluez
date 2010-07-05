@@ -3293,6 +3293,11 @@ init_bluetooth(void)
     ADD_INT_CONST(m, BT_SECURITY_MEDIUM);
     ADD_INT_CONST(m, BT_SECURITY_HIGH);
 
+#ifdef BT_DEFER_SETUP
+    ADD_INT_CONST(m, BT_DEFER_SETUP);
+#endif
+    ADD_INT_CONST(m, SOL_BLUETOOTH);
+
 #undef ADD_INT_CONST
 }
 
