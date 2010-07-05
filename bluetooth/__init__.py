@@ -2,6 +2,8 @@ import sys
 import os
 from btcommon import *
 
+__version__ = 0.19
+
 def _dbg(*args):
     return
     sys.stderr.write(*args)
