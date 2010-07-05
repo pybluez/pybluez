@@ -2231,10 +2231,40 @@ bt_hci_devid(PyObject *self, PyObject *args)
 
     return Py_BuildValue("i",devid);
 }
-PyDoc_STRVAR( bt_hci_devid_doc,
+PyDoc_STRVAR( bt_hci_role_doc,
 "hci_devid(address)\n\
 \n\
 get the device id for the local device with specified address.\n\
+");
+
+/*
+ * params:  (string) device address
+ * effect: -
+ * return: Device id
+ */
+static PyObject *
+bt_hci_role(PyObject *self, PyObject *args)
+{
+    int devid;
+    int fd;
+    int role;
+
+    if ( !PyArg_ParseTuple(args, "|ii", &fd, &devid) )
+        return NULL;
+
+    struct hci_dev_info di = {dev_id: devid};
+
+    if (ioctl(fd, HCIGETDEVINFO, (void *) &di))
+           return NULL;
+
+    role = di.link_mode == HCI_LM_MASTER;
+
+    return Py_BuildValue("i", role);
+}
+PyDoc_STRVAR( bt_hci_devid_doc,
+"hci_role(hci_fd, dev_id)\n\
+\n\
+get the role (master or slave) of the device id.\n\
 ");
 
 /*
@@ -2606,6 +2636,7 @@ stop advertising services associated with this socket\n\
 static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_devid, METH_VARARGS ),
     DECL_BT_METHOD( hci_get_route, METH_VARARGS ),
+    DECL_BT_METHOD( hci_role, METH_VARARGS ),
     DECL_BT_METHOD( hci_open_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_close_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_send_cmd, METH_VARARGS ),
