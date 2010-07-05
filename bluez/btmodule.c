@@ -2249,7 +2249,7 @@ bt_hci_role(PyObject *self, PyObject *args)
     int fd;
     int role;
 
-    if ( !PyArg_ParseTuple(args, "|ii", &fd, &devid) )
+    if ( !PyArg_ParseTuple(args, "ii", &fd, &devid) )
         return NULL;
 
     struct hci_dev_info di = {dev_id: devid};
@@ -2265,6 +2265,39 @@ PyDoc_STRVAR( bt_hci_devid_doc,
 "hci_role(hci_fd, dev_id)\n\
 \n\
 get the role (master or slave) of the device id.\n\
+");
+
+/*
+ * params:  (string) device address
+ * effect: -
+ * return: Device id
+ */
+static PyObject *
+bt_hci_read_clock(PyObject *self, PyObject *args)
+{
+    int fd;
+    int handle;
+    int which;
+    int timeout;
+    uint32_t btclock;
+    uint16_t accuracy; 
+    int res;
+
+    if ( !PyArg_ParseTuple(args, "iiii", &fd, &handle, &which, &timeout) )
+        return NULL;
+
+    res = hci_read_clock(fd, handle, which, &btclock, &accuracy, timeout);
+    if (res) {
+    	Py_INCREF(Py_None);
+    	return Py_None;
+    }
+
+    return Py_BuildValue("(ii)", btclock, accuracy);
+}
+PyDoc_STRVAR( bt_hci_read_clock_doc,
+"hci_read_clock(hci_fd, acl_handle, which_clock, timeout_ms)\n\
+\n\
+Get the Bluetooth Clock (native or piconet).\n\
 ");
 
 /*
@@ -2297,6 +2330,44 @@ PyDoc_STRVAR( bt_hci_get_route_doc,
 "hci_get_route(address)\n\
 \n\
 get the device id through which remote specified addr can be reached.\n\
+");
+
+/*
+ * params:  (string) device address
+ * effect: -
+ * return: Device id
+ */
+static PyObject *
+bt_hci_acl_conn_handle(PyObject *self, PyObject *args)
+{
+    int fd;
+    char *devaddr=NULL;
+    bdaddr_t binaddr;
+    struct hci_conn_info_req *cr;
+    char buf[sizeof(struct hci_conn_info_req) + sizeof(struct hci_conn_info)];
+    int handle = -1;
+
+    if ( !PyArg_ParseTuple(args, "is", &fd, &devaddr) )
+        return NULL;
+
+    if (devaddr)
+    	str2ba(devaddr, &binaddr);
+    else
+        str2ba("00:00:00:00:00:00", &binaddr);
+
+    cr = (struct hci_conn_info_req*) &buf;
+    bacpy(&cr->bdaddr, &binaddr);
+    cr->type = ACL_LINK;
+
+    if (ioctl(fd, HCIGETCONNINFO, (unsigned long) cr) == 0)
+        handle = htobs(cr->conn_info->handle);
+
+    return Py_BuildValue("i", handle);
+}
+PyDoc_STRVAR( bt_hci_acl_conn_handle_doc,
+"hci_acl_conn_handle(hci_fd, address)\n\
+\n\
+get the ACL connection handle for the given remote device addr.\n\
 ");
 
 /*
@@ -2637,6 +2708,8 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_devid, METH_VARARGS ),
     DECL_BT_METHOD( hci_get_route, METH_VARARGS ),
     DECL_BT_METHOD( hci_role, METH_VARARGS ),
+    DECL_BT_METHOD( hci_read_clock, METH_VARARGS ),
+    DECL_BT_METHOD( hci_acl_conn_handle, METH_VARARGS ),
     DECL_BT_METHOD( hci_open_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_close_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_send_cmd, METH_VARARGS ),
