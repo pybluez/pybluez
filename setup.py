@@ -3,6 +3,7 @@
 from distutils.core import setup, Extension
 from distutils.debug import DEBUG
 import sys
+import platform
 import os
 
 mods = []
@@ -18,10 +19,13 @@ if sys.platform == 'win32':
             break
     if PSDK_PATH is None:
         raise SystemExit ("Can't find the Windows XP Platform SDK")
-    
+
+    lib_path = os.path.join(PSDK_PATH, 'Lib')
+    if '64' in platform.architecture()[0]:
+        lib_path = os.path.join(lib_path, 'x64')
     mod1 = Extension ('bluetooth._msbt', 
                         include_dirs = ["%s\\Include" % PSDK_PATH],
-                        library_dirs = ["%s\\Lib" % PSDK_PATH],
+                        library_dirs = [lib_path],
                         libraries = [ "WS2_32", "Irprops" ],
                         sources=['msbt\\_msbt.c'],)
     mods = [ mod1 ]
