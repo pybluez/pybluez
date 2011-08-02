@@ -2,28 +2,41 @@
 
 from distutils.core import setup, Extension
 from distutils.debug import DEBUG
+import itertools
 import sys
 import platform
 import os
 
 mods = []
 
+def find_MS_SDK():
+    candidate_env_roots = 'ProgramFiles', 'ProgramFiles(x86)'
+    candidate_roots = itertools.ifilter(None,
+        itertools.imap(os.getenv, candidate_env_roots)
+    )
+    candidate_paths = (
+        r'Microsoft SDKs\Windows\v6.0A', # Visual Studio 9
+        r'Microsoft SDKs\Windows\v7.0A', # Visual Studio 10
+        'Microsoft Platform SDK for Windows XP',
+        'Microsoft Platform SDK',
+    )
+    candidate_pairs = itertools.product(candidate_roots, candidate_paths)
+    candidates = itertools.starmap(os.path.join, candidate_pairs)
+    matches = itertools.ifilter(os.path.exists, candidates)
+    try:
+        return matches.next()
+    except StopIteration():
+        pass
+
 if sys.platform == 'win32':
-    XP2_PSDK_PATH = os.path.join(os.getenv('ProgramFiles'), r"Microsoft Platform SDK for Windows XP SP2")
-    S03_PSDK_PATH = os.path.join(os.getenv('ProgramFiles'), r"Microsoft Platform SDK")
-    S08_PSDK_PATH = os.path.join(os.getenv('ProgramFiles'), r"Microsoft SDKs\\Windows\\v6.0A")
-    PSDK_PATH = None
-    for p in [ XP2_PSDK_PATH, S03_PSDK_PATH, S08_PSDK_PATH ]:
-        if os.path.exists(p):
-            PSDK_PATH = p
-            break
+    PSDK_PATH = find_MS_SDK()
     if PSDK_PATH is None:
-        raise SystemExit ("Can't find the Windows XP Platform SDK")
+        raise SystemExit("Could not find the Windows Platform SDK")
 
     lib_path = os.path.join(PSDK_PATH, 'Lib')
     if '64' in platform.architecture()[0]:
         lib_path = os.path.join(lib_path, 'x64')
-    mod1 = Extension ('bluetooth._msbt', 
+    mod1 = Extension ('bluetooth._msbt',
                         include_dirs = ["%s\\Include" % PSDK_PATH],
                         library_dirs = [lib_path],
                         libraries = [ "WS2_32", "Irprops" ],
@@ -39,7 +52,7 @@ if sys.platform == 'win32':
                 library_dirs = [ "%s\\Release" % WC_BASE,
                                  "%s\\Lib" % PSDK_PATH, ],
                 libraries = [ "WidcommSdklib", "ws2_32", "version", "user32", "Advapi32", "Winspool", "ole32", "oleaut32" ],
-                sources = [ "widcomm\\_widcomm.cpp", 
+                sources = [ "widcomm\\_widcomm.cpp",
                             "widcomm\\inquirer.cpp",
                             "widcomm\\rfcommport.cpp",
                             "widcomm\\rfcommif.cpp",
@@ -49,7 +62,7 @@ if sys.platform == 'win32':
                             "widcomm\\util.cpp" ]
                 )
         mods.append (mod2)
-    
+
 elif sys.platform == 'linux2':
     mod1 = Extension('bluetooth._bluetooth',
 		                 libraries = ['bluetooth'],
