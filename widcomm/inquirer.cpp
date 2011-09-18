@@ -229,11 +229,16 @@ static PyObject *
 start_inquiry (PyObject *s)
 {
     WCInquirerPyObject *self = (WCInquirerPyObject*) s;
-    if (self->inq->StartInquiry ()) {
+    bool success = TRUE;
+    Py_BEGIN_ALLOW_THREADS
+    success = self->inq->StartInquiry ();
+    Py_END_ALLOW_THREADS
+    if (success) {
         Py_RETURN_TRUE;
     } else {
         Py_RETURN_FALSE;
     }
+	
 }
 
 static PyObject *
