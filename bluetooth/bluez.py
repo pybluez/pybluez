@@ -13,10 +13,10 @@ del _constants
 
 # ============== SDP service registration and unregistration ============
 
-def discover_devices (duration=8, flush_cache=True, lookup_names=False):
+def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_class=False):
     sock = _gethcisock ()
     try:
-        results = _bt.hci_inquiry (sock, duration=duration, flush_cache=True)
+        results = _bt.hci_inquiry (sock, duration=duration, flush_cache=True, lookup_class=lookup_class)
     except _bt.error:
         sock.close ()
         raise BluetoothError ("error communicating with local "
@@ -24,14 +24,18 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False):
 
     if lookup_names:
         pairs = []
-        for addr in results:
+        for item in results:
+            if lookup_class:
+               addr, dev_class = item
+            else:
+               addr = item
             timeoutms = int (10 * 1000)
             try: 
                 name = _bt.hci_read_remote_name (sock, addr, timeoutms)
             except _bt.error, e:
                 # name lookup failed.  either a timeout, or I/O error
                 continue
-            pairs.append ((addr, name))
+            pairs.append ((addr, name, dev_class) if lookup_class else (addr, name))
         sock.close ()
         return pairs
     else:

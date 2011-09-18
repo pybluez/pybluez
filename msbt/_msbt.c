@@ -392,6 +392,7 @@ msbt_discover_devices(PyObject *self, PyObject *args)
 {
     int flushcache = 0;
     int lookupnames = 0;
+    int lookupclass = 0;
 
 	// inquiry data structure
 	DWORD qs_len = sizeof( WSAQUERYSET );
@@ -405,19 +406,20 @@ msbt_discover_devices(PyObject *self, PyObject *args)
 
     dbg("msbt_discover_devices\n");
 
-    if(!PyArg_ParseTuple(args, "ii", &flushcache, &lookupnames)) {
+    if(!PyArg_ParseTuple(args, "iii", &flushcache, &lookupnames, &lookupclass)) {
         free( qs );
         return 0;
     }
 
     if (flushcache) flushcache = LUP_FLUSHCACHE;
     if (lookupnames) lookupnames = LUP_RETURN_NAME;
+    if (lookupclass) lookupclass = LUP_RETURN_TYPE;
 
 	ZeroMemory( qs, qs_len );
 	qs->dwSize = sizeof(WSAQUERYSET);
 	qs->dwNameSpace = NS_BTH;
 
-	flags |= flushcache | lookupnames | LUP_RETURN_ADDR;
+	flags |= flushcache | lookupnames | lookupclass | LUP_RETURN_ADDR;
 
 	Py_BEGIN_ALLOW_THREADS;
 	// start the device inquiry
@@ -456,9 +458,13 @@ msbt_discover_devices(PyObject *self, PyObject *args)
 				((SOCKADDR_BTH*)qs->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
             ba2str( result, buf );
 
-            if( lookupnames ) {
+			if( lookupnames && lookupclass ) {
+                tup = Py_BuildValue( "ssl", buf, qs->lpszServiceInstanceName, qs->lpServiceClassId->Data1 );
+			} else if( lookupnames ) {
                 tup = Py_BuildValue( "ss", buf, qs->lpszServiceInstanceName );
-            } else {
+			} else if (lookupclass) {
+                tup = Py_BuildValue( "sl", buf, qs->lpServiceClassId->Data1 );
+			} else {
                 tup = PyString_FromString (buf);
             }
             PyList_Append( toreturn, tup );

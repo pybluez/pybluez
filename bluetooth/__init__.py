@@ -48,6 +48,8 @@ discover_devices.__doc__ = \
     lookup_names=False
         if set to True, then discover_devices also attempts to lookup the
         display name of each detected device.
+
+    if lookup_class is True, the class of the device is added to the tuple
     """
 
 lookup_name.__doc__ = \

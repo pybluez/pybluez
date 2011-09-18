@@ -1955,18 +1955,18 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     int length = 8;
     int flush = 1;
     int flags = 0;
+    int lookup_class = 0;
     char ba_name[19];
     inquiry_info *info = NULL;
     PySocketSockObject *socko = NULL;
     struct hci_inquiry_req *ir;
     char buf[sizeof(*ir) + sizeof(inquiry_info) * 250];
 
-	PyObject *rtn_list = (PyObject *)NULL;
+    PyObject *rtn_list = (PyObject *)NULL;
+    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", 0};
 
-	static char *keywords[] = {"sock", "duration", "flush_cache", 0};
-
-    if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|ii", keywords,
-                &socko, &length, &flush) )
+    if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iii", keywords,
+                &socko, &length, &flush, &lookup_class) )
     {
         return 0;
     }
@@ -1997,17 +1997,47 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     memset( ba_name, 0, sizeof(ba_name) );
     // fill in the list with the discovered bluetooth addresses
     for(i=0;i<ir->num_rsp;i++) {
-        PyObject * list_entry = (PyObject *)NULL;
+        PyObject * addr_entry = (PyObject *)NULL;
         int err;
 
         ba2str( &(info+i)->bdaddr, ba_name );
         
-        list_entry = PyString_FromString( ba_name );
-        err = PyList_Append( rtn_list, list_entry );
-        Py_DECREF( list_entry );
-        if (err) {
-            Py_XDECREF( rtn_list );
-            return NULL;
+        addr_entry = PyString_FromString( ba_name );
+
+        if (lookup_class) {
+            PyObject *item_tuple = PyTuple_New(2);
+
+            int dev_class = (info+i)->dev_class[2] << 16 | (info+i)->dev_class[1] << 8 | (info+i)->dev_class[0];
+            PyObject *class_entry = PyInt_FromLong( dev_class );
+
+            err = PyTuple_SetItem( item_tuple, 0, addr_entry );
+            if (err) {
+                Py_XDECREF( item_tuple );
+                Py_XDECREF( rtn_list );
+                return NULL;
+            }
+
+            err = PyTuple_SetItem( item_tuple, 1, class_entry );
+            if (err) {
+                Py_XDECREF( item_tuple );
+                Py_XDECREF( rtn_list );
+                return NULL;
+            }
+
+            err = PyList_Append( rtn_list, item_tuple );
+            Py_DECREF( item_tuple );
+            if (err) {
+                Py_XDECREF( rtn_list );
+                return NULL;
+            }
+
+        } else {
+            err = PyList_Append( rtn_list, addr_entry );
+            Py_DECREF( addr_entry );
+            if (err) {
+                Py_XDECREF( rtn_list );
+                return NULL;
+            }
         }
     }
 

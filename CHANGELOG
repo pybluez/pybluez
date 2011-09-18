@@ -5,6 +5,9 @@ this file contains a list of changes through the different versions of PyBluez.
 changes from 0.18 to 0.19
 -------------------------
 
+  Added option to return the class of device in discover_devices()
+    (Lukas Hetzenecker)
+
 GNU/Linux:
     Added setl2capsecurity() method to BluetoothSocket
     Fixed get_l2cap_options(), set_l2cap_options(), set_l2cap_mtu()
