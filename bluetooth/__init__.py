@@ -32,10 +32,12 @@ if sys.platform == "win32":
         _dbg("Widcomm not ready. falling back to MS stack")
         from msbt import *
 
-elif sys.platform == "linux2":
+elif sys.platform.startswith("linux"):
     from bluez import *
 elif sys.platform == "darwin":
     from osx import *
+else:
+    raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
 
 discover_devices.__doc__ = \
     """

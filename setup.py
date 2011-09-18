@@ -63,7 +63,7 @@ if sys.platform == 'win32':
                 )
         mods.append (mod2)
 
-elif sys.platform == 'linux2':
+elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
 		                 libraries = ['bluetooth'],
                          sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
@@ -76,6 +76,8 @@ elif sys.platform == 'darwin':
                      sources = ['osx/_osxbt.c']
                      )
     mods = [ mod1 ]
+else:
+    raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
 
 
 setup (	name = 'PyBluez',

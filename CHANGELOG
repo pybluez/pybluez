@@ -15,6 +15,7 @@ GNU/Linux:
     Added BT_SECURITY_*, L2CAP_MODE_* constants
     Added support for the "Extended Inquiry Response" event in the asynchronous
       DeviceDiscoverer (Lukas Hetzenecker)
+    Fixed problems with kernel 3.x
 
 windows:
     Allow threads during the initialization of the inquiry in widcomm
