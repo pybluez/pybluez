@@ -3220,6 +3220,12 @@ init_bluetooth(void)
 #ifdef EVT_INQUIRY_RESULT_WITH_RSSI
     ADD_INT_CONST(m, EVT_INQUIRY_RESULT_WITH_RSSI);
 #endif
+#ifdef EVT_EXTENDED_INQUIRY_RESULT
+    ADD_INT_CONST(m, EVT_EXTENDED_INQUIRY_RESULT);
+    PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 1)
+#else
+    PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 0)
+#endif
 #ifdef EVT_TESTING
     ADD_INT_CONST(m, EVT_TESTING);
 #endif
@@ -3352,6 +3358,14 @@ init_bluetooth(void)
 #endif
 #ifdef	MSG_ETAG
 	ADD_INT_CONST(m, MSG_ETAG);
+#endif
+
+        /* Size of inquiry info */
+#ifdef  INQUIRY_INFO_WITH_RSSI_SIZE
+        ADD_INT_CONST(m, INQUIRY_INFO_WITH_RSSI_SIZE);
+#endif
+#ifdef  EXTENDED_INQUIRY_INFO_SIZE
+        ADD_INT_CONST(m, EXTENDED_INQUIRY_INFO_SIZE);
 #endif
 
 	/* Protocol level and numbers, usable for [gs]etsockopt */

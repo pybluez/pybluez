@@ -443,7 +443,7 @@ class DeviceDiscoverer:
 
         if self.sock is None: return
         # voodoo magic!!!
-        pkt = self.sock.recv (255)
+        pkt = self.sock.recv (258)
         ptype, event, plen = struct.unpack ("BBB", pkt[:3])
         pkt = pkt[3:]
         if event == _bt.EVT_INQUIRY_RESULT:
@@ -460,7 +460,7 @@ class DeviceDiscoverer:
                 clockoff = pkt[1+12*nrsp+2*i:1+12*nrsp+2*i+2]
 
                 self._device_discovered (addr, devclass, 
-                        psrm, pspm, clockoff)
+                        psrm, pspm, clockoff, None)
         elif event == _bt.EVT_INQUIRY_RESULT_WITH_RSSI:
             nrsp = struct.unpack ("B", pkt[0])[0]
             for i in range (nrsp):
@@ -478,7 +478,36 @@ class DeviceDiscoverer:
                 rssi = struct.unpack ("b", pkt[1+13*nrsp+i])[0]
 
                 self._device_discovered (addr, devclass, 
-                        psrm, pspm, clockoff)
+                        psrm, pspm, clockoff, None)
+        elif _bt.HAVE_EVT_EXTENDED_INQUIRY_RESULT and event == _bt.EVT_EXTENDED_INQUIRY_RESULT:
+            nrsp = struct.unpack ("B", pkt[0])[0]
+            for i in range (nrsp):
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
+                psrm = pkt[ 1+6*nrsp+i ]
+                pspm = pkt[ 1+7*nrsp+i ]
+                devclass_raw = struct.unpack ("BBB",
+                        pkt[1+8*nrsp+3*i:1+8*nrsp+3*i+3])
+                devclass = (devclass_raw[2] << 16) | \
+                        (devclass_raw[1] << 8) | \
+                        devclass_raw[0]
+                clockoff = pkt[1+11*nrsp+2*i:1+11*nrsp+2*i+2]
+                rssi = struct.unpack ("b", pkt[1+13*nrsp+i])[0]
+
+                data_len = _bt.EXTENDED_INQUIRY_INFO_SIZE - _bt.INQUIRY_INFO_WITH_RSSI_SIZE
+                data = pkt[1+14*nrsp+i:1+14*nrsp+i+data_len]
+                name = None
+                pos = 0
+                while(pos <= len(data)):
+                    struct_len = ord(data[pos])
+                    if struct_len == 0:
+                        break
+                    eir_type = ord(data[pos+1])
+                    if eir_type == 0x09: # Complete local name
+                        name = data[pos+2:pos+struct_len+1]
+                    pos += struct_len + 2
+
+                self._device_discovered (addr, devclass,
+                        psrm, pspm, clockoff, name)
         elif event == _bt.EVT_INQUIRY_COMPLETE:
             self.is_inquiring = False
             if len (self.names_to_find) == 0:
@@ -531,9 +560,11 @@ class DeviceDiscoverer:
 #            print "unrecognized packet type 0x%02x" % ptype
 
     def _device_discovered (self, address, device_class, 
-            psrm, pspm, clockoff):
+            psrm, pspm, clockoff, name):
         if self.lookup_names:
-            if address not in self.names_found and \
+            if name is not None:
+                self.device_discovered (address, device_class, name)
+            elif address not in self.names_found and \
                 address not in self.names_to_find:
             
                 self.names_to_find[address] = \
