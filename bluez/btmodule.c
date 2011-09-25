@@ -3222,9 +3222,9 @@ init_bluetooth(void)
 #endif
 #ifdef EVT_EXTENDED_INQUIRY_RESULT
     ADD_INT_CONST(m, EVT_EXTENDED_INQUIRY_RESULT);
-    PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 1)
+    PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 1);
 #else
-    PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 0)
+    PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 0);
 #endif
 #ifdef EVT_TESTING
     ADD_INT_CONST(m, EVT_TESTING);
