@@ -27,6 +27,7 @@ static PyMethodDef widcomm_methods[] = {
 
 extern "C" {
 
+#if PY_MAJOR_VERSION < 3
 PyMODINIT_FUNC
 init_widcomm(void)
 {
@@ -82,6 +83,76 @@ init_widcomm(void)
                 (PyObject *)&wcsdpservice_type) != 0) {
         return;
     }
+#else
+    PyMODINIT_FUNC
+    PyInit__widcomm(void)
+    {
+        PyObject *m;
+
+        Py_TYPE(&wcinquirer_type)   = &PyType_Type;
+        Py_TYPE(&wcrfcommport_type) = &PyType_Type;
+        Py_TYPE(&wcrfcommif_type)   = &PyType_Type;
+        Py_TYPE(&wcl2capif_type)    = &PyType_Type;
+        Py_TYPE(&wcl2capconn_type)  = &PyType_Type;
+        Py_TYPE(&wcsdpservice_type) = &PyType_Type;
+
+        //m = Py_InitModule("_widcomm", widcomm_methods);
+        static struct PyModuleDef moduledef = {
+            PyModuleDef_HEAD_INIT,
+            "_widcomm",
+            NULL,
+            -1,
+            widcomm_methods,
+            NULL,
+            NULL,
+            NULL,
+            NULL
+        };
+        m = PyModule_Create(&moduledef);
+
+        // inquirer
+        Py_INCREF((PyObject *)&wcinquirer_type);
+        if (PyModule_AddObject(m, "_WCInquirer",
+                    (PyObject *)&wcinquirer_type) != 0) {
+            return NULL;
+        }
+
+        // rfcomm port
+        Py_INCREF((PyObject *)&wcrfcommport_type);
+        if (PyModule_AddObject(m, "_WCRfCommPort",
+                    (PyObject *)&wcrfcommport_type) != 0) {
+            return NULL;
+        }
+
+        // rfcomm if
+        Py_INCREF((PyObject *)&wcrfcommif_type);
+        if (PyModule_AddObject(m, "_WCRfCommIf",
+                    (PyObject *)&wcrfcommif_type) != 0) {
+            return NULL;
+        }
+
+        // l2cap if
+        Py_INCREF((PyObject *)&wcl2capif_type);
+        if (PyModule_AddObject(m, "_WCL2CapIf",
+                    (PyObject *)&wcl2capif_type) != 0) {
+            return NULL;
+        }
+
+        // l2cap conn
+        Py_INCREF((PyObject *)&wcl2capconn_type);
+        if (PyModule_AddObject(m, "_WCL2CapConn",
+                    (PyObject *)&wcl2capconn_type) != 0) {
+            return NULL;
+        }
+
+        // sdp service advertisement
+        Py_INCREF((PyObject *)&wcsdpservice_type);
+        if (PyModule_AddObject(m, "_WCSdpService",
+                    (PyObject *)&wcsdpservice_type) != 0) {
+            return NULL;
+        }
+
+#endif
 
 #define ADD_INT_CONST(m, a) PyModule_AddIntConstant(m, #a, a)
     ADD_INT_CONST(m, RFCOMM_DEFAULT_MTU);
@@ -155,6 +226,9 @@ init_widcomm(void)
     ADD_INT_CONST (m, SDP_COULD_NOT_ADD_RECORD);
     ADD_INT_CONST (m, SDP_INVALID_RECORD);
     ADD_INT_CONST (m, SDP_INVALID_PARAMETERS);
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
 }
 
 } // extern "C"

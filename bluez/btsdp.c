@@ -17,6 +17,7 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 
+#include <port3.h>
 #include "btmodule.h"
 #include "btsdp.h"
 
@@ -411,7 +412,7 @@ sess_dealloc(PySDPSessionObject *s)
         sdp_close( s->session );
         s->session = NULL;
     }
-	s->ob_type->tp_free((PyObject *)s);
+    Py_TYPE(s)->tp_free((PyObject *)s);
 }
 
 static PyObject *
@@ -467,8 +468,12 @@ sess_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 /* Type object for socket objects. */
 
 PyTypeObject sdp_session_type = {
-	PyObject_HEAD_INIT(0)	/* Must fill in type value later */
-	0,					/* ob_size */
+#if PY_MAJOR_VERSION < 3
+    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
+    0,                  /* ob_size */
+#else
+    PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
+#endif
 	"_bluetooth.SDPSession",			/* tp_name */
 	sizeof(PySDPSessionObject),		/* tp_basicsize */
 	0,					/* tp_itemsize */

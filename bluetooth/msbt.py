@@ -1,5 +1,5 @@
-from btcommon import *
-import _msbt as bt
+from bluetooth import *
+import bluetooth._msbt as bt
 
 bt.initwinsock ()
 

@@ -4,6 +4,7 @@
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>
 #include <com_error.h>
+#include <port3.h>
 
 #include "util.h"
 
@@ -32,11 +33,8 @@ add_service_class_id_list (WCSdpServicePyObject *self, PyObject *arg)
 
     for (int i=0; i<nuids; i++) {
         PyObject *uuid_obj = PySequence_GetItem (arg, i);
-        char *uuid_str = NULL;
-        int uuid_str_len = 0;
-        int status = PyString_AsStringAndSize (uuid_obj, &uuid_str, 
-                &uuid_str_len);
-        if (status < 0){
+        char *uuid_str = PyString_AsString (uuid_obj);
+        if (uuid_str){
             Py_DECREF (uuid_obj);
             goto fail;
         }
@@ -163,7 +161,7 @@ wcsdpservice_dealloc(WCSdpServicePyObject *self)
         delete self->sdpservice;
         self->sdpservice = NULL;
     }
-    self->ob_type->tp_free((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 int
@@ -176,8 +174,12 @@ wcsdpservice_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcsdpservice_type = {
+#if PY_MAJOR_VERSION < 3
     PyObject_HEAD_INIT(0)   /* Must fill in type value later */
     0,                  /* ob_size */
+#else
+    PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
+#endif
     "_widcomm._WCSdpService",            /* tp_name */
     sizeof(WCSdpServicePyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */

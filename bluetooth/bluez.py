@@ -2,13 +2,19 @@ import sys
 import struct
 import binascii
 
-from btcommon import *
-import _bluetooth as _bt
+if sys.version < '3':
+    from btcommon import *
+    import _bluetooth as _bt
+else:
+    from bluetooth.btcommon import *
+    import bluetooth._bluetooth as _bt
 import array
 import fcntl
 _constants = [ 'HCI', 'RFCOMM', 'L2CAP', 'SCO', 'SOL_L2CAP', 'SOL_RFCOMM',\
     'L2CAP_OPTIONS' ]
-for _c in _constants: exec "%s = _bt.%s" % (_c, _c)
+for _c in _constants:
+    command_ = "{C} = _bt.{C1}".format(C=_c, C1=_c)
+    exec(command_)
 del _constants
 
 # ============== SDP service registration and unregistration ============
@@ -32,7 +38,7 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_c
             timeoutms = int (10 * 1000)
             try: 
                 name = _bt.hci_read_remote_name (sock, addr, timeoutms)
-            except _bt.error, e:
+            except _bt.error as e:
                 # name lookup failed.  either a timeout, or I/O error
                 continue
             pairs.append ((addr, name, dev_class) if lookup_class else (addr, name))
@@ -50,7 +56,7 @@ def lookup_name (address, timeout=10):
     timeoutms = int (timeout * 1000)
     try: 
         name = _bt.hci_read_remote_name (sock, address, timeoutms)
-    except _bt.error, e:
+    except _bt.error as e:
         # name lookup failed.  either a timeout, or I/O error
         name = None
     sock.close ()
@@ -153,7 +159,7 @@ class BluetoothSocket:
     def accept (self):
         try:
             client, addr = self._sock.accept ()
-        except _bt.error, e:
+        except _bt.error as e:
             raise BluetoothError (str (e))
         newsock = BluetoothSocket (self._proto, client)
         return (newsock, addr)
@@ -191,13 +197,13 @@ class BluetoothSocket:
 
         mtu must be between 48 and 65535, inclusive.
         """
-	return set_l2cap_mtu(self, mtu)
+        return set_l2cap_mtu(self, mtu)
 
     # import methods from the wraapped socket object
     _s = ("""def %s (self, *args, **kwargs): 
     try: 
         return self._sock.%s (*args, **kwargs)
-    except _bt.error, e:
+    except _bt.error as e:
         raise BluetoothError (str (e))
     %s.__doc__ = _bt.btsocket.%s.__doc__\n""")
     for _m in ( 'connect', 'connect_ex', 'close',
@@ -205,7 +211,7 @@ class BluetoothSocket:
         'getsockopt', 'listen', 'makefile', 'recv', 'recvfrom', 'sendall',
         'send', 'sendto', 'setblocking', 'setsockopt', 'settimeout', 
         'shutdown', 'setl2capsecurity'):
-        exec _s % (_m, _m, _m, _m)
+        exec( _s % (_m, _m, _m, _m))
     del _m, _s
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \
@@ -226,13 +232,13 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
         _bt.sdp_advertise_service (sock._sock, name, service_id, \
                 service_classes, profiles, provider, description, \
                 protocols)
-    except _bt.error, e:
+    except _bt.error as e:
         raise BluetoothError (str (e))
 
 def stop_advertising (sock):
     try:
         _bt.sdp_stop_advertising (sock._sock)
-    except _bt.error, e:
+    except _bt.error as e:
         raise BluetoothError (str (e))
 
 def find_service (name = None, uuid = None, address = None):
@@ -267,7 +273,7 @@ def find_service (name = None, uuid = None, address = None):
                 m["host"] = addr
 
             results.extend (matches)
-    except _bt.error, e:
+    except _bt.error as e:
         raise BluetoothError (str (e))
 
     return results
@@ -287,7 +293,7 @@ def _get_acl_conn_handle (hci_sock, addr):
     request = array.array ("c", reqstr)
     try:
         fcntl.ioctl (hci_fd, _bt.HCIGETCONNINFO, request, 1)
-    except IOError, e:
+    except IOError as e:
         raise BluetoothError ("There is no ACL connection to %s" % addr)
 
     # XXX should this be "<8xH14x"?
@@ -583,7 +589,7 @@ class DeviceDiscoverer:
         try:
             _bt.hci_send_cmd (self.sock, _bt.OGF_LINK_CTL, \
                     _bt.OCF_REMOTE_NAME_REQ, cmd_pkt)
-        except Exception, e:
+        except Exception as e:
             raise BluetoothError ("error request name of %s - %s" % 
                     (address, str (e)))
 
@@ -616,13 +622,13 @@ class DeviceDiscoverer:
         [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
         """
         if name:
-            print "found: %s - %s (class 0x%X)" % \
-                    (address, name, device_class)
+            print("found: %s - %s (class 0x%X)" % \
+                    (address, name, device_class))
         else:
-            print "found: %s (class 0x%X)" % (address, device_class)
+            print("found: %s (class 0x%X)" % (address, device_class))
 
     def inquiry_complete (self):
         """
         Called when an inquiry started by find_devices has completed.
         """
-        print "inquiry complete"
+        print("inquiry complete")

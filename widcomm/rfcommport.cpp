@@ -4,6 +4,7 @@
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>
 #include <com_error.h>
+#include <port3.h>
 
 #include "rfcommport.hpp"
 
@@ -357,7 +358,7 @@ wcrfcommport_dealloc(WCRfCommPortPyObject *self)
         delete self->rfcp;
         self->rfcp = NULL;
     }
-    self->ob_type->tp_free((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 int
@@ -370,8 +371,12 @@ wcrfcommport_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcrfcommport_type = {
+#if PY_MAJOR_VERSION < 3
     PyObject_HEAD_INIT(0)   /* Must fill in type value later */
     0,                  /* ob_size */
+#else
+    PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
+#endif
     "_widcomm._WCRfCommPort",            /* tp_name */
     sizeof(WCRfCommPortPyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */

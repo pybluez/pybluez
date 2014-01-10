@@ -5,6 +5,8 @@
 #include <Python.h>
 
 #include <initguid.h>
+#include <port3.h>
+
 
 #if 1
 static void dbg(const char *fmt, ...)
@@ -927,16 +929,41 @@ static PyMethodDef msbt_methods[] = {
 
 PyDoc_STRVAR(msbt_doc, "TODO\n");
 
+#define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
+
+#if PY_MAJOR_VERSION < 3
 PyMODINIT_FUNC
 init_msbt(void)
 {
-    PyObject *m;
-
-    m = Py_InitModule3("_msbt", msbt_methods, msbt_doc);
-
-#define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
+    PyObject * m = Py_InitModule3("_msbt", msbt_methods, msbt_doc);
 
     ADD_INT_CONSTANT(m, SOCK_STREAM);
     ADD_INT_CONSTANT(m, BTHPROTO_RFCOMM);
     ADD_INT_CONSTANT(m, BT_PORT_ANY);
 }
+#else
+PyMODINIT_FUNC
+PyInit__msbt(void)
+{
+    PyObject *m;
+
+    static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "_msbt",
+        NULL,
+        -1,
+        msbt_methods,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    };
+    m = PyModule_Create(&moduledef);
+#define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
+
+    ADD_INT_CONSTANT(m, SOCK_STREAM);
+    ADD_INT_CONSTANT(m, BTHPROTO_RFCOMM);
+    ADD_INT_CONSTANT(m, BT_PORT_ANY);
+    return m;
+}
+#endif

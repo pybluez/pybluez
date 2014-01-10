@@ -4,6 +4,7 @@
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>
 #include <com_error.h>
+#include <port3.h>
 
 #include "l2capconn.hpp"
 #include "l2capif.hpp"
@@ -366,7 +367,7 @@ wcl2capconn_dealloc(WCL2CapConnPyObject *self)
         delete self->l2cap;
         self->l2cap = NULL;
     }
-    self->ob_type->tp_free((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 int
@@ -379,8 +380,12 @@ wcl2capconn_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcl2capconn_type = {
+#if PY_MAJOR_VERSION < 3
     PyObject_HEAD_INIT(0)   /* Must fill in type value later */
     0,                  /* ob_size */
+#else
+    PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
+#endif
     "_widcomm._WCL2CapConn",            /* tp_name */
     sizeof(WCL2CapConnPyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */

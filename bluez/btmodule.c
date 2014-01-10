@@ -39,6 +39,7 @@ Local naming conventions:
 #include <bluetooth/l2cap.h>
 #include <bluetooth/sco.h>
 
+#include <port3.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include "btsdp.h"
@@ -159,7 +160,7 @@ internal_select(PySocketSockObject *s, int writing)
 
 static double defaulttimeout = -1.0; /* Default timeout for new sockets */
 
-PyMODINIT_FUNC
+static void
 init_sockobject(PySocketSockObject *s,
 		int fd, int family, int type, int proto)
 {
@@ -357,7 +358,8 @@ getsockaddrlen(PySocketSockObject *s, socklen_t *len_ret)
     }
 }
 
-int str2uuid( const char *uuid_str, uuid_t *uuid ) 
+
+int str2uuid( const char *uuid_str, uuid_t *uuid )
 {
     uint32_t uuid_int[4];
     char *endptr;
@@ -408,6 +410,18 @@ int str2uuid( const char *uuid_str, uuid_t *uuid )
     }
 
     return 1;
+}
+
+int pyunicode2uuid( PyObject *item, uuid_t *uuid )
+{
+#if PY_MAJOR_VERSION >= 3
+    PyObject* ascii = PyUnicode_AsASCIIString( item );
+    int ret =  str2uuid( PyBytes_AsString( ascii ), uuid );
+    Py_XDECREF( ascii );
+    return ret;
+#else
+    return str2uuid( PyString_AsString( item ), NULL );
+#endif
 }
 
 void uuid2str( const uuid_t *uuid, char *dest ) 
@@ -1025,9 +1039,13 @@ sock_makefile(PySocketSockObject *s, PyObject *args)
 			close(fd);
 		return s->errorhandler();
 	}
+#if PY_MAJOR_VERSION >= 3
+	f = PyFile_FromFd(fd, "<socket>", mode, bufsize, NULL, NULL, NULL, 1);
+#else
 	f = PyFile_FromFile(fp, "<socket>", mode, fclose);
 	if (f != NULL)
 		PyFile_SetBufSize(f, bufsize);
+#endif
 	return f;
 }
 
@@ -1387,7 +1405,7 @@ sock_dealloc(PySocketSockObject *s)
         s->sdp_session = NULL;
     }
 
-	s->ob_type->tp_free((PyObject *)s);
+	Py_TYPE(s)->tp_free((PyObject *)s);
 }
 
 
@@ -1488,8 +1506,12 @@ sock_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 /* Type object for socket objects. */
 
 PyTypeObject sock_type = {
+#if PY_MAJOR_VERSION < 3
 	PyObject_HEAD_INIT(0)	/* Must fill in type value later */
 	0,					/* ob_size */
+#else
+    PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
+#endif
 	"_bluetooth.btsocket",			/* tp_name */
 	sizeof(PySocketSockObject),		/* tp_basicsize */
 	0,					/* tp_itemsize */
@@ -2060,7 +2082,7 @@ bt_hci_read_remote_name(PyObject *self, PyObject *args, PyObject *kwds)
     int timeout = 5192;
     static char name[249];
     PySocketSockObject *socko = NULL;
-    int dd = 0, err = 0;
+    int err = 0;
 
 	static char *keywords[] = {"dd", "bdaddr", "timeout", 0};
 
@@ -2072,8 +2094,6 @@ bt_hci_read_remote_name(PyObject *self, PyObject *args, PyObject *kwds)
 
     str2ba( addr, &ba );
     memset( name, 0, sizeof(name) );
-
-    dd = socko->sock_fd;
 
     Py_BEGIN_ALLOW_THREADS
     err = hci_read_remote_name( socko->sock_fd, &ba, sizeof(name)-1, 
@@ -2474,7 +2494,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     // make sure each item in the list is a valid UUID
     for(i = 0; i < PySequence_Length(service_classes); ++i) {
         PyObject *item = PySequence_GetItem(service_classes, i);
-        if( ! str2uuid( PyString_AsString( item ), NULL ) ) {
+        if( ! pyunicode2uuid( item, NULL ) ) {
             PyErr_SetString(PyExc_ValueError, 
                     "service_classes must be a list of "
                     "strings, each either of the form XXXX or "
@@ -2513,7 +2533,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     // make sure each item in the list is a valid UUID
     for(i = 0; i < PySequence_Length(protocols); ++i) {
         PyObject *item = PySequence_GetItem(protocols, i);
-        if( ! str2uuid( PyString_AsString( item ), NULL ) ) {
+        if( ! pyunicode2uuid( item, NULL ) ) {
             PyErr_SetString(PyExc_ValueError, 
                     "protocols must be a list of "
                     "strings, each either of the form XXXX or "
@@ -2598,7 +2618,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         for(i = 0; i < PySequence_Length(protocols); i++) {
             uuid_t *proto_uuid = (uuid_t*) malloc( sizeof( uuid_t ) );
             PyObject *item = PySequence_GetItem(protocols, i);
-            str2uuid( PyString_AsString( item ), proto_uuid );
+            pyunicode2uuid( item, proto_uuid );
             
             sdp_list_t *new_list;
             new_list = sdp_list_append( 0, proto_uuid );
@@ -2616,7 +2636,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     for(i = 0; i < PySequence_Length(service_classes); i++) {
         uuid_t *svc_class_uuid = (uuid_t*) malloc( sizeof( uuid_t ) );
         PyObject *item = PySequence_GetItem(service_classes, i);
-        str2uuid( PyString_AsString( item ), svc_class_uuid );
+        pyunicode2uuid( item, svc_class_uuid );
         svc_class_list = sdp_list_append(svc_class_list, 
                 svc_class_uuid);
     }
@@ -2702,7 +2722,7 @@ bt_sdp_stop_advertising( PyObject *self, PyObject *args )
     }
 
     // verify that we got a real socket object
-    if( ! socko || (socko->ob_type != &sock_type) ) {
+    if( ! socko || (Py_TYPE(socko) != &sock_type) ) {
         // TODO change this to a more accurate exception type
         PyErr_SetString(bluetooth_error, 
                 "must pass in _bluetooth.socket object");
@@ -2789,16 +2809,15 @@ PyDoc_STRVAR(socket_doc,
 \n\
 See the bluetooth module for documentation.");
 
+#if PY_MAJOR_VERSION < 3
 PyMODINIT_FUNC
 init_bluetooth(void)
 {
-	PyObject *m;
-
-	sock_type.ob_type = &PyType_Type;
-    sdp_session_type.ob_type = &PyType_Type;
+	Py_TYPE(&sock_type) = &PyType_Type;
+	Py_TYPE(&sdp_session_type) = &PyType_Type;
 
 // Initialization steps for _bluetooth.
-    m = Py_InitModule3("_bluetooth",
+	PyObject *m = Py_InitModule3("_bluetooth",
                bt_methods,
                socket_doc);
     bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
@@ -2824,6 +2843,49 @@ init_bluetooth(void)
                 (PyObject *)&sdp_session_type) != 0)
         return;
 
+#else
+PyMODINIT_FUNC
+PyInit__bluetooth(void)
+{
+	Py_TYPE(&sock_type) = &PyType_Type;
+	Py_TYPE(&sdp_session_type) = &PyType_Type;
+
+// Initialization steps for _bluetooth.
+    static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "_bluetooth",
+        NULL,
+        -1,
+        bt_methods,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    };
+    PyObject *m = PyModule_Create(&moduledef);
+	bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
+	if (bluetooth_error == NULL)
+		return NULL;
+	Py_INCREF(bluetooth_error);
+	PyModule_AddObject(m, "error", bluetooth_error);
+
+	socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
+			NULL);
+	if (socket_timeout == NULL)
+		return NULL;
+	Py_INCREF(socket_timeout);
+	PyModule_AddObject(m, "timeout", socket_timeout);
+
+	Py_INCREF((PyObject *)&sock_type);
+	if (PyModule_AddObject(m, "btsocket",
+				   (PyObject *)&sock_type) != 0)
+		return NULL;
+
+	Py_INCREF((PyObject *)&sdp_session_type);
+	if (PyModule_AddObject(m, "SDPSession",
+				(PyObject *)&sdp_session_type) != 0)
+		return NULL;
+#endif
 
     // because we're lazy...
 #define ADD_INT_CONST(m, a) PyModule_AddIntConstant(m, #a, a)
@@ -3447,6 +3509,9 @@ init_bluetooth(void)
     ADD_INT_CONST(m, SOL_BLUETOOTH);
 
 #undef ADD_INT_CONST
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
 }
 
 /*

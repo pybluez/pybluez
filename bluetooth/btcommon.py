@@ -243,7 +243,7 @@ def to_full_uuid (uuid):
 # =============== parsing and constructing raw SDP records ============
 
 def sdp_parse_size_desc (data):
-    dts = struct.unpack ("B", data[0])[0]
+    dts = struct.unpack ("B", data[0:1])[0]
     dtype, dsizedesc = dts >> 3, dts & 0x7
     dstart = 1
     if   dtype == 0:     dsize = 0
@@ -253,7 +253,7 @@ def sdp_parse_size_desc (data):
     elif dsizedesc == 3: dsize = 8
     elif dsizedesc == 4: dsize = 16
     elif dsizedesc == 5:
-        dsize = struct.unpack ("B", data[1])[0]
+        dsize = struct.unpack ("B", data[1:2])[0]
         dstart += 1
     elif dsizedesc == 6:
         dsize = struct.unpack ("!H", data[1:3])[0]
@@ -264,7 +264,7 @@ def sdp_parse_size_desc (data):
 
     if dtype > 8:
         raise ValueError ("Invalid TypeSizeDescriptor byte %s %d, %d" \
-                % (binascii.hexlify (data[0]), dtype, dsizedesc))
+                % (binascii.hexlify (data[0:1]), dtype, dsizedesc))
 
     return dtype, dsize, dstart
 
@@ -285,7 +285,7 @@ def sdp_parse_int (data, size, signed):
         upp, low = struct.unpack ("!QQ", data)
         result = ( upp << 64) | low
         if signed:
-            result=- ((~ (result-1))&0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFL)
+            result=- ((~ (result-1))&0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
         return result
     else:
         return struct.unpack (fmt, data)[0]
@@ -363,7 +363,7 @@ def sdp_make_data_element (type, value):
     elif type == "UInt128":
         ts = maketsd (1, 4)
         upper = ts >> 64
-        lower = (ts & 0xFFFFFFFFFFFFFFFFL)
+        lower = (ts & 0xFFFFFFFFFFFFFFFF)
         return ts + struct.pack ("!QQ", upper, lower)
     elif type == "SInt128":
         ts = maketsd (2, 4)
@@ -377,17 +377,17 @@ def sdp_make_data_element (type, value):
         elif len (value) == 36:
             return maketsd (3, 4) + binascii.unhexlify (value.replace ("-",""))
     elif type == "String":
-        return maketsdl (4, len (value)) + value
+        return maketsdl (4, len (value)) + str.encode(value)
     elif type == "Bool":
         return maketsd (5,0) + (value and "\x01" or "\x00")
     elif type == "ElemSeq":
-        packedseq = ""
+        packedseq = bytes()
         for subtype, subval in value:
             nextelem = sdp_make_data_element (subtype, subval)
             packedseq = packedseq + nextelem
         return maketsdl (6, len (packedseq)) + packedseq
     elif type == "AltElemSeq":
-        packedseq = ""
+        packedseq = bytes()
         for subtype, subval in value:
             packedseq = packedseq + sdp_make_data_element (subtype, subval)
         return maketsdl (7, len (packedseq)) + packedseq

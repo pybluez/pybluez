@@ -18,15 +18,15 @@ server_sock.listen(1)
 #                    )
                    
 client_sock,address = server_sock.accept()
-print "Accepted connection from ",address
+print("Accepted connection from ",address)
 
 data = client_sock.recv(1024)
-print "Data received:", data
+print("Data received:", data)
 
 while data:
     client_sock.send('Echo =>' + data)
     data = client_sock.recv(1024)
-    print "Data received:",data
+    print("Data received:",data)
 
 client_sock.close()
 server_sock.close()
