@@ -2,6 +2,13 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
+changes from 0.19 to 0.20(Jan 13, 2014)
+-------------------------
+
+GNU/Linux/Windows:
+    Python 3 is now supported.
+    Python 3.3 uses Visual C++ 2010 Express Edition for build on windows.
+
 changes from 0.18 to 0.19
 -------------------------
 

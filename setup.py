@@ -12,7 +12,7 @@ mods = []
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'),
                        os.getenv('ProgramFiles(x86)'))
-    if sys.version < '3':
+    if sys.version < '3.3':
         MS_SDK = r'Microsoft SDKs\Windows\v6.0A' # Visual Studio 9
     else:
         MS_SDK = r'Microsoft SDKs\Windows\v7.0A' # Visual Studio 10
