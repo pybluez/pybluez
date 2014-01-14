@@ -5,6 +5,9 @@
 import sys
 import bluetooth
 
+if sys.version < '3':
+    input = raw_input
+
 sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
 
 if len(sys.argv) < 2:
