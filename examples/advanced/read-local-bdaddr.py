@@ -32,4 +32,4 @@ if __name__ == "__main__":
     dev_id = 0
     hci_sock = _bt.hci_open_dev(dev_id)
     bdaddr = read_local_bdaddr(hci_sock)
-    print bdaddr
+    print(bdaddr)

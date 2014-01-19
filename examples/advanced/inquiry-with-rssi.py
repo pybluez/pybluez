@@ -9,7 +9,7 @@ import bluetooth._bluetooth as bluez
 def printpacket(pkt):
     for c in pkt:
         sys.stdout.write("%02x " % struct.unpack("B",c)[0])
-    print 
+    print() 
 
 
 def read_inquiry_mode(sock):
@@ -99,13 +99,13 @@ def device_inquiry_with_with_rssi(sock):
                 addr = bluez.ba2str( pkt[1+6*i:1+6*i+6] )
                 rssi = struct.unpack("b", pkt[1+13*nrsp+i])[0]
                 results.append( ( addr, rssi ) )
-                print "[%s] RSSI: [%d]" % (addr, rssi)
+                print("[%s] RSSI: [%d]" % (addr, rssi))
         elif event == bluez.EVT_INQUIRY_COMPLETE:
             done = True
         elif event == bluez.EVT_CMD_STATUS:
             status, ncmd, opcode = struct.unpack("BBH", pkt[3:7])
             if status != 0:
-                print "uh oh..."
+                print("uh oh...")
                 printpacket(pkt[3:7])
                 done = True
         elif event == bluez.EVT_INQUIRY_RESULT:
@@ -114,10 +114,10 @@ def device_inquiry_with_with_rssi(sock):
             for i in range(nrsp):
                 addr = bluez.ba2str( pkt[1+6*i:1+6*i+6] )
                 results.append( ( addr, -1 ) )
-                print "[%s] (no RRSI)" % addr
+                print("[%s] (no RRSI)" % addr)
         else:
-            print "unrecognized packet type 0x%02x" % ptype
-	    print "event ", event
+            print("unrecognized packet type 0x%02x" % ptype)
+        print("event ", event)
 
 
     # restore old filter
@@ -129,28 +129,28 @@ dev_id = 0
 try:
     sock = bluez.hci_open_dev(dev_id)
 except:
-    print "error accessing bluetooth device..."
+    print("error accessing bluetooth device...")
     sys.exit(1)
 
 try:
     mode = read_inquiry_mode(sock)
-except Exception, e:
-    print "error reading inquiry mode.  "
-    print "Are you sure this a bluetooth 1.2 device?"
-    print e
+except Exception as e:
+    print("error reading inquiry mode.  ")
+    print("Are you sure this a bluetooth 1.2 device?")
+    print(e)
     sys.exit(1)
-print "current inquiry mode is %d" % mode
+print("current inquiry mode is %d" % mode)
 
 if mode != 1:
-    print "writing inquiry mode..."
+    print("writing inquiry mode...")
     try:
         result = write_inquiry_mode(sock, 1)
-    except Exception, e:
-        print "error writing inquiry mode.  Are you sure you're root?"
-        print e
+    except Exception as e:
+        print("error writing inquiry mode.  Are you sure you're root?")
+        print(e)
         sys.exit(1)
     if result != 0:
-        print "error while setting inquiry mode"
-    print "result: %d" % result
+        print("error while setting inquiry mode")
+    print("result: %d" % result)
 
 device_inquiry_with_with_rssi(sock)

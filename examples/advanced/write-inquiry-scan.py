@@ -68,23 +68,23 @@ dev_id = 0
 try:
     sock = bluez.hci_open_dev(dev_id)
 except:
-    print "error accessing bluetooth device..."
+    print("error accessing bluetooth device...")
     sys.exit(1)
 
 try:
     interval, window = read_inquiry_scan_activity(sock)
-except Exception, e:
-    print "error reading inquiry scan activity.  "
-    print e
+except Exception as e:
+    print("error reading inquiry scan activity.  ")
+    print(e)
     sys.exit(1)
-print "current inquiry scan interval: %d (0x%X) window: %d (0x%X)" % \
-        (interval, interval, window, window)
+print("current inquiry scan interval: %d (0x%X) window: %d (0x%X)" % \
+        (interval, interval, window, window))
 
 if len(sys.argv) == 3:
     interval = int(sys.argv[1])
     window = int(sys.argv[2])
-    print "target interval: %d window %d" % (interval, window)
+    print("target interval: %d window %d" % (interval, window))
     write_inquiry_scan_activity(sock, interval, window)
     interval, window = read_inquiry_scan_activity(sock)
-    print "current inquiry scan interval: %d (0x%X) window: %d (0x%X)" % \
-            (interval, interval, window, window)
+    print("current inquiry scan interval: %d (0x%X) window: %d (0x%X)" % \
+            (interval, interval, window, window))
