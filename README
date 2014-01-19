@@ -2,7 +2,7 @@ PyBluez
 
 Python extension module allowing access to system Bluetooth resources.
 
-http://org.csail.mit.edu/pybluez
+http://code.google.com/p/pybluez
 
 BUILD REQUIREMENTS:
 
