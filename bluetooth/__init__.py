@@ -1,7 +1,7 @@
 import sys
 import os
 if sys.version < '3':
-    from btcommon import *
+    from .btcommon import *
 else:
     from bluetooth.btcommon import *
 
@@ -21,11 +21,11 @@ if sys.platform == "win32":
        os.path.exists (os.path.join (sysroot, "system32", dll)) or \
        os.path.exists (os.path.join (sysroot, dll)):
         try:
-            import widcomm
+            from . import widcomm
             if widcomm.inquirer.is_device_ready ():
                 # if the Widcomm stack is active and a Bluetooth device on that
                 # stack is detected, then use the Widcomm stack
-                from widcomm import *
+                from .widcomm import *
                 have_widcomm = True
         except ImportError: 
             pass
@@ -34,17 +34,17 @@ if sys.platform == "win32":
         # otherwise, fall back to the Microsoft stack
         _dbg("Widcomm not ready. falling back to MS stack")
         if sys.version < '3':
-            from msbt import *
+            from .msbt import *
         else:
             from bluetooth.msbt import *
 
 elif sys.platform.startswith("linux"):
     if sys.version < '3':
-        from bluez import *
+        from .bluez import *
     else:
         from bluetooth.bluez import *
 elif sys.platform == "darwin":
-    from osx import *
+    from .osx import *
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
 

@@ -96,7 +96,7 @@ class BluezChatGui:
         text = self.input_tb.get_text()
         if len(text) == 0: return
 
-        for addr, sock in self.peers.items():
+        for addr, sock in list(self.peers.items()):
             sock.send(text)
 
         self.input_tb.set_text("")
@@ -159,7 +159,7 @@ class BluezChatGui:
         sock = bluetooth.BluetoothSocket (bluetooth.L2CAP)
         try:
             sock.connect((addr, 0x1001))
-        except bluez.error, e:
+        except bluez.error as e:
             self.add_text("\n%s" % str(e))
             sock.close()
             return

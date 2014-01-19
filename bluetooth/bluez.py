@@ -3,7 +3,7 @@ import struct
 import binascii
 
 if sys.version < '3':
-    from btcommon import *
+    from .btcommon import *
     import _bluetooth as _bt
 else:
     from bluetooth.btcommon import *
@@ -266,8 +266,7 @@ def find_service (name = None, uuid = None, address = None):
                 continue
 
             if name is not None:
-                matches = filter (lambda s: s.get ("name", "") == name, \
-                        matches)
+                matches = [s for s in matches if s.get ("name", "") == name]
 
             for m in matches:
                 m["host"] = addr
@@ -580,7 +579,7 @@ class DeviceDiscoverer:
 
     def _send_next_name_req (self):
         assert len (self.names_to_find) > 0
-        address = self.names_to_find.keys ()[0]
+        address = list(self.names_to_find.keys ())[0]
         device_class, psrm, pspm, clockoff = self.names_to_find[address]
         bdaddr = _bt.str2ba (address)
         
@@ -622,10 +621,10 @@ class DeviceDiscoverer:
         [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
         """
         if name:
-            print("found: %s - %s (class 0x%X)" % \
-                    (address, name, device_class))
+            print(("found: %s - %s (class 0x%X)" % \
+                    (address, name, device_class)))
         else:
-            print("found: %s (class 0x%X)" % (address, device_class))
+            print(("found: %s (class 0x%X)" % (address, device_class)))
 
     def inquiry_complete (self):
         """

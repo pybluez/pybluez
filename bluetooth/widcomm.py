@@ -1,4 +1,4 @@
-from btcommon import *
+from .btcommon import *
 import socket
 import struct
 import threading
@@ -217,7 +217,7 @@ def _port_ev_code_to_str (code):
           _widcomm.PORT_EV_FC : "Flow control enabled flag changed by remote",
           _widcomm.PORT_EV_FCS : "Flow control status true = enabled" }
     result = []
-    for k, v in d.items ():
+    for k, v in list(d.items ()):
         if code & k:
             result.append (v)
     if len (result) == 0:

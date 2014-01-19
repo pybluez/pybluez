@@ -93,7 +93,7 @@ class BluetoothSocket:
 
     def makefile (self):
         # TODO
-        raise "Not yet implemented"
+        raise Exception("Not yet implemented")
 
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \

@@ -1,3 +1,3 @@
-from btcommon import *
+from .btcommon import *
 
 raise NotImplementedError
