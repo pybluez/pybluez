@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>bluetooth.BluetoothSocket</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="bluetooth-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="bluetooth-module.html">Module&nbsp;bluetooth</a> ::
+        Class&nbsp;BluetoothSocket
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/bluetooth.BluetoothSocket-class.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="bluetooth.BluetoothSocket-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Class BluetoothSocket</h2>
+
+<hr/>
+
+<p>BluetoothSocket</p>
+availability: GNU/Linux, Windows XP
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>proto</span>,
+          <span class=summary-sig-arg>_sock</span>)</span></code>
+<br />
+Create a new Bluetooth socket that uses the specified transport 
+protocol.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#accept" class="summary-sig-name"><code>accept</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+accept() -&gt; (BluetoothSocket, addrport)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#bind" class="summary-sig-name"><code>bind</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>addrport</span>)</span></code>
+<br />
+bind(addrport)
+
+availability: GNU/Linux, Windows XP
+
+Bind the socket to a local adapter and port.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#close" class="summary-sig-name"><code>close</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+close()</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#connect" class="summary-sig-name"><code>connect</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>addrport</span>)</span></code>
+<br />
+connect(addrport)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#dup" class="summary-sig-name"><code>dup</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+dup() -&gt; socket object</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#fileno" class="summary-sig-name"><code>fileno</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+fileno() -&gt; integer</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#getpeername" class="summary-sig-name"><code>getpeername</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+getpeername() -&gt; address info</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#getsockname" class="summary-sig-name"><code>getsockname</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+getsockname() -&gt; address info</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#getsockopt" class="summary-sig-name"><code>getsockopt</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>level</span>,
+          <span class=summary-sig-arg>option</span>,
+          <span class=summary-sig-arg>buffersize</span>)</span></code>
+<br />
+getsockopt(level, option[, buffersize]) -&gt; value</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#gettimouet" class="summary-sig-name"><code>gettimouet</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>timeout</span>)</span></code>
+<br />
+gettimeout() -&gt; timeout</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#listen" class="summary-sig-name"><code>listen</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>backlog</span>)</span></code>
+<br />
+listen(backlog)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#makefile" class="summary-sig-name"><code>makefile</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+makefile([mode[, buffersize]]) -&gt; file object</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#recv" class="summary-sig-name"><code>recv</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>buffersize</span>,
+          <span class=summary-sig-arg>flags</span>)</span></code>
+<br />
+recv(buffersize[, flags]) -&gt; data</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#send" class="summary-sig-name"><code>send</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>data</span>,
+          <span class=summary-sig-arg>flags</span>)</span></code>
+<br />
+send(data[, flags]) -&gt; count</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#sendall" class="summary-sig-name"><code>sendall</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>data</span>,
+          <span class=summary-sig-arg>flags</span>)</span></code>
+<br />
+sendall(data[, flags])</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#setblocking" class="summary-sig-name"><code>setblocking</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>blocking</span>)</span></code>
+<br />
+setblocking(flag)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#setsockopt" class="summary-sig-name"><code>setsockopt</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>level</span>,
+          <span class=summary-sig-arg>option</span>,
+          <span class=summary-sig-arg>value</span>)</span></code>
+<br />
+setsockopt(level, option, value)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#settimeout" class="summary-sig-name"><code>settimeout</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>timeout</span>)</span></code>
+<br />
+settimeout(timeout)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.BluetoothSocket-class.html#shutdown" class="summary-sig-name"><code>shutdown</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>flag</span>)</span></code>
+<br />
+shutdown(flag)</td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>proto</span>=<span class=sig-default>0</span>,
+          <span class=sig-arg>_sock</span>=<span class=sig-default>None</span>)</span>
+    <br /><i>(Constructor)</i>
+  </h3>
+  <p>Create a new Bluetooth socket that uses the specified transport 
+  protocol.</p>
+  <p>proto can be one of RFCOMM, L2CAP, HCI, or SCO</p>
+  HCI, L2CAP, and SCO sockets are only available in GNU/Linux
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="accept"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">accept</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>accept() -&gt; (BluetoothSocket, addrport)</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Wait for an incoming connection. Return a new socket representing 
+  the connection, and the address/port of the client. For L2CAP sockets, 
+  addport is a (host, psm) tuple. For RFCOMM sockets, addport is a (host, 
+  channel) tuple. For SCO sockets, addrport is just a Bluetooth 
+  address.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="bind"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">bind</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>addrport</span>)</span>
+  </h3>
+<pre class="literalblock">
+bind(addrport)
+
+availability: GNU/Linux, Windows XP
+
+Bind the socket to a local adapter and port.  addrport must always be a tuple.
+  HCI sockets:    ( device number, )
+                  device number should be 0, 1, 2, etc.
+  L2CAP sockets:  ( host, psm )
+                  host should be an address e.g. &quot;01:23:45:67:89:ab&quot;
+                  psm should be an unsigned integer
+  RFCOMM sockets: ( host, channel )
+  SCO sockets:    ( host )
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="close"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">close</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>close()</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Close the socket. It cannot be used after this call.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="connect"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">connect</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>addrport</span>)</span>
+  </h3>
+  <p>connect(addrport)</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Connect the socket to a remote device. For L2CAP sockets, addrport 
+  is a (host,psm) tuple. For RFCOMM sockets, addrport is a (host,channel) 
+  tuple. For SCO sockets, addrport is just the host.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="dup"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">dup</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>dup() -&gt; socket object</p>
+  <p>availability: GNU/Linux</p>
+  Return a new socket object connected to the same system 
+  resource.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="fileno"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">fileno</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>fileno() -&gt; integer</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Return the integer file descriptor of the socket.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="getpeername"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">getpeername</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>getpeername() -&gt; address info</p>
+  <p>availability: GNU/Linux</p>
+  Return the address of the remote endpoint. For HCI sockets, the 
+  address is a device number (0, 1, 2, etc). For L2CAP sockets, the 
+  address is a (host,psm) tuple. For RFCOMM sockets, the address is a 
+  (host,channel) tuple. For SCO sockets, the address is just the 
+  host.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="getsockname"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">getsockname</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>getsockname() -&gt; address info</p>
+  availability: GNU/Linux, Windows XP Return the address of the local 
+  endpoint.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="getsockopt"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">getsockopt</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>level</span>,
+          <span class=sig-arg>option</span>,
+          <span class=sig-arg>buffersize</span>)</span>
+  </h3>
+  <p>getsockopt(level, option[, buffersize]) -&gt; value</p>
+  <p>availability: GNU/Linux</p>
+  Get a socket option. See the Unix manual for level and option. If a 
+  nonzero buffersize argument is given, the return value is a string of 
+  that length; otherwise it is an integer.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="gettimouet"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">gettimouet</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>timeout</span>)</span>
+  </h3>
+  <p>gettimeout() -&gt; timeout</p>
+  <p>availability: GNU/Linux</p>
+  Returns the timeout in floating seconds associated with socket 
+  operations. A timeout of None indicates that timeouts on socket 
+  operations are disabled.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="listen"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">listen</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>backlog</span>)</span>
+  </h3>
+  <p>listen(backlog)</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Enable a server to accept connections. The backlog argument must be 
+  at least 1; it specifies the number of unaccepted connection that the 
+  system will allow before refusing new connections.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="makefile"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">makefile</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>makefile([mode[, buffersize]]) -&gt; file object</p>
+  <p>availability: GNU/Linux</p>
+  Return a regular file object corresponding to the socket. The mode 
+  and buffersize arguments are as for the built-in open() function.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="recv"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">recv</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>buffersize</span>,
+          <span class=sig-arg>flags</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  <p>recv(buffersize[, flags]) -&gt; data</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Receive up to buffersize bytes from the socket. For the optional 
+  flags argument, see the Unix manual. When no data is available, block 
+  until at least one byte is available or until the remote end is closed. 
+  When the remote end is closed and all data is read, return the empty 
+  string.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="send"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">send</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>data</span>,
+          <span class=sig-arg>flags</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  <p>send(data[, flags]) -&gt; count</p>
+  <p>availability: GNU/Linux, Windows XP</p>
+  Send a data string to the socket. For the optional flags argument, 
+  see the Unix manual. Return the number of bytes sent; this may be less 
+  than len(data) if the network is busy.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="sendall"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">sendall</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>data</span>,
+          <span class=sig-arg>flags</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  <p>sendall(data[, flags])</p>
+  <p>availability: GNU/Linux</p>
+  Send a data string to the socket. For the optional flags argument, 
+  see the Unix manual. This calls send() repeatedly until all data is 
+  sent. If an error occurs, it's impossible to tell how much data has 
+  been sent.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="setblocking"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">setblocking</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>blocking</span>)</span>
+  </h3>
+  <p>setblocking(flag)</p>
+  <p>availability: GNU/Linux</p>
+  Set the socket to blocking (flag is true) or non-blocking (false). 
+  setblocking(True) is equivalent to settimeout(None); setblocking(False) 
+  is equivalent to settimeout(0.0).
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="setsockopt"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">setsockopt</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>level</span>,
+          <span class=sig-arg>option</span>,
+          <span class=sig-arg>value</span>)</span>
+  </h3>
+  <p>setsockopt(level, option, value)</p>
+  <p>availability: GNU/Linux</p>
+  Set a socket option. See the Unix manual for level and option. The 
+  value argument can either be an integer or a string.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="settimeout"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">settimeout</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>timeout</span>)</span>
+  </h3>
+  <p>settimeout(timeout)</p>
+  <p>availability: GNU/Linux</p>
+  Set a timeout on socket operations. 'timeout' can be a float, giving 
+  in seconds, or None. Setting a timeout of None disables the timeout 
+  feature and is equivalent to setblocking(1). Setting a timeout of zero 
+  is the same as setblocking(0).
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="shutdown"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">shutdown</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>flag</span>)</span>
+  </h3>
+  <p>shutdown(flag)</p>
+  <p>availability: GNU/Linux</p>
+  Shut down the reading side of the socket (flag == 0), the writing 
+  side of the socket (flag == 1), or both ends (flag == 2).
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="bluetooth-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue May  9 02:23:40 2006</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

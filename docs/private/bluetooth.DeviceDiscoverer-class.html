@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>bluetooth.DeviceDiscoverer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="bluetooth-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        <a href="bluetooth-module.html">Module&nbsp;bluetooth</a> ::
+        Class&nbsp;DeviceDiscoverer
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/bluetooth.DeviceDiscoverer-class.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="bluetooth.DeviceDiscoverer-class.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF CLASS DESCRIPTION =========== -->
+<h2 class="class">Class DeviceDiscoverer</h2>
+
+<hr/>
+
+<p>DeviceDiscoverer</p>
+<p>availability: GNU/Linux</p>
+<p>Skeleton class for finer control of the device discovery process.</p>
+To implement asynchronous device discovery (e.g. if you want to do 
+something *as soon as* a device is discovered), subclass DeviceDiscoverer 
+and override device_discovered() and inquiry_complete()
+<hr/>
+
+
+<!-- =========== START OF METHOD SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Method Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#__init__" class="summary-sig-name"><code>__init__</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+TODO</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#cancel_inquiry" class="summary-sig-name"><code>cancel_inquiry</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Call this method to cancel an inquiry in process.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#device_discovered" class="summary-sig-name"><code>device_discovered</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>address</span>,
+          <span class=summary-sig-arg>device_class</span>,
+          <span class=summary-sig-arg>name</span>)</span></code>
+<br />
+Called when a bluetooth device is discovered.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="fileno"></a><span class="summary-sig"><span class="summary-sig-name">fileno</span>(<span class=summary-sig-arg>self</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#find_devices" class="summary-sig-name"><code>find_devices</code></a>(<span class=summary-sig-arg>self</span>,
+          <span class=summary-sig-arg>lookup_names</span>,
+          <span class=summary-sig-arg>duration</span>,
+          <span class=summary-sig-arg>flush_cache</span>)</span></code>
+<br />
+find_devices( lookup_names=True, service_name=None, 
+               duration=8, flush_cache=True )
+
+Call this method to initiate the device discovery process
+
+lookup_names - set to True if you want to lookup the user-friendly 
+               names for each device found.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#inquiry_complete" class="summary-sig-name"><code>inquiry_complete</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Called when an inquiry started by find_devices has completed.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#pre_inquiry" class="summary-sig-name"><code>pre_inquiry</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Called just after find_devices is invoked, but just before the inquiry 
+is started.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#process_event" class="summary-sig-name"><code>process_event</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Waits for one event to happen, and proceses it.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth.DeviceDiscoverer-class.html#process_inquiry" class="summary-sig-name"><code>process_inquiry</code></a>(<span class=summary-sig-arg>self</span>)</span></code>
+<br />
+Repeatedly calls process_event() until the device inquiry has 
+completed.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF METHOD DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Method Details</th></tr>
+</table>
+
+<a name="__init__"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class=sig-arg>self</span>)</span>
+    <br /><i>(Constructor)</i>
+  </h3>
+  TODO
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="cancel_inquiry"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">cancel_inquiry</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Call this method to cancel an inquiry in process. inquiry_complete 
+  will still be called.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="device_discovered"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">device_discovered</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>address</span>,
+          <span class=sig-arg>device_class</span>,
+          <span class=sig-arg>name</span>)</span>
+  </h3>
+<pre class="literalblock">
+Called when a bluetooth device is discovered.
+
+address is the bluetooth address of the device
+
+device_class is the Class of Device, as specified in [1]
+             passed in as a 3-byte string
+
+name is the user-friendly name of the device if lookup_names was set
+     when the inquiry was started.  otherwise None
+
+This method exists to be overriden.
+
+[1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="find_devices"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">find_devices</span>(<span class=sig-arg>self</span>,
+          <span class=sig-arg>lookup_names</span>=<span class=sig-default>True</span>,
+          <span class=sig-arg>duration</span>=<span class=sig-default>8</span>,
+          <span class=sig-arg>flush_cache</span>=<span class=sig-default>True</span>)</span>
+  </h3>
+<pre class="literalblock">
+find_devices( lookup_names=True, service_name=None, 
+               duration=8, flush_cache=True )
+
+Call this method to initiate the device discovery process
+
+lookup_names - set to True if you want to lookup the user-friendly 
+               names for each device found.
+
+service_name - set to the name of a service you're looking for.
+               only devices with a service of this name will be 
+               returned in device_discovered() NOT YET IMPLEMENTED
+
+
+ADVANCED PARAMETERS:  (don't change these unless you know what 
+                    you're doing)
+
+duration - the number of 1.2 second units to spend searching for
+           bluetooth devices.  If lookup_names is True, then the 
+           inquiry process can take a lot longer.
+
+flush_cache - return devices discovered in previous inquiries
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="inquiry_complete"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">inquiry_complete</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Called when an inquiry started by find_devices has completed.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="pre_inquiry"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">pre_inquiry</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  <p>Called just after find_devices is invoked, but just before the 
+  inquiry is started.</p>
+  This method exists to be overriden
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="process_event"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">process_event</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Waits for one event to happen, and proceses it. The event will be 
+  either a device discovery, or an inquiry completion.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="process_inquiry"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">process_inquiry</span>(<span class=sig-arg>self</span>)</span>
+  </h3>
+  Repeatedly calls process_event() until the device inquiry has 
+  completed.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="bluetooth-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue May  9 02:23:39 2006</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,3223 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>bluetooth</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th bgcolor="#70b0f0" class="navselect">&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        Module&nbsp;bluetooth
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[<a href="../private/bluetooth-module.html">show&nbsp;private</a>&nbsp;|&nbsp;hide&nbsp;private]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="bluetooth-module.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF MODULE DESCRIPTION =========== -->
+<h2 class="module">Module bluetooth</h2>
+
+PyBluez - Bluetooth extension module
+<hr/>
+
+<!-- =========== START OF CLASSES =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Classes</th></tr>
+<tr><td width="15%">
+  <b><a href="bluetooth.BluetoothSocket-class.html"><code>BluetoothSocket</code></a></b></td>
+  <td>BluetoothSocket</td></tr>
+<tr><td width="15%">
+  <b><a href="bluetooth.DeviceDiscoverer-class.html"><code>DeviceDiscoverer</code></a></b></td>
+  <td>DeviceDiscoverer</td></tr>
+</table><br />
+
+
+<!-- =========== START OF EXCEPTIONS =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Exceptions</th></tr>
+<tr><td width="15%">
+  <b><a href="bluetooth.BluetoothError-class.html"><code>BluetoothError</code></a></b></td>
+  <td>&nbsp;</td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Function Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#advertise_service" class="summary-sig-name"><code>advertise_service</code></a>(<span class=summary-sig-arg>sock</span>,
+          <span class=summary-sig-arg>name</span>,
+          <span class=summary-sig-arg>service_id</span>,
+          <span class=summary-sig-arg>service_classes</span>,
+          <span class=summary-sig-arg>profiles</span>,
+          <span class=summary-sig-arg>provider</span>,
+          <span class=summary-sig-arg>description</span>)</span></code>
+<br />
+Advertises a service with the local SDP server.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#discover_devices" class="summary-sig-name"><code>discover_devices</code></a>(<span class=summary-sig-arg>duration</span>,
+          <span class=summary-sig-arg>flush_cache</span>,
+          <span class=summary-sig-arg>lookup_names</span>)</span></code>
+<br />
+discover_devices( duration=8, flush_cache=True, lookup_names=False ) -&gt; results
+
+availability: GNU/Linux, Windows XP
+
+performs a bluetooth device discovery using the first available bluetooth
+resource.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#find_service" class="summary-sig-name"><code>find_service</code></a>(<span class=summary-sig-arg>name</span>,
+          <span class=summary-sig-arg>uuid</span>,
+          <span class=summary-sig-arg>address</span>)</span></code>
+<br />
+find_service( name = None, uuid = None, address = None )
+
+Searches for SDP services that match the specified criteria and returns
+the search results.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#get_available_port" class="summary-sig-name"><code>get_available_port</code></a>(<span class=summary-sig-arg>protocol</span>)</span></code>
+<br />
+deprecated.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#is_valid_address" class="summary-sig-name"><code>is_valid_address</code></a>(<span class=summary-sig-arg>address</span>)</span></code>
+<br />
+is_valid_address(address) -&gt; bool
+
+availability: GNU/Linux, Windows XP
+
+returns True if address is a valid bluetooth address
+
+valid address are always strings of the form XX:XX:XX:XX:XX:XX
+where X is a hexadecimal character.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#is_valid_uuid" class="summary-sig-name"><code>is_valid_uuid</code></a>(<span class=summary-sig-arg>uuid</span>)</span></code>
+<br />
+is_valid_uuid(uuid) -&gt; bool
+
+availability: GNU/Linux, Windows XP
+
+returns True if uuid is a valid UUID.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#lookup_name" class="summary-sig-name"><code>lookup_name</code></a>(<span class=summary-sig-arg>address</span>,
+          <span class=summary-sig-arg>timeout</span>)</span></code>
+<br />
+lookup_name( address, timeout=10 ) -&gt; name</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#set_l2cap_mtu" class="summary-sig-name"><code>set_l2cap_mtu</code></a>(<span class=summary-sig-arg>sock</span>,
+          <span class=summary-sig-arg>mtu</span>)</span></code>
+<br />
+set_l2cap_mtu( sock, mtu )</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#set_packet_timeout" class="summary-sig-name"><code>set_packet_timeout</code></a>(<span class=summary-sig-arg>address</span>,
+          <span class=summary-sig-arg>timeout</span>)</span></code>
+<br />
+set_packet_timeout( address, timeout )</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="bluetooth-module.html#stop_advertising" class="summary-sig-name"><code>stop_advertising</code></a>(<span class=summary-sig-arg>sock</span>)</span></code>
+<br />
+Instructs the local SDP server to stop advertising the service 
+associated with sock.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#ADVANCED_AUDIO_CLASS"><code>ADVANCED_AUDIO_CLASS</code></a></b> = <span title="'110d'"><code><span class="variable-quote">'</span>110d<span class="variable-quote">'</span>                            </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#ADVANCED_AUDIO_PROFILE"><code>ADVANCED_AUDIO_PROFILE</code></a></b> = <span title="('110d', 256)"><code>('110d',&nbsp;256)                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#AUDIO_SINK_CLASS"><code>AUDIO_SINK_CLASS</code></a></b> = <span title="'110b'"><code><span class="variable-quote">'</span>110b<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#AUDIO_SINK_PROFILE"><code>AUDIO_SINK_PROFILE</code></a></b> = <span title="('110b', 256)"><code>('110b',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#AUDIO_SOURCE_CLASS"><code>AUDIO_SOURCE_CLASS</code></a></b> = <span title="'110a'"><code><span class="variable-quote">'</span>110a<span class="variable-quote">'</span>                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#AUDIO_SOURCE_PROFILE"><code>AUDIO_SOURCE_PROFILE</code></a></b> = <span title="('110a', 256)"><code>('110a',&nbsp;256)                     </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#AV_CLASS"><code>AV_CLASS</code></a></b> = <span title="'112c'"><code><span class="variable-quote">'</span>112c<span class="variable-quote">'</span>                                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#AV_PROFILE"><code>AV_PROFILE</code></a></b> = <span title="('112c', 256)"><code>('112c',&nbsp;256)                               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#AV_REMOTE_CLASS"><code>AV_REMOTE_CLASS</code></a></b> = <span title="'110e'"><code><span class="variable-quote">'</span>110e<span class="variable-quote">'</span>                                 </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#AV_REMOTE_PROFILE"><code>AV_REMOTE_PROFILE</code></a></b> = <span title="('110e', 256)"><code>('110e',&nbsp;256)                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#AV_REMOTE_TARGET_CLASS"><code>AV_REMOTE_TARGET_CLASS</code></a></b> = <span title="'110c'"><code><span class="variable-quote">'</span>110c<span class="variable-quote">'</span>                          </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#AV_REMOTE_TARGET_PROFILE"><code>AV_REMOTE_TARGET_PROFILE</code></a></b> = <span title="('110c', 256)"><code>('110c',&nbsp;256)                 </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#BASIC_PRINTING_CLASS"><code>BASIC_PRINTING_CLASS</code></a></b> = <span title="'1122'"><code><span class="variable-quote">'</span>1122<span class="variable-quote">'</span>                            </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#BASIC_PRINTING_PROFILE"><code>BASIC_PRINTING_PROFILE</code></a></b> = <span title="('1122', 256)"><code>('1122',&nbsp;256)                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#BROWSE_GRP_DESC_CLASS"><code>BROWSE_GRP_DESC_CLASS</code></a></b> = <span title="'1001'"><code><span class="variable-quote">'</span>1001<span class="variable-quote">'</span>                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#BROWSE_GRP_DESC_PROFILE"><code>BROWSE_GRP_DESC_PROFILE</code></a></b> = <span title="('1001', 256)"><code>('1001',&nbsp;256)                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#CIP_CLASS"><code>CIP_CLASS</code></a></b> = <span title="'1128'"><code><span class="variable-quote">'</span>1128<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#CIP_PROFILE"><code>CIP_PROFILE</code></a></b> = <span title="('1128', 256)"><code>('1128',&nbsp;256)                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#CORDLESS_TELEPHONY_CLASS"><code>CORDLESS_TELEPHONY_CLASS</code></a></b> = <span title="'1109'"><code><span class="variable-quote">'</span>1109<span class="variable-quote">'</span>                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#CORDLESS_TELEPHONY_PROFILE"><code>CORDLESS_TELEPHONY_PROFILE</code></a></b> = <span title="('1109', 256)"><code>('1109',&nbsp;256)               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#DIALUP_NET_CLASS"><code>DIALUP_NET_CLASS</code></a></b> = <span title="'1103'"><code><span class="variable-quote">'</span>1103<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#DIALUP_NET_PROFILE"><code>DIALUP_NET_PROFILE</code></a></b> = <span title="('1103', 256)"><code>('1103',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#DIRECT_PRINTING_CLASS"><code>DIRECT_PRINTING_CLASS</code></a></b> = <span title="'1118'"><code><span class="variable-quote">'</span>1118<span class="variable-quote">'</span>                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#DIRECT_PRINTING_PROFILE"><code>DIRECT_PRINTING_PROFILE</code></a></b> = <span title="('1118', 256)"><code>('1118',&nbsp;256)                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#DIRECT_PRT_REFOBJS_CLASS"><code>DIRECT_PRT_REFOBJS_CLASS</code></a></b> = <span title="'1120'"><code><span class="variable-quote">'</span>1120<span class="variable-quote">'</span>                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#DIRECT_PRT_REFOBJS_PROFILE"><code>DIRECT_PRT_REFOBJS_PROFILE</code></a></b> = <span title="('1120', 256)"><code>('1120',&nbsp;256)               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#FAX_CLASS"><code>FAX_CLASS</code></a></b> = <span title="'1111'"><code><span class="variable-quote">'</span>1111<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#FAX_PROFILE"><code>FAX_PROFILE</code></a></b> = <span title="('1111', 256)"><code>('1111',&nbsp;256)                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_AUDIO_CLASS"><code>GENERIC_AUDIO_CLASS</code></a></b> = <span title="'1203'"><code><span class="variable-quote">'</span>1203<span class="variable-quote">'</span>                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_AUDIO_PROFILE"><code>GENERIC_AUDIO_PROFILE</code></a></b> = <span title="('1203', 256)"><code>('1203',&nbsp;256)                    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_FILETRANS_CLASS"><code>GENERIC_FILETRANS_CLASS</code></a></b> = <span title="'1202'"><code><span class="variable-quote">'</span>1202<span class="variable-quote">'</span>                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_FILETRANS_PROFILE"><code>GENERIC_FILETRANS_PROFILE</code></a></b> = <span title="('1202', 256)"><code>('1202',&nbsp;256)                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_NETWORKING_CLASS"><code>GENERIC_NETWORKING_CLASS</code></a></b> = <span title="'1201'"><code><span class="variable-quote">'</span>1201<span class="variable-quote">'</span>                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_NETWORKING_PROFILE"><code>GENERIC_NETWORKING_PROFILE</code></a></b> = <span title="('1201', 256)"><code>('1201',&nbsp;256)               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_TELEPHONY_CLASS"><code>GENERIC_TELEPHONY_CLASS</code></a></b> = <span title="'1204'"><code><span class="variable-quote">'</span>1204<span class="variable-quote">'</span>                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#GENERIC_TELEPHONY_PROFILE"><code>GENERIC_TELEPHONY_PROFILE</code></a></b> = <span title="('1204', 256)"><code>('1204',&nbsp;256)                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#GN_CLASS"><code>GN_CLASS</code></a></b> = <span title="'1117'"><code><span class="variable-quote">'</span>1117<span class="variable-quote">'</span>                                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#GN_PROFILE"><code>GN_PROFILE</code></a></b> = <span title="('1117', 256)"><code>('1117',&nbsp;256)                               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HANDSFREE_AGW_CLASS"><code>HANDSFREE_AGW_CLASS</code></a></b> = <span title="'111f'"><code><span class="variable-quote">'</span>111f<span class="variable-quote">'</span>                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HANDSFREE_AGW_PROFILE"><code>HANDSFREE_AGW_PROFILE</code></a></b> = <span title="('111f', 256)"><code>('111f',&nbsp;256)                    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HANDSFREE_CLASS"><code>HANDSFREE_CLASS</code></a></b> = <span title="'111e'"><code><span class="variable-quote">'</span>111e<span class="variable-quote">'</span>                                 </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HANDSFREE_PROFILE"><code>HANDSFREE_PROFILE</code></a></b> = <span title="('111e', 256)"><code>('111e',&nbsp;256)                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HCR_CLASS"><code>HCR_CLASS</code></a></b> = <span title="'1125'"><code><span class="variable-quote">'</span>1125<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HCR_PRINT_CLASS"><code>HCR_PRINT_CLASS</code></a></b> = <span title="'1126'"><code><span class="variable-quote">'</span>1126<span class="variable-quote">'</span>                                 </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HCR_PRINT_PROFILE"><code>HCR_PRINT_PROFILE</code></a></b> = <span title="('1126', 256)"><code>('1126',&nbsp;256)                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HCR_PROFILE"><code>HCR_PROFILE</code></a></b> = <span title="('1127', 256)"><code>('1127',&nbsp;256)                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HCR_SCAN_CLASS"><code>HCR_SCAN_CLASS</code></a></b> = <span title="'1127'"><code><span class="variable-quote">'</span>1127<span class="variable-quote">'</span>                                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HCR_SCAN_PROFILE"><code>HCR_SCAN_PROFILE</code></a></b> = <span title="('1127', 256)"><code>('1127',&nbsp;256)                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HEADSET_AGW_CLASS"><code>HEADSET_AGW_CLASS</code></a></b> = <span title="'1112'"><code><span class="variable-quote">'</span>1112<span class="variable-quote">'</span>                               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HEADSET_AGW_PROFILE"><code>HEADSET_AGW_PROFILE</code></a></b> = <span title="('1112', 256)"><code>('1112',&nbsp;256)                      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HEADSET_CLASS"><code>HEADSET_CLASS</code></a></b> = <span title="'1108'"><code><span class="variable-quote">'</span>1108<span class="variable-quote">'</span>                                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HEADSET_PROFILE"><code>HEADSET_PROFILE</code></a></b> = <span title="('1108', 256)"><code>('1108',&nbsp;256)                          </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#HID_CLASS"><code>HID_CLASS</code></a></b> = <span title="'1124'"><code><span class="variable-quote">'</span>1124<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#HID_PROFILE"><code>HID_PROFILE</code></a></b> = <span title="('1124', 256)"><code>('1124',&nbsp;256)                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_ARCHIVE_CLASS"><code>IMAGING_ARCHIVE_CLASS</code></a></b> = <span title="'111c'"><code><span class="variable-quote">'</span>111c<span class="variable-quote">'</span>                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_ARCHIVE_PROFILE"><code>IMAGING_ARCHIVE_PROFILE</code></a></b> = <span title="('111c', 256)"><code>('111c',&nbsp;256)                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_CLASS"><code>IMAGING_CLASS</code></a></b> = <span title="'111a'"><code><span class="variable-quote">'</span>111a<span class="variable-quote">'</span>                                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_PROFILE"><code>IMAGING_PROFILE</code></a></b> = <span title="('111a', 256)"><code>('111a',&nbsp;256)                          </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_REFOBJS_CLASS"><code>IMAGING_REFOBJS_CLASS</code></a></b> = <span title="'111d'"><code><span class="variable-quote">'</span>111d<span class="variable-quote">'</span>                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_REFOBJS_PROFILE"><code>IMAGING_REFOBJS_PROFILE</code></a></b> = <span title="('111d', 256)"><code>('111d',&nbsp;256)                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_RESPONDER_CLASS"><code>IMAGING_RESPONDER_CLASS</code></a></b> = <span title="'111b'"><code><span class="variable-quote">'</span>111b<span class="variable-quote">'</span>                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#IMAGING_RESPONDER_PROFILE"><code>IMAGING_RESPONDER_PROFILE</code></a></b> = <span title="('111b', 256)"><code>('111b',&nbsp;256)                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#INTERCOM_CLASS"><code>INTERCOM_CLASS</code></a></b> = <span title="'1110'"><code><span class="variable-quote">'</span>1110<span class="variable-quote">'</span>                                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#INTERCOM_PROFILE"><code>INTERCOM_PROFILE</code></a></b> = <span title="('1110', 256)"><code>('1110',&nbsp;256)                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#IRMC_SYNC_CLASS"><code>IRMC_SYNC_CLASS</code></a></b> = <span title="'1104'"><code><span class="variable-quote">'</span>1104<span class="variable-quote">'</span>                                 </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#IRMC_SYNC_CMD_CLASS"><code>IRMC_SYNC_CMD_CLASS</code></a></b> = <span title="'1107'"><code><span class="variable-quote">'</span>1107<span class="variable-quote">'</span>                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#IRMC_SYNC_CMD_PROFILE"><code>IRMC_SYNC_CMD_PROFILE</code></a></b> = <span title="('1107', 256)"><code>('1107',&nbsp;256)                    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#IRMC_SYNC_PROFILE"><code>IRMC_SYNC_PROFILE</code></a></b> = <span title="('1104', 256)"><code>('1104',&nbsp;256)                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="bluetooth-module.html#L2CAP"><code>L2CAP</code></a></b> = <span title="3">3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#LAN_ACCESS_CLASS"><code>LAN_ACCESS_CLASS</code></a></b> = <span title="'1102'"><code><span class="variable-quote">'</span>1102<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#LAN_ACCESS_PROFILE"><code>LAN_ACCESS_PROFILE</code></a></b> = <span title="('1102', 256)"><code>('1102',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#NAP_CLASS"><code>NAP_CLASS</code></a></b> = <span title="'1116'"><code><span class="variable-quote">'</span>1116<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#NAP_PROFILE"><code>NAP_PROFILE</code></a></b> = <span title="('1116', 256)"><code>('1116',&nbsp;256)                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#OBEX_FILETRANS_CLASS"><code>OBEX_FILETRANS_CLASS</code></a></b> = <span title="'1106'"><code><span class="variable-quote">'</span>1106<span class="variable-quote">'</span>                            </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#OBEX_FILETRANS_PROFILE"><code>OBEX_FILETRANS_PROFILE</code></a></b> = <span title="('1106', 256)"><code>('1106',&nbsp;256)                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#OBEX_OBJPUSH_CLASS"><code>OBEX_OBJPUSH_CLASS</code></a></b> = <span title="'1105'"><code><span class="variable-quote">'</span>1105<span class="variable-quote">'</span>                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#OBEX_OBJPUSH_PROFILE"><code>OBEX_OBJPUSH_PROFILE</code></a></b> = <span title="('1105', 256)"><code>('1105',&nbsp;256)                     </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#PANU_CLASS"><code>PANU_CLASS</code></a></b> = <span title="'1115'"><code><span class="variable-quote">'</span>1115<span class="variable-quote">'</span>                                      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#PANU_PROFILE"><code>PANU_PROFILE</code></a></b> = <span title="('1115', 256)"><code>('1115',&nbsp;256)                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#PNP_INFO_CLASS"><code>PNP_INFO_CLASS</code></a></b> = <span title="'1200'"><code><span class="variable-quote">'</span>1200<span class="variable-quote">'</span>                                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#PNP_INFO_PROFILE"><code>PNP_INFO_PROFILE</code></a></b> = <span title="('1200', 256)"><code>('1200',&nbsp;256)                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="bluetooth-module.html#PORT_ANY"><code>PORT_ANY</code></a></b> = <span title="0">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#PRINTING_STATUS_CLASS"><code>PRINTING_STATUS_CLASS</code></a></b> = <span title="'1123'"><code><span class="variable-quote">'</span>1123<span class="variable-quote">'</span>                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#PRINTING_STATUS_PROFILE"><code>PRINTING_STATUS_PROFILE</code></a></b> = <span title="('1123', 256)"><code>('1123',&nbsp;256)                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#PUBLIC_BROWSE_GROUP"><code>PUBLIC_BROWSE_GROUP</code></a></b> = <span title="'1002'"><code><span class="variable-quote">'</span>1002<span class="variable-quote">'</span>                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#REFERENCE_PRINTING_CLASS"><code>REFERENCE_PRINTING_CLASS</code></a></b> = <span title="'1119'"><code><span class="variable-quote">'</span>1119<span class="variable-quote">'</span>                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#REFERENCE_PRINTING_PROFILE"><code>REFERENCE_PRINTING_PROFILE</code></a></b> = <span title="('1119', 256)"><code>('1119',&nbsp;256)               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#REFLECTED_UI_CLASS"><code>REFLECTED_UI_CLASS</code></a></b> = <span title="'1121'"><code><span class="variable-quote">'</span>1121<span class="variable-quote">'</span>                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#REFLECTED_UI_PROFILE"><code>REFLECTED_UI_PROFILE</code></a></b> = <span title="('1121', 256)"><code>('1121',&nbsp;256)                     </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>int</code></font></td>
+<td><b><a href="bluetooth-module.html#RFCOMM"><code>RFCOMM</code></a></b> = <span title="0">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#SAP_CLASS"><code>SAP_CLASS</code></a></b> = <span title="'112d'"><code><span class="variable-quote">'</span>112d<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#SAP_PROFILE"><code>SAP_PROFILE</code></a></b> = <span title="('112d', 256)"><code>('112d',&nbsp;256)                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#SDP_SERVER_CLASS"><code>SDP_SERVER_CLASS</code></a></b> = <span title="'1000'"><code><span class="variable-quote">'</span>1000<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#SDP_SERVER_PROFILE"><code>SDP_SERVER_PROFILE</code></a></b> = <span title="('1000', 256)"><code>('1000',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#SERIAL_PORT_CLASS"><code>SERIAL_PORT_CLASS</code></a></b> = <span title="'1101'"><code><span class="variable-quote">'</span>1101<span class="variable-quote">'</span>                               </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#SERIAL_PORT_PROFILE"><code>SERIAL_PORT_PROFILE</code></a></b> = <span title="('1101', 256)"><code>('1101',&nbsp;256)                      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UDI_MT_CLASS"><code>UDI_MT_CLASS</code></a></b> = <span title="'112a'"><code><span class="variable-quote">'</span>112a<span class="variable-quote">'</span>                                    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UDI_MT_PROFILE"><code>UDI_MT_PROFILE</code></a></b> = <span title="('112a', 256)"><code>('112a',&nbsp;256)                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UDI_TA_CLASS"><code>UDI_TA_CLASS</code></a></b> = <span title="'112b'"><code><span class="variable-quote">'</span>112b<span class="variable-quote">'</span>                                    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UDI_TA_PROFILE"><code>UDI_TA_PROFILE</code></a></b> = <span title="('112b', 256)"><code>('112b',&nbsp;256)                           </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_CLASS"><code>UPNP_CLASS</code></a></b> = <span title="'1205'"><code><span class="variable-quote">'</span>1205<span class="variable-quote">'</span>                                      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_IP_CLASS"><code>UPNP_IP_CLASS</code></a></b> = <span title="'1206'"><code><span class="variable-quote">'</span>1206<span class="variable-quote">'</span>                                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_IP_PROFILE"><code>UPNP_IP_PROFILE</code></a></b> = <span title="('1206', 256)"><code>('1206',&nbsp;256)                          </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_L2CAP_CLASS"><code>UPNP_L2CAP_CLASS</code></a></b> = <span title="'1302'"><code><span class="variable-quote">'</span>1302<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_L2CAP_PROFILE"><code>UPNP_L2CAP_PROFILE</code></a></b> = <span title="('1302', 256)"><code>('1302',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_LAP_CLASS"><code>UPNP_LAP_CLASS</code></a></b> = <span title="'1301'"><code><span class="variable-quote">'</span>1301<span class="variable-quote">'</span>                                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_LAP_PROFILE"><code>UPNP_LAP_PROFILE</code></a></b> = <span title="('1301', 256)"><code>('1301',&nbsp;256)                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_PAN_CLASS"><code>UPNP_PAN_CLASS</code></a></b> = <span title="'1300'"><code><span class="variable-quote">'</span>1300<span class="variable-quote">'</span>                                  </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_PAN_PROFILE"><code>UPNP_PAN_PROFILE</code></a></b> = <span title="('1300', 256)"><code>('1300',&nbsp;256)                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#UPNP_PROFILE"><code>UPNP_PROFILE</code></a></b> = <span title="('1205', 256)"><code>('1205',&nbsp;256)                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_CONF_CLASS"><code>VIDEO_CONF_CLASS</code></a></b> = <span title="'110f'"><code><span class="variable-quote">'</span>110f<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_CONF_GW_CLASS"><code>VIDEO_CONF_GW_CLASS</code></a></b> = <span title="'1129'"><code><span class="variable-quote">'</span>1129<span class="variable-quote">'</span>                             </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_CONF_GW_PROFILE"><code>VIDEO_CONF_GW_PROFILE</code></a></b> = <span title="('1129', 256)"><code>('1129',&nbsp;256)                    </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_CONF_PROFILE"><code>VIDEO_CONF_PROFILE</code></a></b> = <span title="('110f', 256)"><code>('110f',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_SINK_CLASS"><code>VIDEO_SINK_CLASS</code></a></b> = <span title="'1304'"><code><span class="variable-quote">'</span>1304<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_SINK_PROFILE"><code>VIDEO_SINK_PROFILE</code></a></b> = <span title="('1304', 256)"><code>('1304',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_SOURCE_CLASS"><code>VIDEO_SOURCE_CLASS</code></a></b> = <span title="'1303'"><code><span class="variable-quote">'</span>1303<span class="variable-quote">'</span>                              </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#VIDEO_SOURCE_PROFILE"><code>VIDEO_SOURCE_PROFILE</code></a></b> = <span title="('1303', 256)"><code>('1303',&nbsp;256)                     </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#WAP_CLASS"><code>WAP_CLASS</code></a></b> = <span title="'1113'"><code><span class="variable-quote">'</span>1113<span class="variable-quote">'</span>                                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="bluetooth-module.html#WAP_CLIENT_CLASS"><code>WAP_CLIENT_CLASS</code></a></b> = <span title="'1114'"><code><span class="variable-quote">'</span>1114<span class="variable-quote">'</span>                                </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#WAP_CLIENT_PROFILE"><code>WAP_CLIENT_PROFILE</code></a></b> = <span title="('1114', 256)"><code>('1114',&nbsp;256)                       </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>tuple</code></font></td>
+<td><b><a href="bluetooth-module.html#WAP_PROFILE"><code>WAP_PROFILE</code></a></b> = <span title="('1113', 256)"><code>('1113',&nbsp;256)                              </code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Function Details</th></tr>
+</table>
+
+<a name="advertise_service"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">advertise_service</span>(<span class=sig-arg>sock</span>,
+          <span class=sig-arg>name</span>,
+          <span class=sig-arg>service_id</span>=<span class=sig-default>''</span>,
+          <span class=sig-arg>service_classes</span>=<span class=sig-default>[]</span>,
+          <span class=sig-arg>profiles</span>=<span class=sig-default>[]</span>,
+          <span class=sig-arg>provider</span>=<span class=sig-default>''</span>,
+          <span class=sig-arg>description</span>=<span class=sig-default>''</span>)</span>
+  </h3>
+<pre class="literalblock">
+Advertises a service with the local SDP server.  sock must be a bound,
+listening socket.  name should be the name of the service, and service_id 
+(if specified) should be a string of the form 
+&quot;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&quot;, where each 'X' is a hexadecimal digit.
+
+service_classes is a list of service classes whose this service belongs to.
+Each class service is a 16-bit UUID in the form &quot;XXXX&quot;, where each 'X' is a
+hexadecimal digit, or a 128-bit UUID in the form
+&quot;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&quot;. There are some constants for
+standard services, e.g. SERIAL_PORT_CLASS that equals to &quot;1101&quot;. Some class
+constants:
+
+SERIAL_PORT_CLASS        LAN_ACCESS_CLASS         DIALUP_NET_CLASS 
+HEADSET_CLASS            CORDLESS_TELEPHONY_CLASS AUDIO_SOURCE_CLASS
+AUDIO_SINK_CLASS         PANU_CLASS               NAP_CLASS
+GN_CLASS
+
+profiles is a list of service profiles that thie service fulfills. Each
+profile is a tuple with ( uuid, version ). Most standard profiles use
+standard classes as UUIDs. PyBluez offers a list of standard profiles,
+for example SERIAL_PORT_PROFILE. All standard profiles have the same
+name as the classes, except that _CLASS suffix is replaced by _PROFILE.
+
+provider is a text string specifying the provider of the service
+
+description is a text string describing the service
+
+A note on working with Symbian smartphones:
+    bt_discover in Python for Series 60 will only detect service records
+    with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="discover_devices"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">discover_devices</span>(<span class=sig-arg>duration</span>=<span class=sig-default>8</span>,
+          <span class=sig-arg>flush_cache</span>=<span class=sig-default>True</span>,
+          <span class=sig-arg>lookup_names</span>=<span class=sig-default>False</span>)</span>
+  </h3>
+<pre class="literalblock">
+discover_devices( duration=8, flush_cache=True, lookup_names=False ) -&gt; results
+
+availability: GNU/Linux, Windows XP
+
+performs a bluetooth device discovery using the first available bluetooth
+resource.
+
+if lookup_names is False, returns a list of bluetooth addresses.
+if lookup_names is True, returns a list of (address, name) tuples
+
+duration=8 
+    how long, in units of 1.28 seconds, to search for devices.  To find as
+    many devices as possible, you should set this to at least 8.  
+    This parameter only works with GNU/Linux systems
+flush_cache=True 
+    if set to False, then discover_devices may return devices found during
+    previous discoveries.
+lookup_names=False
+    if set to True, then discover_devices also attempts to lookup the
+    display name of each detected device.
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="find_service"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">find_service</span>(<span class=sig-arg>name</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>uuid</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>address</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+<pre class="literalblock">
+find_service( name = None, uuid = None, address = None )
+
+Searches for SDP services that match the specified criteria and returns
+the search results.  If no criteria are specified, then returns a list of
+all nearby services detected.  If more than one is specified, then
+the search results will match all the criteria specified.  If uuid is
+specified, it must be either a 16-bit UUID in the form &quot;XXXX&quot;, where each
+'X' is a hexadecimal digit, or as a 128-bit UUID in the form
+&quot;XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX&quot;.  A special case of address is
+&quot;localhost&quot;, which will search for services on the local machine.
+
+The search results will be a list of dictionaries.  Each dictionary
+represents a search match and will have the following key/value pairs:
+
+  host          - the bluetooth address of the device advertising the
+                  service
+  name          - the name of the service being advertised
+  description   - a description of the service being advertised
+  provider      - the name of the person/organization providing the service
+  protocol      - either 'RFCOMM', 'L2CAP', None if the protocol was not
+                  specified, or 'UNKNOWN' if the protocol was specified but
+                  unrecognized
+  port          - the L2CAP PSM # if the protocol is 'L2CAP', the RFCOMM
+                  channel # if the protocol is 'RFCOMM', or None if it
+                  wasn't specified
+  service-classes - a list of service class IDs (UUID strings).  possibly
+                    empty
+  profiles        - a list of profiles - (UUID, version) pairs - the
+                    service claims to support.  possibly empty.
+  service-id      - the Service ID of the service.  None if it wasn't set
+                    See the Bluetooth spec for the difference between
+                    Service ID and Service Class ID List
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="get_available_port"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">get_available_port</span>(<span class=sig-arg>protocol</span>)</span>
+  </h3>
+  deprecated. bind to port zero instead.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="is_valid_address"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">is_valid_address</span>(<span class=sig-arg>address</span>)</span>
+  </h3>
+<pre class="literalblock">
+is_valid_address(address) -&gt; bool
+
+availability: GNU/Linux, Windows XP
+
+returns True if address is a valid bluetooth address
+
+valid address are always strings of the form XX:XX:XX:XX:XX:XX
+where X is a hexadecimal character.  For example,
+    01:23:45:67:89:AB is a valid address, but
+    IN:VA:LI:DA:DD:RE is not
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="is_valid_uuid"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">is_valid_uuid</span>(<span class=sig-arg>uuid</span>)</span>
+  </h3>
+<pre class="literalblock">
+is_valid_uuid(uuid) -&gt; bool
+
+availability: GNU/Linux, Windows XP
+
+returns True if uuid is a valid UUID.
+
+valid UUIDs are always strings taking one of the following forms:
+    XXXX
+    XXXXXXXX
+    XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+where each X is a hexadecimal digit (case insensitive)
+</pre>
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="lookup_name"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">lookup_name</span>(<span class=sig-arg>address</span>,
+          <span class=sig-arg>timeout</span>=<span class=sig-default>10</span>)</span>
+  </h3>
+  <p>lookup_name( address, timeout=10 ) -&gt; name</p>
+  <p>availability: GNU/Linux</p>
+  <p>Tries to determine the friendly name (human readable) of the device 
+  with the specified bluetooth address. Returns the name on success, and 
+  None on failure.</p>
+  timeout=10 how many seconds to search before giving up.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="set_l2cap_mtu"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">set_l2cap_mtu</span>(<span class=sig-arg>sock</span>,
+          <span class=sig-arg>mtu</span>)</span>
+  </h3>
+  <p>set_l2cap_mtu( sock, mtu )</p>
+  <p>availability: GNU/Linux</p>
+  <p>Adjusts the MTU for the specified L2CAP socket. This method needs to 
+  be invoked on both sides of the connection for it to work! The default 
+  mtu that all L2CAP connections start with is 672 bytes.</p>
+  mtu must be between 48 and 65535, inclusive.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="set_packet_timeout"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">set_packet_timeout</span>(<span class=sig-arg>address</span>,
+          <span class=sig-arg>timeout</span>)</span>
+  </h3>
+  <p>set_packet_timeout( address, timeout )</p>
+  <p>Availability: GNU/Linux</p>
+  <p>Adjusts the ACL flush timeout for the ACL connection to the 
+  specified device. This means that all L2CAP and RFCOMM data being sent 
+  to that device will be dropped if not acknowledged in timeout 
+  milliseconds (maximum 1280). A timeout of 0 means to never drop 
+  packets.</p>
+  <p>Since this affects all Bluetooth connections to that device, and not 
+  just those initiated by this process or PyBluez, a call to this method 
+  requires superuser privileges.</p>
+  You must have an active connection to the specified device before 
+  invoking this method
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="stop_advertising"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">stop_advertising</span>(<span class=sig-arg>sock</span>)</span>
+  </h3>
+  Instructs the local SDP server to stop advertising the service 
+  associated with sock. You should typically call this right before you 
+  close sock.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="ADVANCED_AUDIO_CLASS"></a>
+<h3>ADVANCED_AUDIO_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'110d'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>110d<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="ADVANCED_AUDIO_PROFILE"></a>
+<h3>ADVANCED_AUDIO_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('110d', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('110d', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AUDIO_SINK_CLASS"></a>
+<h3>AUDIO_SINK_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'110b'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>110b<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AUDIO_SINK_PROFILE"></a>
+<h3>AUDIO_SINK_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('110b', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('110b', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AUDIO_SOURCE_CLASS"></a>
+<h3>AUDIO_SOURCE_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'110a'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>110a<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AUDIO_SOURCE_PROFILE"></a>
+<h3>AUDIO_SOURCE_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('110a', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('110a', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AV_CLASS"></a>
+<h3>AV_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'112c'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>112c<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AV_PROFILE"></a>
+<h3>AV_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('112c', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('112c', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AV_REMOTE_CLASS"></a>
+<h3>AV_REMOTE_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'110e'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>110e<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AV_REMOTE_PROFILE"></a>
+<h3>AV_REMOTE_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('110e', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('110e', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AV_REMOTE_TARGET_CLASS"></a>
+<h3>AV_REMOTE_TARGET_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'110c'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>110c<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="AV_REMOTE_TARGET_PROFILE"></a>
+<h3>AV_REMOTE_TARGET_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('110c', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('110c', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BASIC_PRINTING_CLASS"></a>
+<h3>BASIC_PRINTING_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1122'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1122<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BASIC_PRINTING_PROFILE"></a>
+<h3>BASIC_PRINTING_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1122', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1122', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BROWSE_GRP_DESC_CLASS"></a>
+<h3>BROWSE_GRP_DESC_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1001'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1001<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="BROWSE_GRP_DESC_PROFILE"></a>
+<h3>BROWSE_GRP_DESC_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1001', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1001', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="CIP_CLASS"></a>
+<h3>CIP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1128'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1128<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="CIP_PROFILE"></a>
+<h3>CIP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1128', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1128', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="CORDLESS_TELEPHONY_CLASS"></a>
+<h3>CORDLESS_TELEPHONY_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1109'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1109<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="CORDLESS_TELEPHONY_PROFILE"></a>
+<h3>CORDLESS_TELEPHONY_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1109', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1109', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DIALUP_NET_CLASS"></a>
+<h3>DIALUP_NET_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1103'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1103<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DIALUP_NET_PROFILE"></a>
+<h3>DIALUP_NET_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1103', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1103', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DIRECT_PRINTING_CLASS"></a>
+<h3>DIRECT_PRINTING_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1118'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1118<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DIRECT_PRINTING_PROFILE"></a>
+<h3>DIRECT_PRINTING_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1118', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1118', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DIRECT_PRT_REFOBJS_CLASS"></a>
+<h3>DIRECT_PRT_REFOBJS_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1120'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1120<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="DIRECT_PRT_REFOBJS_PROFILE"></a>
+<h3>DIRECT_PRT_REFOBJS_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1120', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1120', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="FAX_CLASS"></a>
+<h3>FAX_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1111'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1111<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="FAX_PROFILE"></a>
+<h3>FAX_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1111', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1111', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_AUDIO_CLASS"></a>
+<h3>GENERIC_AUDIO_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1203'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1203<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_AUDIO_PROFILE"></a>
+<h3>GENERIC_AUDIO_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1203', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1203', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_FILETRANS_CLASS"></a>
+<h3>GENERIC_FILETRANS_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1202'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1202<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_FILETRANS_PROFILE"></a>
+<h3>GENERIC_FILETRANS_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1202', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1202', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_NETWORKING_CLASS"></a>
+<h3>GENERIC_NETWORKING_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1201'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1201<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_NETWORKING_PROFILE"></a>
+<h3>GENERIC_NETWORKING_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1201', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1201', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_TELEPHONY_CLASS"></a>
+<h3>GENERIC_TELEPHONY_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1204'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1204<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GENERIC_TELEPHONY_PROFILE"></a>
+<h3>GENERIC_TELEPHONY_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1204', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1204', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GN_CLASS"></a>
+<h3>GN_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1117'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1117<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="GN_PROFILE"></a>
+<h3>GN_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1117', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1117', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HANDSFREE_AGW_CLASS"></a>
+<h3>HANDSFREE_AGW_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'111f'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>111f<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HANDSFREE_AGW_PROFILE"></a>
+<h3>HANDSFREE_AGW_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('111f', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('111f', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HANDSFREE_CLASS"></a>
+<h3>HANDSFREE_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'111e'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>111e<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HANDSFREE_PROFILE"></a>
+<h3>HANDSFREE_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('111e', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('111e', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HCR_CLASS"></a>
+<h3>HCR_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1125'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1125<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HCR_PRINT_CLASS"></a>
+<h3>HCR_PRINT_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1126'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1126<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HCR_PRINT_PROFILE"></a>
+<h3>HCR_PRINT_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1126', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1126', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HCR_PROFILE"></a>
+<h3>HCR_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1127', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1127', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HCR_SCAN_CLASS"></a>
+<h3>HCR_SCAN_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1127'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1127<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HCR_SCAN_PROFILE"></a>
+<h3>HCR_SCAN_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1127', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1127', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HEADSET_AGW_CLASS"></a>
+<h3>HEADSET_AGW_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1112'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1112<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HEADSET_AGW_PROFILE"></a>
+<h3>HEADSET_AGW_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1112', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1112', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HEADSET_CLASS"></a>
+<h3>HEADSET_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1108'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1108<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HEADSET_PROFILE"></a>
+<h3>HEADSET_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1108', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1108', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HID_CLASS"></a>
+<h3>HID_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1124'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1124<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="HID_PROFILE"></a>
+<h3>HID_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1124', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1124', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_ARCHIVE_CLASS"></a>
+<h3>IMAGING_ARCHIVE_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'111c'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>111c<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_ARCHIVE_PROFILE"></a>
+<h3>IMAGING_ARCHIVE_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('111c', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('111c', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_CLASS"></a>
+<h3>IMAGING_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'111a'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>111a<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_PROFILE"></a>
+<h3>IMAGING_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('111a', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('111a', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_REFOBJS_CLASS"></a>
+<h3>IMAGING_REFOBJS_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'111d'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>111d<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_REFOBJS_PROFILE"></a>
+<h3>IMAGING_REFOBJS_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('111d', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('111d', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_RESPONDER_CLASS"></a>
+<h3>IMAGING_RESPONDER_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'111b'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>111b<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IMAGING_RESPONDER_PROFILE"></a>
+<h3>IMAGING_RESPONDER_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('111b', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('111b', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="INTERCOM_CLASS"></a>
+<h3>INTERCOM_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1110'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1110<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="INTERCOM_PROFILE"></a>
+<h3>INTERCOM_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1110', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1110', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IRMC_SYNC_CLASS"></a>
+<h3>IRMC_SYNC_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1104'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1104<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IRMC_SYNC_CMD_CLASS"></a>
+<h3>IRMC_SYNC_CMD_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1107'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1107<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IRMC_SYNC_CMD_PROFILE"></a>
+<h3>IRMC_SYNC_CMD_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1107', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1107', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="IRMC_SYNC_PROFILE"></a>
+<h3>IRMC_SYNC_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1104', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1104', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="L2CAP"></a>
+<h3>L2CAP</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>int</code>
+
+      </dd>
+<span title="3">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="LAN_ACCESS_CLASS"></a>
+<h3>LAN_ACCESS_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1102'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1102<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="LAN_ACCESS_PROFILE"></a>
+<h3>LAN_ACCESS_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1102', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1102', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="NAP_CLASS"></a>
+<h3>NAP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1116'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1116<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="NAP_PROFILE"></a>
+<h3>NAP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1116', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1116', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="OBEX_FILETRANS_CLASS"></a>
+<h3>OBEX_FILETRANS_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1106'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1106<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="OBEX_FILETRANS_PROFILE"></a>
+<h3>OBEX_FILETRANS_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1106', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1106', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="OBEX_OBJPUSH_CLASS"></a>
+<h3>OBEX_OBJPUSH_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1105'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1105<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="OBEX_OBJPUSH_PROFILE"></a>
+<h3>OBEX_OBJPUSH_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1105', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1105', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PANU_CLASS"></a>
+<h3>PANU_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1115'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1115<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PANU_PROFILE"></a>
+<h3>PANU_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1115', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1115', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PNP_INFO_CLASS"></a>
+<h3>PNP_INFO_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1200'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1200<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PNP_INFO_PROFILE"></a>
+<h3>PNP_INFO_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1200', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1200', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PORT_ANY"></a>
+<h3>PORT_ANY</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>int</code>
+
+      </dd>
+<span title="0">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PRINTING_STATUS_CLASS"></a>
+<h3>PRINTING_STATUS_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1123'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1123<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PRINTING_STATUS_PROFILE"></a>
+<h3>PRINTING_STATUS_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1123', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1123', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="PUBLIC_BROWSE_GROUP"></a>
+<h3>PUBLIC_BROWSE_GROUP</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1002'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1002<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="REFERENCE_PRINTING_CLASS"></a>
+<h3>REFERENCE_PRINTING_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1119'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1119<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="REFERENCE_PRINTING_PROFILE"></a>
+<h3>REFERENCE_PRINTING_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1119', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1119', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="REFLECTED_UI_CLASS"></a>
+<h3>REFLECTED_UI_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1121'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1121<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="REFLECTED_UI_PROFILE"></a>
+<h3>REFLECTED_UI_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1121', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1121', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="RFCOMM"></a>
+<h3>RFCOMM</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>int</code>
+
+      </dd>
+<span title="0">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="SAP_CLASS"></a>
+<h3>SAP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'112d'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>112d<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="SAP_PROFILE"></a>
+<h3>SAP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('112d', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('112d', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="SDP_SERVER_CLASS"></a>
+<h3>SDP_SERVER_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1000'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1000<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="SDP_SERVER_PROFILE"></a>
+<h3>SDP_SERVER_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1000', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1000', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="SERIAL_PORT_CLASS"></a>
+<h3>SERIAL_PORT_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1101'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1101<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="SERIAL_PORT_PROFILE"></a>
+<h3>SERIAL_PORT_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1101', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1101', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UDI_MT_CLASS"></a>
+<h3>UDI_MT_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'112a'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>112a<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UDI_MT_PROFILE"></a>
+<h3>UDI_MT_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('112a', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('112a', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UDI_TA_CLASS"></a>
+<h3>UDI_TA_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'112b'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>112b<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UDI_TA_PROFILE"></a>
+<h3>UDI_TA_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('112b', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('112b', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_CLASS"></a>
+<h3>UPNP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1205'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1205<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_IP_CLASS"></a>
+<h3>UPNP_IP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1206'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1206<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_IP_PROFILE"></a>
+<h3>UPNP_IP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1206', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1206', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_L2CAP_CLASS"></a>
+<h3>UPNP_L2CAP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1302'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1302<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_L2CAP_PROFILE"></a>
+<h3>UPNP_L2CAP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1302', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1302', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_LAP_CLASS"></a>
+<h3>UPNP_LAP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1301'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1301<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_LAP_PROFILE"></a>
+<h3>UPNP_LAP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1301', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1301', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_PAN_CLASS"></a>
+<h3>UPNP_PAN_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1300'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1300<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_PAN_PROFILE"></a>
+<h3>UPNP_PAN_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1300', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1300', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="UPNP_PROFILE"></a>
+<h3>UPNP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1205', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1205', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_CONF_CLASS"></a>
+<h3>VIDEO_CONF_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'110f'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>110f<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_CONF_GW_CLASS"></a>
+<h3>VIDEO_CONF_GW_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1129'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1129<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_CONF_GW_PROFILE"></a>
+<h3>VIDEO_CONF_GW_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1129', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1129', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_CONF_PROFILE"></a>
+<h3>VIDEO_CONF_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('110f', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('110f', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_SINK_CLASS"></a>
+<h3>VIDEO_SINK_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1304'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1304<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_SINK_PROFILE"></a>
+<h3>VIDEO_SINK_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1304', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1304', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_SOURCE_CLASS"></a>
+<h3>VIDEO_SOURCE_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1303'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1303<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="VIDEO_SOURCE_PROFILE"></a>
+<h3>VIDEO_SOURCE_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1303', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1303', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="WAP_CLASS"></a>
+<h3>WAP_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1113'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1113<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="WAP_CLIENT_CLASS"></a>
+<h3>WAP_CLIENT_CLASS</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'1114'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>1114<span class="variable-quote">'</span>                                                                 </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="WAP_CLIENT_PROFILE"></a>
+<h3>WAP_CLIENT_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1114', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1114', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="WAP_PROFILE"></a>
+<h3>WAP_PROFILE</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>tuple</code>
+
+      </dd>
+<span title="('1113', 256)">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+('1113', 256)                                                          </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th bgcolor="#70b0f0" class="navselect">&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue May  9 02:23:39 2006</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>
