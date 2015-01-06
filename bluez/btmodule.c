@@ -2854,7 +2854,7 @@ PyInit__bluetooth(void)
     static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
         "_bluetooth",
-        NULL,
+        socket_doc,
         -1,
         bt_methods,
         NULL,
