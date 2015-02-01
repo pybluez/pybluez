@@ -1,6 +1,5 @@
 import sys
 import struct
-import binascii
 
 if sys.version < '3':
     from .btcommon import *
@@ -32,13 +31,13 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_c
         pairs = []
         for item in results:
             if lookup_class:
-               addr, dev_class = item
+                addr, dev_class = item
             else:
-               addr = item
+                addr = item
             timeoutms = int (10 * 1000)
             try: 
                 name = _bt.hci_read_remote_name (sock, addr, timeoutms)
-            except _bt.error as e:
+            except _bt.error:
                 # name lookup failed.  either a timeout, or I/O error
                 continue
             pairs.append ((addr, name, dev_class) if lookup_class else (addr, name))
@@ -56,7 +55,7 @@ def lookup_name (address, timeout=10):
     timeoutms = int (timeout * 1000)
     try: 
         name = _bt.hci_read_remote_name (sock, address, timeoutms)
-    except _bt.error as e:
+    except _bt.error:
         # name lookup failed.  either a timeout, or I/O error
         name = None
     sock.close ()
@@ -292,7 +291,7 @@ def _get_acl_conn_handle (hci_sock, addr):
     request = array.array ("c", reqstr)
     try:
         fcntl.ioctl (hci_fd, _bt.HCIGETCONNINFO, request, 1)
-    except IOError as e:
+    except IOError:
         raise BluetoothError ("There is no ACL connection to %s" % addr)
 
     # XXX should this be "<8xH14x"?
@@ -444,7 +443,6 @@ class DeviceDiscoverer:
         self._process_hci_event ()
 
     def _process_hci_event (self):
-        import socket
 
         if self.sock is None: return
         # voodoo magic!!!
@@ -465,7 +463,7 @@ class DeviceDiscoverer:
                 clockoff = pkt[1+12*nrsp+2*i:1+12*nrsp+2*i+2]
 
                 self._device_discovered (addr, devclass, 
-                        psrm, pspm, clockoff, None)
+                        psrm, pspm, clockoff, None, None)
         elif event == _bt.EVT_INQUIRY_RESULT_WITH_RSSI:
             nrsp = struct.unpack ("B", pkt[0])[0]
             for i in range (nrsp):
@@ -483,7 +481,7 @@ class DeviceDiscoverer:
                 rssi = struct.unpack ("b", pkt[1+13*nrsp+i])[0]
 
                 self._device_discovered (addr, devclass, 
-                        psrm, pspm, clockoff, None)
+                        psrm, pspm, clockoff, rssi, None)
         elif _bt.HAVE_EVT_EXTENDED_INQUIRY_RESULT and event == _bt.EVT_EXTENDED_INQUIRY_RESULT:
             nrsp = struct.unpack ("B", pkt[0])[0]
             for i in range (nrsp):
@@ -512,7 +510,7 @@ class DeviceDiscoverer:
                     pos += struct_len + 2
 
                 self._device_discovered (addr, devclass,
-                        psrm, pspm, clockoff, name)
+                        psrm, pspm, clockoff, rssi, name)
         elif event == _bt.EVT_INQUIRY_COMPLETE:
             self.is_inquiring = False
             if len (self.names_to_find) == 0:
@@ -542,10 +540,10 @@ class DeviceDiscoverer:
                 except IndexError:
                     name = '' 
                 if addr in self.names_to_find:
-                    device_class = self.names_to_find[addr][0]
-                    self.device_discovered (addr, device_class, name)
+                    device_class, rssi = self.names_to_find[addr][:2]
+                    self.device_discovered (addr, device_class, rssi, name)
                     del self.names_to_find[addr]
-                    self.names_found[addr] = ( device_class, name)
+                    self.names_found[addr] = ( device_class, rssi, name)
                 else:
                     pass
             else:
@@ -565,22 +563,22 @@ class DeviceDiscoverer:
 #            print "unrecognized packet type 0x%02x" % ptype
 
     def _device_discovered (self, address, device_class, 
-            psrm, pspm, clockoff, name):
+            psrm, pspm, clockoff, rssi, name):
         if self.lookup_names:
             if name is not None:
-                self.device_discovered (address, device_class, name)
+                self.device_discovered (address, device_class, rssi, name)
             elif address not in self.names_found and \
                 address not in self.names_to_find:
             
                 self.names_to_find[address] = \
-                    (device_class, psrm, pspm, clockoff)
+                    (device_class, rssi, psrm, pspm, clockoff)
         else:
-            self.device_discovered (address, device_class, None)
+            self.device_discovered (address, device_class, rssi, None)
 
     def _send_next_name_req (self):
         assert len (self.names_to_find) > 0
         address = list(self.names_to_find.keys ())[0]
-        device_class, psrm, pspm, clockoff = self.names_to_find[address]
+        device_class, rssi, psrm, pspm, clockoff = self.names_to_find[address]
         bdaddr = _bt.str2ba (address)
         
         cmd_pkt = "%s%s\0%s" % (bdaddr, psrm, clockoff)
@@ -604,7 +602,7 @@ class DeviceDiscoverer:
         This method exists to be overriden
         """
 
-    def device_discovered (self, address, device_class, name):
+    def device_discovered (self, address, device_class, rssi, name):
         """
         Called when a bluetooth device is discovered.
 
@@ -621,10 +619,12 @@ class DeviceDiscoverer:
         [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
         """
         if name:
-            print(("found: %s - %s (class 0x%X)" % \
-                    (address, name, device_class)))
+            print(("found: %s - %s (class 0x%X, rssi %s)" % \
+                    (address, name, device_class, rssi)))
         else:
             print(("found: %s (class 0x%X)" % (address, device_class)))
+            print(("found: %s (class 0x%X, rssi %s)" % \
+                    (address, device_class, rssi)))
 
     def inquiry_complete (self):
         """

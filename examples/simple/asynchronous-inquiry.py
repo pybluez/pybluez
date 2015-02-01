@@ -14,7 +14,7 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
     def pre_inquiry(self):
         self.done = False
     
-    def device_discovered(self, address, device_class, name):
+    def device_discovered(self, address, device_class, rssi, name):
         print("%s - %s" % (address, name))
         
         # get some information out of the device class and display it.
@@ -47,6 +47,7 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
         for bitpos, classname in service_classes:
             if device_class & (1 << (bitpos-1)):
                 print("    %s" % classname)
+        print("  RSSI: " + str(rssi))
 
     def inquiry_complete(self):
         self.done = True
