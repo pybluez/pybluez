@@ -6,7 +6,25 @@ bt.initwinsock ()
 # ============== SDP service registration and unregistration ============
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_class=False):
-    return bt.discover_devices (flush_cache, lookup_names, lookup_class)
+    #this is order of items in C-code
+    btAddresIndex = 0
+    namesIndex = 1
+    classIndex = 2
+
+    devices = bt.discover_devices()
+    ret = list()
+    for device in devices:
+        item = [device[btAddresIndex],]
+        if lookup_names:
+            item.append(device[namesIndex])
+        if lookup_class:
+            item.append(device[classIndex])
+
+        if len(item) == 1: # in case of address-only we return string not tuple
+            ret.append(item[0])
+        else:
+            ret.append(tuple(i for i in item))
+    return ret
 
 def lookup_name (address, timeout=10):
     if not is_valid_address (address): 

@@ -6,7 +6,7 @@
 
 #include <initguid.h>
 #include <port3.h>
-
+#include <wchar.h>
 
 #if 1
 static void dbg(const char *fmt, ...)
@@ -390,11 +390,8 @@ PyDoc_STRVAR(msbt_dup_doc, "TODO");
 // ====================
 
 static PyObject *
-msbt_discover_devices(PyObject *self, PyObject *args)
+msbt_discover_devices(PyObject *self)
 {
-    int flushcache = 0;
-    int lookupnames = 0;
-    int lookupclass = 0;
 
 	// inquiry data structure
 	DWORD qs_len = sizeof( WSAQUERYSET );
@@ -408,20 +405,11 @@ msbt_discover_devices(PyObject *self, PyObject *args)
 
     dbg("msbt_discover_devices\n");
 
-    if(!PyArg_ParseTuple(args, "iii", &flushcache, &lookupnames, &lookupclass)) {
-        free( qs );
-        return 0;
-    }
-
-    if (flushcache) flushcache = LUP_FLUSHCACHE;
-    if (lookupnames) lookupnames = LUP_RETURN_NAME;
-    if (lookupclass) lookupclass = LUP_RETURN_TYPE;
-
 	ZeroMemory( qs, qs_len );
 	qs->dwSize = sizeof(WSAQUERYSET);
 	qs->dwNameSpace = NS_BTH;
 
-	flags |= flushcache | lookupnames | lookupclass | LUP_RETURN_ADDR;
+	flags |= LUP_FLUSHCACHE | LUP_RETURN_NAME | LUP_RETURN_TYPE | LUP_RETURN_ADDR;
 
 	Py_BEGIN_ALLOW_THREADS;
 	// start the device inquiry
@@ -460,15 +448,20 @@ msbt_discover_devices(PyObject *self, PyObject *args)
 				((SOCKADDR_BTH*)qs->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
             ba2str( result, buf );
 
-			if( lookupnames && lookupclass ) {
-                tup = Py_BuildValue( "ssl", buf, qs->lpszServiceInstanceName, qs->lpServiceClassId->Data1 );
-			} else if( lookupnames ) {
-                tup = Py_BuildValue( "ss", buf, qs->lpszServiceInstanceName );
-			} else if (lookupclass) {
-                tup = Py_BuildValue( "sl", buf, qs->lpServiceClassId->Data1 );
-			} else {
-                tup = PyString_FromString (buf);
+#if PY_MAJOR_VERSION >= 3
+            {
+				PyObject *item_tuple = NULL;
+				tup = PyTuple_New(3);
+				item_tuple = PyUnicode_DecodeLocale(buf, "surrogateescape");
+				PyTuple_SetItem( tup, 0, item_tuple );
+				item_tuple = PyUnicode_DecodeLocale(qs->lpszServiceInstanceName, "surrogateescape");
+				PyTuple_SetItem( tup, 1, item_tuple );
+				item_tuple = PyInt_FromLong(qs->lpServiceClassId->Data1);
+				PyTuple_SetItem( tup, 2, item_tuple );
             }
+#else
+			tup = Py_BuildValue( "ssl", buf, qs->lpszServiceInstanceName, qs->lpServiceClassId->Data1 );
+#endif
             PyList_Append( toreturn, tup );
             Py_DECREF( tup );
 		} else {
@@ -916,7 +909,7 @@ static PyMethodDef msbt_methods[] = {
     { "getsockname", (PyCFunction)msbt_getsockname, METH_VARARGS, 
         msbt_getsockname_doc },
     { "dup", (PyCFunction)msbt_dup, METH_VARARGS, msbt_dup_doc },
-    { "discover_devices", (PyCFunction)msbt_discover_devices, METH_VARARGS, msbt_discover_devices_doc },
+    { "discover_devices", (PyCFunction)msbt_discover_devices, METH_NOARGS, msbt_discover_devices_doc },
     { "lookup_name", (PyCFunction)msbt_lookup_name, METH_VARARGS, msbt_lookup_name_doc },
     { "find_service", (PyCFunction)msbt_find_service, METH_VARARGS, msbt_find_service_doc },
     { "set_service", (PyCFunction)msbt_set_service, METH_VARARGS, msbt_set_service_doc },
