@@ -36,14 +36,14 @@ static void Err_SetFromWSALastError(PyObject *exc)
         if( !(cond) ) { Err_SetFromWSALastError( PyExc_IOError ); return 0; }
 
 static void
-ba2str( BTH_ADDR ba, char *addr )
+ba2str( BTH_ADDR ba, char *addr, size_t len )
 {
     int i;
     unsigned char bytes[6];
     for( i=0; i<6; i++ ) {
         bytes[5-i] = (unsigned char) ((ba >> (i*8)) & 0xff);
     }
-    sprintf(addr, "%02X:%02X:%02X:%02X:%02X:%02X", 
+    sprintf_s( addr, len, "%02X:%02X:%02X:%02X:%02X:%02X",
             bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5] );
 }
 
@@ -103,20 +103,20 @@ str2uuid( const char *uuid_str, GUID *uuid)
     int i;
     char buf[20] = { 0 };
 
-    strncpy(buf, uuid_str, 8);
+    strncpy_s(buf, _countof(buf), uuid_str, 8);
     uuid->Data1 = strtoul( buf, NULL, 16 );
     memset(buf, 0, sizeof(buf));
 
-    strncpy(buf, uuid_str+9, 4);
+    strncpy_s(buf, _countof(buf), uuid_str+9, 4);
     uuid->Data2 = (unsigned short) strtoul( buf, NULL, 16 );
     memset(buf, 0, sizeof(buf));
     
-    strncpy(buf, uuid_str+14, 4);
+    strncpy_s(buf, _countof(buf), uuid_str+14, 4);
     uuid->Data3 = (unsigned short) strtoul( buf, NULL, 16 );
     memset(buf, 0, sizeof(buf));
 
-    strncpy(buf, uuid_str+19, 4);
-    strncpy(buf+4, uuid_str+24, 12);
+    strncpy_s(buf, _countof(buf), uuid_str+19, 4);
+    strncpy_s(buf+4, _countof(buf)-4, uuid_str+24, 12);
     for( i=0; i<8; i++ ) {
         char buf2[3] = { buf[2*i], buf[2*i+1], 0 };
         uuid->Data4[i] = (unsigned char)strtoul( buf2, NULL, 16 );
@@ -222,7 +222,7 @@ msbt_accept(PyObject *self, PyObject *args)
 
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != clientfd );
 
-    ba2str(ca.btAddr, buf);
+    ba2str(ca.btAddr, buf, _countof(buf));
     result = Py_BuildValue( "isi", clientfd, buf, ca.port );
     return result;
 };
@@ -355,7 +355,7 @@ msbt_getsockname(PyObject *self, PyObject *args)
 
     _CHECK_OR_RAISE_WSA( NO_ERROR == status );
 
-    ba2str( sa.btAddr, buf );
+    ba2str( sa.btAddr, buf, buf_len );
     return Py_BuildValue( "si", buf, sa.port );
 };
 PyDoc_STRVAR(msbt_getsockname_doc, "TODO");
@@ -446,7 +446,7 @@ msbt_discover_devices(PyObject *self)
             PyObject *tup = NULL;
 			BTH_ADDR result = 
 				((SOCKADDR_BTH*)qs->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
-            ba2str( result, buf );
+            ba2str( result, buf, _countof(buf) );
 
 #if PY_MAJOR_VERSION >= 3
             {
@@ -579,7 +579,7 @@ msbt_find_service(PyObject *self, PyObject *args)
         _CHECK_OR_RAISE_WSA( \
             ERROR_SUCCESS != BluetoothGetRadioInfo( rhandle, &info ) );
 
-        ba2str( info.address.ullLong, localAddressBuf );
+        ba2str( info.address.ullLong, localAddressBuf, _countof(localAddressBuf) );
 #else
         // bind a temporary socket and get its Bluetooth address
         SOCKADDR_BTH sa = { 0 };
@@ -594,13 +594,13 @@ msbt_find_service(PyObject *self, PyObject *args)
         _CHECK_OR_RAISE_WSA(NO_ERROR == getsockname(tmpfd, (LPSOCKADDR)&sa,\
                     &sa_len ) );
 
-        ba2str(sa.btAddr, localAddressBuf );
-        close(tmpfd);
+        ba2str(sa.btAddr, localAddressBuf, _countof(localAddressBuf) );
+        _close(tmpfd);
 #endif
 
         flags |= LUP_RES_SERVICE;
     } else {
-        strcpy( localAddressBuf, addrstr );
+        strcpy_s(localAddressBuf, _countof(localAddressBuf), addrstr);
     }
 
     if( strlen(uuidstr) != 36 || uuidstr[8] != '-' || uuidstr[13] != '-' 
