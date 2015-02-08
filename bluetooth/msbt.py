@@ -5,7 +5,8 @@ bt.initwinsock ()
 
 # ============== SDP service registration and unregistration ============
 
-def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_class=False):
+def discover_devices (duration=8, flush_cache=True, lookup_names=False,
+                      lookup_class=False, device_id=-1):
     #this is order of items in C-code
     btAddresIndex = 0
     namesIndex = 1

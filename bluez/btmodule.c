@@ -1858,6 +1858,35 @@ bt_hci_open_dev(PyObject *self, PyObject *args)
 PyDoc_STRVAR(bt_hci_open_dev_doc, "hci_open_dev");
 
 /*
+ * params: (str) device bt address
+ *
+ */
+static PyObject *
+bt_hci_get_device_route(PyObject *self, PyObject *args)
+{
+	int dev_id = 0;
+    char *addr = NULL;
+    bdaddr_t ba;
+    if ( !PyArg_ParseTuple(args, "|s", &addr) ) {
+        return NULL;
+    }
+    if(addr && strlen(addr)) {
+        str2ba( addr, &ba );
+        dev_id = hci_get_route(&ba);
+
+        if (dev_id < 0) {
+            PyErr_SetString(bluetooth_error, "no available bluetoot devices");
+            return NULL;
+        }
+    } else {
+        dev_id = hci_get_route(NULL);
+    }
+    return PyInt_FromLong(dev_id);
+}
+PyDoc_STRVAR(bt_hci_get_device_route_doc,
+		"Uses bluez hci_get_route to get device id");
+
+/*
  * params: (int) device number
  * effect: closes an HCI socket
  */
@@ -1985,10 +2014,10 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     char buf[sizeof(*ir) + sizeof(inquiry_info) * 250];
 
     PyObject *rtn_list = (PyObject *)NULL;
-    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", 0};
+    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", "device_id", 0};
 
-    if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iii", keywords,
-                &socko, &length, &flush, &lookup_class) )
+    if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iiii", keywords,
+                &socko, &length, &flush, &lookup_class, &dev_id) )
     {
         return 0;
     }
@@ -2761,6 +2790,7 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_read_clock, METH_VARARGS ),
     DECL_BT_METHOD( hci_acl_conn_handle, METH_VARARGS ),
     DECL_BT_METHOD( hci_open_dev, METH_VARARGS ),
+    DECL_BT_METHOD( hci_get_device_route, METH_VARARGS ),
     DECL_BT_METHOD( hci_close_dev, METH_VARARGS ),
     DECL_BT_METHOD( hci_send_cmd, METH_VARARGS ),
     DECL_BT_METHOD( hci_send_req, METH_VARARGS | METH_KEYWORDS ),

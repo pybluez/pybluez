@@ -18,10 +18,15 @@ del _constants
 
 # ============== SDP service registration and unregistration ============
 
-def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_class=False):
-    sock = _gethcisock ()
+def discover_devices (duration=8, flush_cache=True, lookup_names=False,
+                      lookup_class=False, device_id=-1):
+    if device_id == -1:
+        device_id = _bt.hci_get_device_route()
+
+    sock = _gethcisock (device_id)
     try:
-        results = _bt.hci_inquiry (sock, duration=duration, flush_cache=True, lookup_class=lookup_class)
+        results = _bt.hci_inquiry (sock, duration=duration, flush_cache=True,
+                                   lookup_class=lookup_class, device_id=device_id)
     except _bt.error:
         sock.close ()
         raise BluetoothError ("error communicating with local "
