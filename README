@@ -2,22 +2,22 @@ PyBluez
 
 Python extension module allowing access to system Bluetooth resources.
 
-http://code.google.com/p/pybluez
+https://github.com/karulis/pybluez
 
 BUILD REQUIREMENTS:
 
   GNU/Linux:
-     - Python 2.3 or Python 2.4
+    - Python 2.3 or more recent version
      - Python distutils (standard in most Python distros, separate package
                          python-dev in Debian)
      - BlueZ libraries and header files
 
-  Windows XP:
-    - Microsoft Windows XP SP1 or Windows Vista/7/8
+  Windows:
+    - Microsoft Windows XP SP1 or Windows Vista/7/8/8.1
     - Visual C++ 2010 Express for build for Python 3.3 or newer 
     - Visual C++ 2008 Express for build for Python 3.2 or older
     - In order to build 64-bit debug and release executables,
-      Visual Studio 2008/2010 Standard Edition is required
+          Visual Studio 2008/2010 Standard Edition is required
     - Widcomm BTW development kit 5.0 or later (Optional)
     - Python 2.3 or more recent version
 
@@ -29,10 +29,10 @@ INSTALLATION:
 EXAMPLES:
   GNU/Linux and Windows XP:
 
-  # examples/simple/inquiry.py
-  # examples/simple/sdp-browse.py
-  # examples/simple/rfcomm-server.py
-  # examples/simple/rfcomm-client.py
+  # examples/simple/inquiry.py - Detecting nearby Bluetooth devices
+  # examples/simple/sdp-browse.py - Browsing SDP services on a Bluetooth device
+  # examples/simple/rfcomm-server.py - establishing an RFCOMM connection.
+  # examples/simple/rfcomm-client.py - establishing an RFCOMM connection.
 
   GNU/Linux only:
 
@@ -46,7 +46,7 @@ EXAMPLES:
   # examples/l2-unreliable-client.py
 
 CONTACT:
-  Albert Huang <albert@csail.mit.edu>
+    Please use the mailing list at http://groups.google.com/group/pybluez/
 
 LICENSE:
 
