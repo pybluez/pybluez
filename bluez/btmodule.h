@@ -35,6 +35,16 @@ typedef struct {
     sdp_session_t *sdp_session;
 } PySocketSockObject;
 
+
+/* Wrapper for hci filter.*/
+
+typedef struct {
+	PyObject_HEAD
+	struct hci_filter filter;
+} PyHciFilterObject;
+
+
+
 #ifdef __cplusplus
 }
 #endif
