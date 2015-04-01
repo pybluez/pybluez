@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 from distutils.core import setup, Extension
-from distutils.debug import DEBUG
-import itertools
 import sys
 import platform
 import os
