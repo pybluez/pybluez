@@ -2235,22 +2235,18 @@ initially cleared");
 #define DECL_HCI_FILTER_OP_1(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
 { \
-    char *param; \
-    int len, arg; \
-    if( !PyArg_ParseTuple(args,"s#i", &param, &len, &arg) ) \
-        return 0; \
-    if( len != sizeof(struct hci_filter) ) { \
-		PyErr_SetString(PyExc_ValueError, "bad filter"); \
-        return 0; \
-    } \
-    hci_filter_ ## name ( arg, (struct hci_filter*)param ); \
-    len = sizeof(struct hci_filter); \
-    return Py_BuildValue("s#", param, len); \
+   PyHciFilterObject *filter = NULL; \
+   int arg; \
+   if ( !PyArg_ParseTuple(args, "O!i", &filter_type, &filter, &arg) ) { \
+       return 0; \
+   } \
+   hci_filter_ ## name ( arg, &filter->filter ); \
+   Py_RETURN_NONE; \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
 DECL_HCI_FILTER_OP_1(set_ptype, "set ptype!")
-//DECL_HCI_FILTER_OP_1(clear_ptype, "clear ptype!")q
+DECL_HCI_FILTER_OP_1(clear_ptype, "clear ptype!")
 DECL_HCI_FILTER_OP_1(test_ptype, "test ptype!")
 
 DECL_HCI_FILTER_OP_1(set_event, "set event!")
@@ -2265,17 +2261,12 @@ DECL_HCI_FILTER_OP_1(test_opcode, "test opcode!")
 #define DECL_HCI_FILTER_OP_2(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
 { \
-    char *param; \
-    int len; \
-    if( !PyArg_ParseTuple(args,"s#", &param, &len) ) \
-        return 0; \
-    if( len != sizeof(struct hci_filter) ) { \
-		PyErr_SetString(PyExc_ValueError, "bad filter"); \
-        return 0; \
-    } \
-    hci_filter_ ## name ( (struct hci_filter*)param ); \
-    len = sizeof(struct hci_filter); \
-    return Py_BuildValue("s#", param, len); \
+   PyHciFilterObject *filter = NULL; \
+   if ( !PyArg_ParseTuple(args, "O!", &filter_type, &filter) ) { \
+       return 0; \
+   } \
+   hci_filter_ ## name ( &filter->filter ); \
+   Py_RETURN_NONE; \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
@@ -2859,18 +2850,6 @@ bt_hci_filter_new1(PyObject *self, PyObject *args)
 }
 PyDoc_STRVAR( bt_hci_filter_new1_doc,"TODO doc");
 
-static PyObject * bt_hci_filter_clear_ptype(PyObject *self, PyObject *args)
-{
-    int t = 0;
-    PyHciFilterObject *filter = NULL;
-    if ( !PyArg_ParseTuple(args, "iO!", &t, &filter_type, &filter ) ) {
-        return 0;
-    }
-    hci_filter_clear_ptype(t, &filter->filter);
-    return Py_None;
-}
-PyDoc_STRVAR( bt_hci_filter_clear_ptype_doc,"TODO doc");
-
 #define DECL_BT_METHOD(name, argtype) \
 { #name, (PyCFunction)bt_ ##name, argtype, bt_ ## name ## _doc }
 
@@ -2888,8 +2867,8 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_inquiry, METH_VARARGS | METH_KEYWORDS ),
     DECL_BT_METHOD( hci_read_remote_name, METH_VARARGS | METH_KEYWORDS ),
     DECL_BT_METHOD( hci_filter_new, METH_VARARGS ),
-    DECL_BT_METHOD( hci_filter_clear, METH_VARARGS ),
     DECL_BT_METHOD( hci_filter_new1, METH_NOARGS ),
+    DECL_BT_METHOD( hci_filter_clear, METH_VARARGS ),
     DECL_BT_METHOD( hci_filter_all_events, METH_VARARGS ),
     DECL_BT_METHOD( hci_filter_all_ptypes, METH_VARARGS ),
     DECL_BT_METHOD( hci_filter_clear_opcode, METH_VARARGS ),
