@@ -388,7 +388,7 @@ class DeviceDiscoverer:
         self.lookup_names = lookup_names
 
         self.sock = _gethcisock (self.device_id)
-        flt = _bt.hci_filter_new ()
+        flt = _bt.hci_filter_new1 ()
         _bt.hci_filter_all_events (flt)
         _bt.hci_filter_set_ptype (flt, _bt.HCI_EVENT_PKT)
 
@@ -488,6 +488,7 @@ class DeviceDiscoverer:
                 self._device_discovered (addr, devclass, 
                         psrm, pspm, clockoff, rssi, None)
         elif _bt.HAVE_EVT_EXTENDED_INQUIRY_RESULT and event == _bt.EVT_EXTENDED_INQUIRY_RESULT:
+            print(pkt)
             nrsp = struct.unpack ("B", pkt[0])[0]
             for i in range (nrsp):
                 addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
