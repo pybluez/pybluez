@@ -388,7 +388,7 @@ class DeviceDiscoverer:
         self.lookup_names = lookup_names
 
         self.sock = _gethcisock (self.device_id)
-        flt = _bt.hci_filter_new1 ()
+        flt = _bt.hci_filter_new ()
         _bt.hci_filter_all_events (flt)
         _bt.hci_filter_set_ptype (flt, _bt.HCI_EVENT_PKT)
 

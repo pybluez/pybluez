@@ -668,14 +668,19 @@ static PyTypeObject filter_type = {
 };
 
 static PyObject *
-bt_hci_filter_new1(PyObject *self, PyObject *args)
+bt_hci_filter_new(PyObject *self, PyObject *args)
 {
 	PyHciFilterObject *filter
 			= (PyHciFilterObject *)PyType_GenericNew(&filter_type, NULL, NULL);
 
 	return (PyObject*)filter;
 }
-PyDoc_STRVAR( bt_hci_filter_new1_doc,"TODO doc");
+PyDoc_STRVAR(bt_hci_filter_new_doc,
+"hci_filter_new()\n\
+\n\
+Returns a new HCI filter python wrapper suitable for operating on with \
+the hci_filter_*\n methods, and for passing to getsockopt and setsockopt. \
+The filter is\n initially cleared");
 
 
 /* s.setsockopt() method.
@@ -731,7 +736,6 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 	int level;
 	int optname;
 	int res;
-	PyObject *buf;
 	socklen_t buflen = 0;
 
 
@@ -753,16 +757,17 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 				"getsockopt buflen out of range");
 		return NULL;
 	}
-	PyHciFilterObject * filter = bt_hci_filter_new1(NULL, NULL);
+    PyHciFilterObject * filter
+            = (PyHciFilterObject *)bt_hci_filter_new(NULL, NULL);
 	if (filter == NULL)
 		return NULL;
 	res = getsockopt(s->sock_fd, level, optname,
 			 (void *)&filter->filter, &buflen);
 	if (res < 0) {
-		Py_DECREF(buf);
+		Py_DECREF(filter);
 		return s->errorhandler();
 	}
-	return filter;
+	return (PyObject *)filter;
 }
 
 PyDoc_STRVAR(getsockopt_doc,
@@ -2226,24 +2231,6 @@ Performs a remote name request to the specified bluetooth device.\n\
 \n\
 Returns the name of the device, or raises an error on failure");
 
-
-/* HCI filter operations */
-
-static PyObject *
-bt_hci_filter_new(PyObject *self, PyObject *args)
-{
-    struct hci_filter flt;
-    int len = sizeof(flt);
-    hci_filter_clear( &flt );
-    return Py_BuildValue("s#", (char*)&flt, len);
-}
-PyDoc_STRVAR(bt_hci_filter_new_doc,
-"hci_filter_new()\n\
-\n\
-Returns a new HCI filter suitable for operating on with the hci_filter_*\n\
-methods, and for passing to getsockopt and setsockopt.  The filter is\n\
-initially cleared");
-
 // lot of repetitive code... yay macros!!
 #define DECL_HCI_FILTER_OP_1(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
@@ -2870,7 +2857,6 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_inquiry, METH_VARARGS | METH_KEYWORDS ),
     DECL_BT_METHOD( hci_read_remote_name, METH_VARARGS | METH_KEYWORDS ),
     DECL_BT_METHOD( hci_filter_new, METH_VARARGS ),
-    DECL_BT_METHOD( hci_filter_new1, METH_NOARGS ),
     DECL_BT_METHOD( hci_filter_clear, METH_VARARGS ),
     DECL_BT_METHOD( hci_filter_all_events, METH_VARARGS ),
     DECL_BT_METHOD( hci_filter_all_ptypes, METH_VARARGS ),
