@@ -4,9 +4,11 @@ import struct
 if sys.version < '3':
     from .btcommon import *
     import _bluetooth as _bt
+    get_byte = ord
 else:
     from bluetooth.btcommon import *
     import bluetooth._bluetooth as _bt
+    get_byte = int
 import array
 import fcntl
 _constants = [ 'HCI', 'RFCOMM', 'L2CAP', 'SCO', 'SOL_L2CAP', 'SOL_RFCOMM',\
@@ -448,16 +450,15 @@ class DeviceDiscoverer:
         self._process_hci_event ()
 
     def _process_hci_event (self):
-
         if self.sock is None: return
         # voodoo magic!!!
         pkt = self.sock.recv (258)
         ptype, event, plen = struct.unpack ("BBB", pkt[:3])
         pkt = pkt[3:]
         if event == _bt.EVT_INQUIRY_RESULT:
-            nrsp = struct.unpack ("B", pkt[0])[0]
+            nrsp = get_byte(pkt[0])
             for i in range (nrsp):
-                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6]) #TODO
                 psrm = pkt[ 1+6*nrsp+i ]
                 pspm = pkt[ 1+7*nrsp+i ]
                 devclass_raw = struct.unpack ("BBB", 
@@ -470,9 +471,9 @@ class DeviceDiscoverer:
                 self._device_discovered (addr, devclass, 
                         psrm, pspm, clockoff, None, None)
         elif event == _bt.EVT_INQUIRY_RESULT_WITH_RSSI:
-            nrsp = struct.unpack ("B", pkt[0])[0]
+            nrsp = get_byte(pkt[0])
             for i in range (nrsp):
-                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])#TODO
                 psrm = pkt[ 1+6*nrsp+i ]
                 pspm = pkt[ 1+7*nrsp+i ]
 #                devclass_raw = pkt[1+8*nrsp+3*i:1+8*nrsp+3*i+3]
@@ -483,15 +484,14 @@ class DeviceDiscoverer:
                         (devclass_raw[1] << 8) | \
                         devclass_raw[0]
                 clockoff = pkt[1+11*nrsp+2*i:1+11*nrsp+2*i+2]
-                rssi = struct.unpack ("b", pkt[1+13*nrsp+i])[0]
+                rssi = get_byte(pkt[1+13*nrsp+i])
 
                 self._device_discovered (addr, devclass, 
                         psrm, pspm, clockoff, rssi, None)
         elif _bt.HAVE_EVT_EXTENDED_INQUIRY_RESULT and event == _bt.EVT_EXTENDED_INQUIRY_RESULT:
-            print(pkt)
-            nrsp = struct.unpack ("B", pkt[0])[0]
+            nrsp = get_byte(pkt[0])
             for i in range (nrsp):
-                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])#TODO
                 psrm = pkt[ 1+6*nrsp+i ]
                 pspm = pkt[ 1+7*nrsp+i ]
                 devclass_raw = struct.unpack ("BBB",
@@ -500,17 +500,17 @@ class DeviceDiscoverer:
                         (devclass_raw[1] << 8) | \
                         devclass_raw[0]
                 clockoff = pkt[1+11*nrsp+2*i:1+11*nrsp+2*i+2]
-                rssi = struct.unpack ("b", pkt[1+13*nrsp+i])[0]
+                rssi = get_byte(pkt[1+13*nrsp+i])
 
                 data_len = _bt.EXTENDED_INQUIRY_INFO_SIZE - _bt.INQUIRY_INFO_WITH_RSSI_SIZE
                 data = pkt[1+14*nrsp+i:1+14*nrsp+i+data_len]
                 name = None
                 pos = 0
                 while(pos <= len(data)):
-                    struct_len = ord(data[pos])
+                    struct_len = get_byte(data[pos])
                     if struct_len == 0:
                         break
-                    eir_type = ord(data[pos+1])
+                    eir_type = get_byte(data[pos+1])
                     if eir_type == 0x09: # Complete local name
                         name = data[pos+2:pos+struct_len+1]
                     pos += struct_len + 2
@@ -538,8 +538,8 @@ class DeviceDiscoverer:
                 self.names_to_find = {}
                 self.inquiry_complete ()
         elif event == _bt.EVT_REMOTE_NAME_REQ_COMPLETE:
-            status = struct.unpack ("B", pkt[0])[0]
-            addr = _bt.ba2str (pkt[1:7])
+            status = get_byte(pkt[0])
+            addr = _bt.ba2str (pkt[1:7])#TODO
             if status == 0:
                 try:
                     name = pkt[7:].split ('\0')[0]
