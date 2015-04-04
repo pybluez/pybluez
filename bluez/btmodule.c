@@ -616,7 +616,7 @@ filter_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static int
 filter_init(PyHciFilterObject *self, PyObject *args, PyObject *kwds)
 {
-	// TODO init filter self->filter.
+    hci_filter_clear(&self->filter);
     return 0;
 }
 
