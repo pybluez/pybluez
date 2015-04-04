@@ -334,6 +334,12 @@ def _read_flush_timeout (addr):
     return fto
 
 # =============== DeviceDiscoverer ==================
+def byte_to_signed_int(byte_):
+    if byte_ > 127:
+        return byte_ - 256
+    else:
+        return byte_
+
 class DeviceDiscoverer:
     """
     Skeleton class for finer control of the device discovery process.
@@ -458,7 +464,7 @@ class DeviceDiscoverer:
         if event == _bt.EVT_INQUIRY_RESULT:
             nrsp = get_byte(pkt[0])
             for i in range (nrsp):
-                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6]) #TODO
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
                 psrm = pkt[ 1+6*nrsp+i ]
                 pspm = pkt[ 1+7*nrsp+i ]
                 devclass_raw = struct.unpack ("BBB", 
@@ -473,7 +479,7 @@ class DeviceDiscoverer:
         elif event == _bt.EVT_INQUIRY_RESULT_WITH_RSSI:
             nrsp = get_byte(pkt[0])
             for i in range (nrsp):
-                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])#TODO
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
                 psrm = pkt[ 1+6*nrsp+i ]
                 pspm = pkt[ 1+7*nrsp+i ]
 #                devclass_raw = pkt[1+8*nrsp+3*i:1+8*nrsp+3*i+3]
@@ -484,14 +490,14 @@ class DeviceDiscoverer:
                         (devclass_raw[1] << 8) | \
                         devclass_raw[0]
                 clockoff = pkt[1+11*nrsp+2*i:1+11*nrsp+2*i+2]
-                rssi = get_byte(pkt[1+13*nrsp+i])
+                rssi = byte_to_signed_int(get_byte(pkt[1+13*nrsp+i]))
 
                 self._device_discovered (addr, devclass, 
                         psrm, pspm, clockoff, rssi, None)
         elif _bt.HAVE_EVT_EXTENDED_INQUIRY_RESULT and event == _bt.EVT_EXTENDED_INQUIRY_RESULT:
             nrsp = get_byte(pkt[0])
             for i in range (nrsp):
-                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])#TODO
+                addr = _bt.ba2str (pkt[1+6*i:1+6*i+6])
                 psrm = pkt[ 1+6*nrsp+i ]
                 pspm = pkt[ 1+7*nrsp+i ]
                 devclass_raw = struct.unpack ("BBB",
@@ -500,7 +506,7 @@ class DeviceDiscoverer:
                         (devclass_raw[1] << 8) | \
                         devclass_raw[0]
                 clockoff = pkt[1+11*nrsp+2*i:1+11*nrsp+2*i+2]
-                rssi = get_byte(pkt[1+13*nrsp+i])
+                rssi = byte_to_signed_int(get_byte(pkt[1+13*nrsp+i]))
 
                 data_len = _bt.EXTENDED_INQUIRY_INFO_SIZE - _bt.INQUIRY_INFO_WITH_RSSI_SIZE
                 data = pkt[1+14*nrsp+i:1+14*nrsp+i+data_len]
@@ -539,7 +545,7 @@ class DeviceDiscoverer:
                 self.inquiry_complete ()
         elif event == _bt.EVT_REMOTE_NAME_REQ_COMPLETE:
             status = get_byte(pkt[0])
-            addr = _bt.ba2str (pkt[1:7])#TODO
+            addr = _bt.ba2str (pkt[1:7])
             if status == 0:
                 try:
                     name = pkt[7:].split ('\0')[0]
@@ -585,7 +591,9 @@ class DeviceDiscoverer:
         assert len (self.names_to_find) > 0
         address = list(self.names_to_find.keys ())[0]
         device_class, rssi, psrm, pspm, clockoff = self.names_to_find[address]
-        bdaddr = _bt.str2ba (address)
+        bdaddr = _bt.str2ba (address) #TOFO
+        #UnicodeDecodeError: 'utf-8' codec can't decode byte 0xaa in position 1: invalid start byte
+
         
         cmd_pkt = "%s%s\0%s" % (bdaddr, psrm, clockoff)
 
