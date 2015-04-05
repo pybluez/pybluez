@@ -591,10 +591,8 @@ class DeviceDiscoverer:
         assert len (self.names_to_find) > 0
         address = list(self.names_to_find.keys ())[0]
         device_class, rssi, psrm, pspm, clockoff = self.names_to_find[address]
-        bdaddr = _bt.str2ba (address) #TODO
-        #UnicodeDecodeError: 'utf-8' codec can't decode byte 0xaa in position 1: invalid start byte
+        bdaddr = _bt.str2ba (address) #TODO not supported in python3
 
-        
         cmd_pkt = "%s%s\0%s" % (bdaddr, psrm, clockoff)
 
         try:

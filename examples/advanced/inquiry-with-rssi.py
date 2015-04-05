@@ -5,6 +5,7 @@ import os
 import sys
 import struct
 import bluetooth._bluetooth as bluez
+import bluetooth
 
 def printpacket(pkt):
     for c in pkt:
@@ -94,10 +95,11 @@ def device_inquiry_with_with_rssi(sock):
         ptype, event, plen = struct.unpack("BBB", pkt[:3])
         if event == bluez.EVT_INQUIRY_RESULT_WITH_RSSI:
             pkt = pkt[3:]
-            nrsp = struct.unpack("B", pkt[0])[0]
+            nrsp = bluetooth.get_byte(pkt[0])
             for i in range(nrsp):
                 addr = bluez.ba2str( pkt[1+6*i:1+6*i+6] )
-                rssi = struct.unpack("b", pkt[1+13*nrsp+i])[0]
+                rssi = bluetooth.byte_to_signed_int(
+                        bluetooth.get_byte(pkt[1+13*nrsp+i]))
                 results.append( ( addr, rssi ) )
                 print("[%s] RSSI: [%d]" % (addr, rssi))
         elif event == bluez.EVT_INQUIRY_COMPLETE:
@@ -110,7 +112,7 @@ def device_inquiry_with_with_rssi(sock):
                 done = True
         elif event == bluez.EVT_INQUIRY_RESULT:
             pkt = pkt[3:]
-            nrsp = struct.unpack("B", pkt[0])[0]
+            nrsp = bluetooth.get_byte(pkt[0])
             for i in range(nrsp):
                 addr = bluez.ba2str( pkt[1+6*i:1+6*i+6] )
                 results.append( ( addr, -1 ) )
