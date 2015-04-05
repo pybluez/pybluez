@@ -82,7 +82,7 @@ else:
 
 
 setup ( name = 'PyBluez',
-        version = '0.20',
+        version = '0.21',
         description = 'Bluetooth Python extension module',
         author="Albert Huang",
         author_email="ashuang@alum.mit.edu",
