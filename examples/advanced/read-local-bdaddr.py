@@ -3,6 +3,12 @@ import sys
 import struct
 import bluetooth._bluetooth as _bt
 
+if sys.version < '3':
+    get_byte = str
+else:
+    get_byte = chr
+
+
 def read_local_bdaddr(hci_sock):
     old_filter = hci_sock.getsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, 14)
     flt = _bt.hci_filter_new()
@@ -20,7 +26,7 @@ def read_local_bdaddr(hci_sock):
     status,raw_bdaddr = struct.unpack("xxxxxxB6s", pkt)
     assert status == 0
 
-    t = [ "%X" % ord(b) for b in raw_bdaddr ]
+    t = [ "%X" % ord(get_byte(b)) for b in raw_bdaddr ]
     t.reverse()
     bdaddr = ":".join(t)
 
