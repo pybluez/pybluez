@@ -8,8 +8,9 @@ import os
 mods = []
 
 def find_MS_SDK():
-    candidate_roots = (os.getenv('ProgramFiles'),
-                       os.getenv('ProgramFiles(x86)'))
+    candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
+            os.getenv('ProgramFiles(x86)'))
+
     if sys.version < '3.3':
         MS_SDK = r'Microsoft SDKs\Windows\v6.0A' # Visual Studio 9
     else:
@@ -20,6 +21,7 @@ def find_MS_SDK():
             'Microsoft Platform SDK for Windows XP',
             'Microsoft Platform SDK',
     )
+
     for candidate_root in candidate_roots:
         for candidate_path in candidate_paths:
             candidate_sdk = os.path.join(candidate_root, candidate_path)
@@ -86,7 +88,7 @@ setup ( name = 'PyBluez',
         description = 'Bluetooth Python extension module',
         author="Albert Huang",
         author_email="ashuang@alum.mit.edu",
-        url="http://org.csail.mit.edu/pybluez",
+        url="http://karulis.github.io/pybluez/",
         ext_modules = mods,
         packages = [ "bluetooth" ],
 # for the python cheese shop
@@ -96,11 +98,10 @@ setup ( name = 'PyBluez',
             'Programming Language :: Python :: 2',
             'Programming Language :: Python :: 3',
             'Topic :: Communications' ],
-        download_url = 'http://org.csail.mit.edu/pybluez/download.html',
+        download_url = 'https://github.com/karulis/pybluez',
         long_description = 'Bluetooth Python extension module to allow Python "\
                 "developers to use system Bluetooth resources. PyBluez works "\
                 "with GNU/Linux and Windows XP.',
-        maintainer = 'Albert Huang',
-        maintainer_email = 'ashuang@alum.mit.edu',
+        maintainer = 'Piotr Karulis',
         license = 'GPL',
         )
