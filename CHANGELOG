@@ -2,6 +2,20 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
+changes from 0.19 to 0.20(Apr 05, 2015)
+-------------------------
+
+GNU/Linux:
+    Bugs:
+        - No way to select device id for device discovery #77 
+        - RSSI info not passed on by DeviceDiscoverer #74 
+        - Warnings during compilation on linux #73
+Windows:
+    Bugs:
+        - Problem with iqnuiring unicode names on windows8.1 with python3.4 #76
+        - python3 UnicodeDecodeError in DeviceDiscoverer find_devices #67 
+        - warnings during build for windows (ms visual studio 2010 express) #60 
+
 changes from 0.19 to 0.20(Jan 13, 2014)
 -------------------------
 
@@ -85,8 +99,8 @@ win32:
 changes from 0.9.2 to 0.10 (August 10, 2007)
 --------------------------------------------
 win32:
-    better searching for Platform SDK path (René Müller)
-    proper Py_{BEGIN,END}_ALLOW_THREADS (René Müller)
+    better searching for Platform SDK path (Renï¿½ Mï¿½ller)
+    proper Py_{BEGIN,END}_ALLOW_THREADS (Renï¿½ Mï¿½ller)
 
     added experimental Broadcom/Widcomm support.  All the basics should be
     supported:
@@ -207,7 +221,7 @@ added service-classes and profiles keys to find_service result
 added service class list and profile list support to 
     advertise_service (Elvis Pf zenreuter)
 fixed do_search response_list (Richard Moore)
-BluetoothError now inherits from IOError (Elvis Pfützenreuter)
+BluetoothError now inherits from IOError (Elvis Pfï¿½tzenreuter)
 added CHANGELOG
 added COPYING
 
