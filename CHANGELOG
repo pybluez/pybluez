@@ -10,10 +10,10 @@ GNU/Linux:
         - No way to select device id for device discovery #77 
         - RSSI info not passed on by DeviceDiscoverer #74 
         - Warnings during compilation on linux #73
+        - python3 UnicodeDecodeError in DeviceDiscoverer find_devices #67 
 Windows:
     Bugs:
         - Problem with iqnuiring unicode names on windows8.1 with python3.4 #76
-        - python3 UnicodeDecodeError in DeviceDiscoverer find_devices #67 
         - warnings during build for windows (ms visual studio 2010 express) #60 
 
 changes from 0.19 to 0.20(Jan 13, 2014)
