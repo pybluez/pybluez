@@ -5,39 +5,6 @@ import array
 import bluetooth
 import bluetooth._bluetooth as bt   # low level bluetooth wrappers.
 
-def __get_acl_conn_handle(sock, addr):
-    hci_fd = sock.fileno()
-    reqstr = struct.pack( "6sB17s", bt.str2ba(addr), bt.ACL_LINK, "\0" * 17)
-    request = array.array( "c", reqstr )
-    fcntl.ioctl( hci_fd, bt.HCIGETCONNINFO, request, 1 )
-    handle = struct.unpack("8xH14x", request.tostring())[0]
-    return handle
-
-def write_flush_timeout( addr, timeout ):
-    hci_sock = bt.hci_open_dev()
-    # get the ACL connection handle to the remote device
-    handle = __get_acl_conn_handle(hci_sock, addr)
-    pkt = struct.pack("HH", handle, bt.htobs(timeout))
-    response = bt.hci_send_req(hci_sock, bt.OGF_HOST_CTL, 
-        0x0028, bt.EVT_CMD_COMPLETE, 3, pkt)
-    status = struct.unpack("B", response[0])[0]
-    rhandle = struct.unpack("H", response[1:3])[0]
-    assert rhandle == handle 
-    assert status == 0
-
-def read_flush_timeout( addr ):
-    hci_sock = bt.hci_open_dev()
-    # get the ACL connection handle to the remote device
-    handle = __get_acl_conn_handle(hci_sock, addr)
-    pkt = struct.pack("H", handle)
-    response = bt.hci_send_req(hci_sock, bt.OGF_HOST_CTL, 
-        0x0027, bt.EVT_CMD_COMPLETE, 5, pkt)
-    status = struct.unpack("B", response[0])[0]
-    rhandle = struct.unpack("H", response[1:3])[0]
-    assert rhandle == handle
-    assert status == 0
-    fto = struct.unpack("H", response[3:5])[0]
-    return fto
 
 # Create the client socket
 sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
@@ -58,14 +25,14 @@ port = 0x1001
 sock.connect((bt_addr, port))
 
 print("connected.  Adjusting link parameters.")
-print("current flush timeout is %d ms" % read_flush_timeout( bt_addr ))
+print("current flush timeout is %d ms" % bluetooth.read_flush_timeout( bt_addr ))
 try:
-    write_flush_timeout( bt_addr, timeout )
+    bluetooth.write_flush_timeout( bt_addr, timeout )
 except bt.error as e:
     print("error setting flush timeout.  are you sure you're superuser?")
     print(e)
     sys.exit(1)
-print("new flush timeout is %d ms" % read_flush_timeout( bt_addr ))
+print("new flush timeout is %d ms" % bluetooth.read_flush_timeout( bt_addr ))
 
 totalsent = 0 
 for i in range(num_packets):

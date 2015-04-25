@@ -83,7 +83,7 @@ def set_packet_timeout (address, timeout):
     this method
     """
     n = round (timeout / 0.625)
-    _write_flush_timeout (address, n)
+    write_flush_timeout (address, n)
 
 def get_l2cap_options (sock):
     """get_l2cap_options (sock, mtu)
@@ -291,10 +291,10 @@ def _gethcisock (device_id = -1):
         raise BluetoothError ("error accessing bluetooth device")
     return sock
 
-def _get_acl_conn_handle (hci_sock, addr):
+def get_acl_conn_handle (hci_sock, addr):
     hci_fd = hci_sock.fileno ()
     reqstr = struct.pack ("6sB17s", _bt.str2ba (addr), 
-            _bt.ACL_LINK, "\0" * 17)
+            _bt.ACL_LINK, b"\0" * 17)
     request = array.array ("c", reqstr)
     try:
         fcntl.ioctl (hci_fd, _bt.HCIGETCONNINFO, request, 1)
@@ -305,10 +305,10 @@ def _get_acl_conn_handle (hci_sock, addr):
     handle = struct.unpack ("8xH14x", request.tostring ())[0]
     return handle
 
-def _write_flush_timeout (addr, timeout):
+def write_flush_timeout (addr, timeout):
     hci_sock = _bt.hci_open_dev ()
     # get the ACL connection handle to the remote device
-    handle = _get_acl_conn_handle (hci_sock, addr)
+    handle = get_acl_conn_handle (hci_sock, addr)
     # XXX should this be "<HH"
     pkt = struct.pack ("HH", handle, _bt.htobs (timeout))
     response = _bt.hci_send_req (hci_sock, _bt.OGF_HOST_CTL, 
@@ -318,10 +318,10 @@ def _write_flush_timeout (addr, timeout):
     assert rhandle == handle 
     assert status == 0
 
-def _read_flush_timeout (addr):
+def read_flush_timeout (addr):
     hci_sock = _bt.hci_open_dev ()
     # get the ACL connection handle to the remote device
-    handle = _get_acl_conn_handle (hci_sock, addr)
+    handle = get_acl_conn_handle (hci_sock, addr)
     # XXX should this be "<H"?
     pkt = struct.pack ("H", handle)
     response = _bt.hci_send_req (hci_sock, _bt.OGF_HOST_CTL, 
