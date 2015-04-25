@@ -10,8 +10,10 @@
 	#define PyString_AsString PyBytes_AsString
 	#define PyInt_Check PyLong_Check
 	#define PyInt_AS_LONG PyLong_AS_LONG
+    #define BYTES_FORMAT_CHR "y#"
 #else
 	#ifndef Py_TYPE
 		#define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 	#endif
+    #define BYTES_FORMAT_CHR "s#"
 #endif

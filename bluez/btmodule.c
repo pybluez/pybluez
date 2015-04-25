@@ -2338,7 +2338,7 @@ bt_str2ba(PyObject *self, PyObject *args)
     bdaddr_t ba;
     if (!PyArg_ParseTuple(args, "s", &ba_str)) return 0;
     str2ba( ba_str, &ba );
-    return Py_BuildValue("s#", (char*)(&ba), sizeof(ba));
+    return Py_BuildValue(BYTES_FORMAT_CHR, (char*)(&ba), sizeof(ba));
 }
 PyDoc_STRVAR(bt_str2ba_doc,
 "str2ba(string)\n\
