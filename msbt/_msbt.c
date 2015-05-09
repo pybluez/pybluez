@@ -388,6 +388,29 @@ msbt_dup(PyObject *self, PyObject *args)
 PyDoc_STRVAR(msbt_dup_doc, "TODO");
 
 // ====================
+static int bt_adapter_present()
+{
+   int hwactive = 1;
+   SOCKADDR_BTH sa = { 0 };
+
+   int s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+
+   sa.addressFamily = AF_BTH;
+   sa.port = BT_PORT_ANY;
+   if (s == INVALID_SOCKET)
+   {
+      closesocket(s);
+      return 0;
+   }
+
+   if (SOCKET_ERROR == bind(s, (LPSOCKADDR)&sa, sizeof(sa)))
+   {
+	   hwactive = 0;
+   }
+
+   closesocket(s);
+   return hwactive;
+}
 
 static PyObject *
 msbt_discover_devices(PyObject *self)
@@ -404,6 +427,12 @@ msbt_discover_devices(PyObject *self)
     int status = 0;
 
     dbg("msbt_discover_devices\n");
+    if(!bt_adapter_present())
+    {
+        free( qs );
+        PyErr_SetString (PyExc_IOError, "No Bluetooth adapter detected");
+        return NULL;
+    }
 
 	ZeroMemory( qs, qs_len );
 	qs->dwSize = sizeof(WSAQUERYSET);
@@ -424,8 +453,8 @@ msbt_discover_devices(PyObject *self)
             // no devices detected.
             WSALookupServiceEnd( h );
             free( qs );
-            PyErr_SetString (PyExc_IOError, "No Bluetooth adapter detected");
-            return NULL;
+            toreturn = PyList_New(0);
+            return toreturn;
         } else {
             Err_SetFromWSALastError( PyExc_IOError );
             free(qs);
