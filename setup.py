@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 import sys
 import platform
 import os
 
 mods = []
+install_req = list()
 
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
@@ -71,6 +72,7 @@ elif sys.platform.startswith('linux'):
                         #extra_compile_args=['-O0'],
                         sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
     mods = [ mod1 ]
+    install_req = ['gattlib']
 elif sys.platform == 'darwin':
     mod1 = Extension('bluetooth._osxbt',
                     include_dirs = ["/System/Library/Frameworks/IOBluetooth.framework/Headers",
@@ -104,4 +106,5 @@ setup ( name = 'PyBluez',
                 "with GNU/Linux and Windows XP.',
         maintainer = 'Piotr Karulis',
         license = 'GPL',
+        install_requires=install_req
         )
