@@ -72,7 +72,16 @@ elif sys.platform.startswith('linux'):
                         #extra_compile_args=['-O0'],
                         sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
     mods = [ mod1 ]
-    install_req = ['gattlib']
+    try:
+        import subprocess
+        gatt_req_version = b"4.101"
+        gatt_req_version = [int(i) for i in gatt_req_version.split(b".")]
+        bluez_version = subprocess.check_output(["/usr/sbin/bluetoothd", "-v"])
+        bluez_version = [int(i) for i in bluez_version.split(b".")]
+        if gatt_req_version <= bluez_version:
+            install_req = ['gattlib']
+    except Exception as err:
+        print("Gattlib will not be installed - " + str(err))
 elif sys.platform == 'darwin':
     mod1 = Extension('bluetooth._osxbt',
                     include_dirs = ["/System/Library/Frameworks/IOBluetooth.framework/Headers",
