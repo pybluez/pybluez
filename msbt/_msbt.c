@@ -920,6 +920,72 @@ msbt_gettimeout(PyObject *self, PyObject *args)
 }
 PyDoc_STRVAR(msbt_gettimeout_doc, "");
 
+/* s.setsockopt() method.
+   With an integer third argument, sets an integer option.
+   With a string third argument, sets an option from a buffer;
+   use optional built-in module 'struct' to encode the string. */
+
+static PyObject *
+sock_setsockopt(PyObject *s, PyObject *args)
+{
+    int sockfd = -1;
+    int level;
+    int optname;
+    int res;
+    ULONG flag;
+
+    if (!PyArg_ParseTuple(args, "iiii:setsockopt", &sockfd, &level, &optname,
+            &flag)) {
+        return 0;
+    }
+    res = setsockopt(sockfd, level, optname, (char*) &flag, sizeof(ULONG));
+    if (res < 0) {
+        Err_SetFromWSALastError(PyExc_IOError);
+        return 0;
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+PyDoc_STRVAR(setsockopt_doc,
+"setsockopt(level, option, value)\n\
+\n\
+Set a socket option.  See the Unix manual for level and option.\n\
+The value argument can either be an integer or a string.");
+
+
+/* s.getsockopt() method.
+   With two arguments, retrieves an integer option.
+   With a third integer argument, retrieves a string buffer of that size;
+   use optional built-in module 'struct' to decode the string. */
+
+static PyObject *
+sock_getsockopt(PyObject *s, PyObject *args)
+{
+    int sockfd = -1;
+    int level;
+    int optname;
+    int res;
+    int flag = 0;
+    int flagsize = sizeof flag;
+
+    if (!PyArg_ParseTuple(args, "iii|i:getsockopt", &sockfd, &level, &optname))
+        return NULL;
+
+    res = getsockopt(sockfd, level, optname, (void *) &flag, &flagsize);
+    if (res < 0) {
+        Err_SetFromWSALastError(PyExc_IOError);
+        return 0;
+    }
+    return PyInt_FromLong(flag);
+}
+
+PyDoc_STRVAR(getsockopt_doc,
+"getsockopt(level, option[, buffersize]) -> value\n\
+\n\
+Get a socket option.  See the Unix manual for level and option.\n\
+If a nonzero buffersize argument is given, the return value is a\n\
+string of that length; otherwise it is an integer.");
 
 
 // =======================  ADMINISTRATIVE =========================
