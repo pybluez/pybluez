@@ -2431,8 +2431,7 @@ bt_hci_get_route(PyObject *self, PyObject *args)
         dev_id = hci_get_route(NULL);
     }
     if (dev_id < 0) {
-        PyErr_SetString(bluetooth_error, "No available bluetooth device");
-        return NULL;
+        return PyErr_SetFromErrno(PyExc_OSError);
     }
     return PyInt_FromLong(dev_id);
 }
