@@ -930,11 +930,11 @@ msbt_setsockopt(PyObject *s, PyObject *args)
 {
     int sockfd = -1;
     int level;
-    int optname;
+    ULONG optname;
     int res;
     ULONG flag;
 
-    if (!PyArg_ParseTuple(args, "iiii:setsockopt", &sockfd, &level, &optname,
+    if (!PyArg_ParseTuple(args, "iiIi:setsockopt", &sockfd, &level, &optname,
             &flag)) {
         return 0;
     }
@@ -964,13 +964,13 @@ msbt_getsockopt(PyObject *s, PyObject *args)
 {
     int sockfd = -1;
     int level;
-    int optname;
+    ULONG optname;
     int res;
-    int flag = 0;
+    ULONG flag;
     int flagsize = sizeof flag;
 
-    if (!PyArg_ParseTuple(args, "iii", &sockfd, &level, &optname))
-        return NULL;
+    if (!PyArg_ParseTuple(args, "iiI", &sockfd, &level, &optname))
+        return 0;
 
     res = getsockopt(sockfd, level, optname, (void *) &flag, &flagsize);
     if (res < 0) {
