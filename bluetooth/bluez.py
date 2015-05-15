@@ -23,7 +23,7 @@ del _constants
 def discover_devices (duration=8, flush_cache=True, lookup_names=False,
                       lookup_class=False, device_id=-1):
     if device_id == -1:
-        device_id = _bt.hci_get_device_route()
+        device_id = _bt.hci_get_route()
 
     sock = _gethcisock (device_id)
     try:
