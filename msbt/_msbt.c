@@ -920,6 +920,72 @@ msbt_gettimeout(PyObject *self, PyObject *args)
 }
 PyDoc_STRVAR(msbt_gettimeout_doc, "");
 
+/* s.setsockopt() method.
+   With an integer third argument, sets an integer option.
+   With a string third argument, sets an option from a buffer;
+   use optional built-in module 'struct' to encode the string. */
+
+static PyObject *
+msbt_setsockopt(PyObject *s, PyObject *args)
+{
+    int sockfd = -1;
+    int level;
+    ULONG optname;
+    int res;
+    ULONG flag;
+
+    if (!PyArg_ParseTuple(args, "iiIi:setsockopt", &sockfd, &level, &optname,
+            &flag)) {
+        return 0;
+    }
+    res = setsockopt(sockfd, level, optname, (char*) &flag, sizeof(ULONG));
+    if (res < 0) {
+        Err_SetFromWSALastError(PyExc_IOError);
+        return 0;
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+PyDoc_STRVAR(msbt_setsockopt_doc,
+"setsockopt(level, option, value)\n\
+\n\
+Set a socket option.  See the Unix manual for level and option.\n\
+The value argument can either be an integer or a string.");
+
+
+/* s.getsockopt() method.
+   With two arguments, retrieves an integer option.
+   With a third integer argument, retrieves a string buffer of that size;
+   use optional built-in module 'struct' to decode the string. */
+
+static PyObject *
+msbt_getsockopt(PyObject *s, PyObject *args)
+{
+    int sockfd = -1;
+    int level;
+    ULONG optname;
+    int res;
+    ULONG flag;
+    int flagsize = sizeof flag;
+
+    if (!PyArg_ParseTuple(args, "iiI", &sockfd, &level, &optname))
+        return 0;
+
+    res = getsockopt(sockfd, level, optname, (void *) &flag, &flagsize);
+    if (res < 0) {
+        Err_SetFromWSALastError(PyExc_IOError);
+        return 0;
+    }
+    return PyInt_FromLong(flag);
+}
+
+PyDoc_STRVAR(msbt_getsockopt_doc,
+"getsockopt(level, option[, buffersize]) -> value\n\
+\n\
+Get a socket option.  See the Unix manual for level and option.\n\
+If a nonzero buffersize argument is given, the return value is a\n\
+string of that length; otherwise it is an integer.");
 
 
 // =======================  ADMINISTRATIVE =========================
@@ -946,6 +1012,8 @@ static PyMethodDef msbt_methods[] = {
     { "setblocking", (PyCFunction)msbt_setblocking, METH_VARARGS, msbt_setblocking_doc },
     { "settimeout", (PyCFunction)msbt_settimeout, METH_VARARGS, msbt_settimeout_doc },
     { "gettimeout", (PyCFunction)msbt_gettimeout, METH_VARARGS, msbt_gettimeout_doc },
+    { "setsockopt", (PyCFunction)msbt_setsockopt, METH_VARARGS, msbt_setsockopt_doc },
+    { "getsockopt", (PyCFunction)msbt_getsockopt, METH_VARARGS, msbt_getsockopt_doc },
     { NULL, NULL }
 };
 
@@ -958,11 +1026,6 @@ PyMODINIT_FUNC
 init_msbt(void)
 {
     PyObject * m = Py_InitModule3("_msbt", msbt_methods, msbt_doc);
-
-    ADD_INT_CONSTANT(m, SOCK_STREAM);
-    ADD_INT_CONSTANT(m, BTHPROTO_RFCOMM);
-    ADD_INT_CONSTANT(m, BT_PORT_ANY);
-}
 #else
 PyMODINIT_FUNC
 PyInit__msbt(void)
@@ -981,11 +1044,20 @@ PyInit__msbt(void)
         NULL
     };
     m = PyModule_Create(&moduledef);
-#define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
+#endif
 
     ADD_INT_CONSTANT(m, SOCK_STREAM);
     ADD_INT_CONSTANT(m, BTHPROTO_RFCOMM);
     ADD_INT_CONSTANT(m, BT_PORT_ANY);
+
+    ADD_INT_CONSTANT(m, SOL_RFCOMM);
+    ADD_INT_CONSTANT(m, SO_BTH_AUTHENTICATE);
+    ADD_INT_CONSTANT(m, SO_BTH_ENCRYPT);
+    ADD_INT_CONSTANT(m, SO_BTH_MTU);
+    ADD_INT_CONSTANT(m, SO_BTH_MTU_MAX);
+    ADD_INT_CONSTANT(m, SO_BTH_MTU_MIN);
+
+#if PY_MAJOR_VERSION >= 3
     return m;
-}
 #endif
+}
