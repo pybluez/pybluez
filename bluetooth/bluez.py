@@ -122,7 +122,7 @@ def set_l2cap_mtu (sock, mtu):
     options[0] = options[1] = mtu
     set_l2cap_options (sock, options)
 
-def _get_available_port (protocol):
+def _get_available_port (protocol, addr=""):
     """
     deprecated.  bind to PORT_ANY instead.
     """
@@ -130,7 +130,7 @@ def _get_available_port (protocol):
         for channel in range (1,31):
             s = BluetoothSocket (RFCOMM)
             try:
-                s.bind ( ("", channel))
+                s.bind ( (addr, channel))
                 s.close ()
                 return channel
             except:
@@ -139,7 +139,7 @@ def _get_available_port (protocol):
         for psm in range (0x1001,0x8000,2):
             s = BluetoothSocket (L2CAP)
             try:
-                s.bind ( ("", psm))
+                s.bind ( (addr, psm))
                 s.close ()
                 return psm
             except:
@@ -174,7 +174,7 @@ class BluetoothSocket:
     def bind (self, addrport):
         if self._proto == RFCOMM or self._proto == L2CAP:
             addr, port = addrport
-            if port == 0: addrport = (addr, _get_available_port (self._proto))
+            if port == 0: addrport = (addr, _get_available_port (self._proto, addr))
         return self._sock.bind (addrport)
 
     def get_l2cap_options(self):
