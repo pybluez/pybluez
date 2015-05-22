@@ -12,7 +12,7 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False,
     namesIndex = 1
     classIndex = 2
 
-    devices = bt.discover_devices()
+    devices = bt.discover_devices(duration=duration, flush_cache=flush_cache)
     ret = list()
     for device in devices:
         item = [device[btAddresIndex],]

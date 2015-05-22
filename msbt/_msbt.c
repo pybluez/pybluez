@@ -413,113 +413,71 @@ static int bt_adapter_present()
 }
 
 static PyObject *
-msbt_discover_devices(PyObject *self)
+msbt_discover_devices(PyObject *self, PyObject *args, PyObject *kwds)
 {
+    BLUETOOTH_DEVICE_INFO device_info;
+    BLUETOOTH_DEVICE_SEARCH_PARAMS search_criteria;
+    HBLUETOOTH_DEVICE_FIND found_device;
+    BOOL next = TRUE;
+    PyObject * toreturn = NULL;
+    int duration = 8;
+    int flush_cache = 1;
 
-	// inquiry data structure
-	DWORD qs_len = sizeof( WSAQUERYSET );
-	WSAQUERYSET *qs = (WSAQUERYSET*) malloc( qs_len );
-
-	DWORD flags = LUP_CONTAINERS;
-	HANDLE h;
-	int done = 0;
-    PyObject *toreturn = NULL;
-    int status = 0;
-
-    dbg("msbt_discover_devices\n");
-    if(!bt_adapter_present())
-    {
-        free( qs );
-        PyErr_SetString (PyExc_IOError, "No Bluetooth adapter detected");
+    static char *keywords[] = {"duration", "flush_cache", 0};
+    if(!PyArg_ParseTupleAndKeywords(args, kwds, "ii", keywords,
+                &duration, &flush_cache)) {
         return NULL;
     }
-
-	ZeroMemory( qs, qs_len );
-	qs->dwSize = sizeof(WSAQUERYSET);
-	qs->dwNameSpace = NS_BTH;
-
-	flags |= LUP_FLUSHCACHE | LUP_RETURN_NAME | LUP_RETURN_TYPE | LUP_RETURN_ADDR;
-
-	Py_BEGIN_ALLOW_THREADS;
-	// start the device inquiry
-    status = WSALookupServiceBegin (qs, flags, &h);
-    Py_END_ALLOW_THREADS;
-
-	if (SOCKET_ERROR == status) {
-        int error = WSAGetLastError();
-        if( error == WSASERVICE_NOT_FOUND ) {
-            dbg("No devices detected\n");
-
-            // no devices detected.
-            WSALookupServiceEnd( h );
-            free( qs );
-            toreturn = PyList_New(0);
-            return toreturn;
-        } else {
-            Err_SetFromWSALastError( PyExc_IOError );
-            free(qs);
-            return 0;
-        }
-	}
-
     toreturn = PyList_New(0);
+    ZeroMemory(&device_info, sizeof(BLUETOOTH_DEVICE_INFO));
+    ZeroMemory(&search_criteria, sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS));
 
-	// iterate through the inquiry results
-	while(! done) {
-        Py_BEGIN_ALLOW_THREADS;
-        status = WSALookupServiceNext (h, flags, &qs_len, qs);
-        Py_END_ALLOW_THREADS;
+    device_info.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+    search_criteria.dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS);
+    search_criteria.fReturnAuthenticated = TRUE;
+    search_criteria.fReturnRemembered = !flush_cache;
+    search_criteria.fReturnConnected = TRUE;
+    search_criteria.fReturnUnknown = TRUE;
+    search_criteria.fIssueInquiry = TRUE;
+    search_criteria.cTimeoutMultiplier = duration;
+    search_criteria.hRadio = NULL;
 
-		if (NO_ERROR == status) {
-			char buf[40] = {0};
-            PyObject *tup = NULL;
-			BTH_ADDR result = 
-				((SOCKADDR_BTH*)qs->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
-            ba2str( result, buf, _countof(buf) );
-
-#if PY_MAJOR_VERSION >= 3
-            {
-				PyObject *item_tuple = NULL;
-				tup = PyTuple_New(3);
-				item_tuple = PyUnicode_DecodeLocale(buf, "surrogateescape");
-				PyTuple_SetItem( tup, 0, item_tuple );
-				item_tuple = PyUnicode_DecodeLocale(qs->lpszServiceInstanceName, "surrogateescape");
-				PyTuple_SetItem( tup, 1, item_tuple );
-				item_tuple = PyInt_FromLong(qs->lpServiceClassId->Data1);
-				PyTuple_SetItem( tup, 2, item_tuple );
-            }
-#else
-			tup = Py_BuildValue( "ssl", buf, qs->lpszServiceInstanceName, qs->lpServiceClassId->Data1 );
-#endif
-            PyList_Append( toreturn, tup );
-            Py_DECREF( tup );
-		} else {
-			int error = WSAGetLastError();
-			
-			if( error == WSAEFAULT ) {
-                // the qs data structure is too small.  allocate a bigger
-                // buffer and try again.
-				free( qs );
-				qs = (WSAQUERYSET*) malloc( qs_len );
-			} else if( error == WSA_E_NO_MORE ) {
-                // no more results.
-				done = 1;
-			} else {
-                // unexpected error.  raise an exception.
-                Err_SetFromWSALastError( PyExc_IOError );
-                Py_DECREF( toreturn );
-                return 0;
-			}
-		}
-	}
     Py_BEGIN_ALLOW_THREADS;
-    WSALookupServiceEnd( h );
+    found_device = BluetoothFindFirstDevice(&search_criteria, &device_info);
     Py_END_ALLOW_THREADS;
-	free( qs );
 
+    _CHECK_OR_RAISE_WSA(found_device != NULL)
+
+    while(next) {
+        PyObject *tup = NULL;
+        PyObject *item_tuple = NULL;
+        char buf[40] = {0};
+        BTH_ADDR result = device_info.Address.ullLong;
+        ba2str( result, buf, _countof(buf) );
+
+        tup = PyTuple_New(3);
+        item_tuple = PyString_FromString(buf);
+        PyTuple_SetItem( tup, 0, item_tuple );
+        item_tuple = PyUnicode_FromUnicode(
+                (const Py_UNICODE*)device_info.szName,
+                wcslen(device_info.szName));
+        PyTuple_SetItem( tup, 1, item_tuple );
+        item_tuple = PyInt_FromLong(device_info.ulClassofDevice);
+        PyTuple_SetItem( tup, 2, item_tuple );
+        PyList_Append( toreturn, tup );
+        Py_DECREF( tup );
+        
+        Py_BEGIN_ALLOW_THREADS;
+        next = BluetoothFindNextDevice(found_device, &device_info);
+        Py_END_ALLOW_THREADS;
+    }
     return toreturn;
 }
-PyDoc_STRVAR(msbt_discover_devices_doc, "TODO");
+PyDoc_STRVAR(msbt_discover_devices_doc,
+	"msbt_discover_devices(duration=8, flush_cache=True\n\\n\
+	Performs a device inquiry. The inquiry will last 1.28 * duration seconds.\
+	If flush_cache is True, then new inquiry will be performed,\
+	else cashed devices will be returned(plus paired devices).)");
 
 static PyObject *
 msbt_lookup_name(PyObject *self, PyObject *args)
@@ -1004,7 +962,8 @@ static PyMethodDef msbt_methods[] = {
     { "getsockname", (PyCFunction)msbt_getsockname, METH_VARARGS, 
         msbt_getsockname_doc },
     { "dup", (PyCFunction)msbt_dup, METH_VARARGS, msbt_dup_doc },
-    { "discover_devices", (PyCFunction)msbt_discover_devices, METH_NOARGS, msbt_discover_devices_doc },
+    { "discover_devices", (PyCFunction)msbt_discover_devices,
+            METH_VARARGS | METH_KEYWORDS, msbt_discover_devices_doc },
     { "lookup_name", (PyCFunction)msbt_lookup_name, METH_VARARGS, msbt_lookup_name_doc },
     { "find_service", (PyCFunction)msbt_find_service, METH_VARARGS, msbt_find_service_doc },
     { "set_service", (PyCFunction)msbt_set_service, METH_VARARGS, msbt_set_service_doc },
