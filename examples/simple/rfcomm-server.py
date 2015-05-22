@@ -22,7 +22,7 @@ advertise_service( server_sock, "SampleServer",
                     )
                    
 print("Waiting for connection on RFCOMM channel %d" % port)
-
+server_sock.setblocking(True)
 client_sock, client_info = server_sock.accept()
 print("Accepted connection from ", client_info)
 
