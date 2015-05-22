@@ -230,7 +230,7 @@ static PyObject *
 start_inquiry (PyObject *s)
 {
     WCInquirerPyObject *self = (WCInquirerPyObject*) s;
-    bool success = TRUE;
+    BOOL success = TRUE;
     Py_BEGIN_ALLOW_THREADS
     success = self->inq->StartInquiry ();
     Py_END_ALLOW_THREADS
@@ -373,7 +373,7 @@ read_discovery_records (PyObject *s, PyObject *args)
     }
 
     char bdaddr_str[18];
-    sprintf (bdaddr_str, "%02X:%02X:%02X:%02X:%02X:%02X", 
+    sprintf_s (bdaddr_str, sizeof(bdaddr_str), "%02X:%02X:%02X:%02X:%02X:%02X",
             bdaddr_in[0], bdaddr_in[1], bdaddr_in[2], 
             bdaddr_in[3], bdaddr_in[4], bdaddr_in[5]);
 
