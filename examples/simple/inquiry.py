@@ -9,8 +9,8 @@ import bluetooth
 
 print("performing inquiry...")
 
-nearby_devices = bluetooth.discover_devices(duration=2, lookup_names=True,
-                                            lookup_class=False)
+nearby_devices = bluetooth.discover_devices(
+        duration=8, lookup_names=True, flush_cache=True, lookup_class=False)
 
 print("found %d devices" % len(nearby_devices))
 

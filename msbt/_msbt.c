@@ -413,30 +413,39 @@ static int bt_adapter_present()
 }
 
 static PyObject *
-msbt_discover_devices(PyObject *self)
+msbt_discover_devices(PyObject *self, PyObject *args, PyObject *kwds)
 {
     BLUETOOTH_DEVICE_INFO device_info;
     BLUETOOTH_DEVICE_SEARCH_PARAMS search_criteria;
     HBLUETOOTH_DEVICE_FIND found_device;
     BOOL next = TRUE;
-    PyObject * toreturn = PyList_New(0);
+    PyObject * toreturn = NULL;
+    int duration = 8;
+    int flush_cache = 1;
+
+    static char *keywords[] = {"duration", "flush_cache", 0};
+    if(!PyArg_ParseTupleAndKeywords(args, kwds, "ii", keywords,
+                &duration, &flush_cache)) {
+        return NULL;
+    }
+    toreturn = PyList_New(0);
     ZeroMemory(&device_info, sizeof(BLUETOOTH_DEVICE_INFO));
     ZeroMemory(&search_criteria, sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS));
 
     device_info.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
     search_criteria.dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS);
     search_criteria.fReturnAuthenticated = TRUE;
-    search_criteria.fReturnRemembered = TRUE;
+    search_criteria.fReturnRemembered = !flush_cache;
     search_criteria.fReturnConnected = TRUE;
     search_criteria.fReturnUnknown = TRUE;
     search_criteria.fIssueInquiry = TRUE;
-    search_criteria.cTimeoutMultiplier = 3;
+    search_criteria.cTimeoutMultiplier = duration;
     search_criteria.hRadio = NULL;
 
     Py_BEGIN_ALLOW_THREADS;
     found_device = BluetoothFindFirstDevice(&search_criteria, &device_info);
     Py_END_ALLOW_THREADS;
-    
+
     _CHECK_OR_RAISE_WSA(found_device != NULL)
 
     while(next) {
@@ -462,10 +471,13 @@ msbt_discover_devices(PyObject *self)
         next = BluetoothFindNextDevice(found_device, &device_info);
         Py_END_ALLOW_THREADS;
     }
-    
     return toreturn;
 }
-PyDoc_STRVAR(msbt_discover_devices_doc, "TODO");
+PyDoc_STRVAR(msbt_discover_devices_doc,
+	"msbt_discover_devices(duration=8, flush_cache=True\n\\n\
+	Performs a device inquiry. The inquiry will last 1.28 * duration seconds.\
+	If flush_cache is True, then new inquiry will be performed,\
+	else cashed devices will be returned(plus paired devices).)");
 
 static PyObject *
 msbt_lookup_name(PyObject *self, PyObject *args)
@@ -950,7 +962,8 @@ static PyMethodDef msbt_methods[] = {
     { "getsockname", (PyCFunction)msbt_getsockname, METH_VARARGS, 
         msbt_getsockname_doc },
     { "dup", (PyCFunction)msbt_dup, METH_VARARGS, msbt_dup_doc },
-    { "discover_devices", (PyCFunction)msbt_discover_devices, METH_NOARGS, msbt_discover_devices_doc },
+    { "discover_devices", (PyCFunction)msbt_discover_devices,
+            METH_VARARGS | METH_KEYWORDS, msbt_discover_devices_doc },
     { "lookup_name", (PyCFunction)msbt_lookup_name, METH_VARARGS, msbt_lookup_name_doc },
     { "find_service", (PyCFunction)msbt_find_service, METH_VARARGS, msbt_find_service_doc },
     { "set_service", (PyCFunction)msbt_set_service, METH_VARARGS, msbt_set_service_doc },
