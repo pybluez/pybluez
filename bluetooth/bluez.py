@@ -434,9 +434,9 @@ class DeviceDiscoverer:
             try:
                 _bt.hci_send_cmd (self.sock, _bt.OGF_LINK_CTL, \
                         _bt.OCF_INQUIRY_CANCEL)
+            except:
                 self.sock.close ()
                 self.sock = None
-            except:
                 raise BluetoothError ("error canceling inquiry")
             self.is_inquiring = False
 
@@ -523,12 +523,12 @@ class DeviceDiscoverer:
 
                 self._device_discovered (addr, devclass,
                         psrm, pspm, clockoff, rssi, name)
-        elif event == _bt.EVT_INQUIRY_COMPLETE:
+        elif event == _bt.EVT_INQUIRY_COMPLETE or event == _bt.EVT_CMD_COMPLETE:
             self.is_inquiring = False
             if len (self.names_to_find) == 0:
 #                print "inquiry complete (evt_inquiry_complete)"
                 self.sock.close ()
-                self.inquiry_complete ()
+                self._inquiry_complete ()
             else:
                 self._send_next_name_req ()
 
@@ -542,7 +542,7 @@ class DeviceDiscoverer:
 #                print "inquiry complete (bad status 0x%X 0x%X 0x%X)" % \
 #                        (status, ncmd, opcode)
                 self.names_to_find = {}
-                self.inquiry_complete ()
+                self._inquiry_complete ()
         elif event == _bt.EVT_REMOTE_NAME_REQ_COMPLETE:
             status = get_byte(pkt[0])
             addr = _bt.ba2str (pkt[1:7])
@@ -637,6 +637,14 @@ class DeviceDiscoverer:
             print(("found: %s (class 0x%X)" % (address, device_class)))
             print(("found: %s (class 0x%X, rssi %s)" % \
                     (address, device_class, rssi)))
+
+    def _inquiry_complete (self):
+        """
+        Called when an inquiry started by find_devices has completed.
+        """
+        self.sock.close ()
+        self.sock = None
+        self.inquiry_complete()
 
     def inquiry_complete (self):
         """
