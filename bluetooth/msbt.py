@@ -57,7 +57,7 @@ class BluetoothSocket:
             addr, port = addrport
 
             if port == 0: port = bt.BT_PORT_ANY
-            status = bt.bind (self._sockfd, addr, port)
+            bt.bind (self._sockfd, addr, port)
 
     def listen (self, backlog):
         bt.listen (self._sockfd, backlog)
@@ -84,7 +84,7 @@ class BluetoothSocket:
         return bt.getsockname (self._sockfd)
 
     def setblocking (self, blocking):
-        s = bt.setblocking (self._sockfd, blocking)
+        bt.setblocking (self._sockfd, blocking)
         self._blocking = blocking
 
     def settimeout (self, timeout):
@@ -94,10 +94,8 @@ class BluetoothSocket:
             self.setblocking (False)
         else:
             self.setblocking (True)
-            # XXX this doesn't look correct
-            timeout = 0 # winsock timeout still needs to be set 0
 
-        s = bt.settimeout (self._sockfd, timeout)
+        bt.settimeout (self._sockfd, timeout)
         self._timeout = timeout
 
     def gettimeout (self):    

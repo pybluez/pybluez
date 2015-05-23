@@ -60,8 +60,7 @@ msbt_initwinsock(PyObject *self)
         return 0;
     }
 
-    Py_INCREF( Py_None );
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(msbt_initwinsock_doc, "TODO");
 
@@ -179,9 +178,8 @@ msbt_bind(PyObject *self, PyObject *args)
 
     _CHECK_OR_RAISE_WSA( NO_ERROR == status );
 
-    Py_INCREF(Py_None);
-    return Py_None;
-};
+    Py_RETURN_NONE;
+}
 PyDoc_STRVAR(msbt_bind_doc, "TODO");
 
 static PyObject *
@@ -198,9 +196,8 @@ msbt_listen(PyObject *self, PyObject *args)
 
     _CHECK_OR_RAISE_WSA( NO_ERROR == status );
     
-    Py_INCREF(Py_None);
-    return Py_None;
-};
+    Py_RETURN_NONE;
+}
 PyDoc_STRVAR(msbt_listen_doc, "TODO");
 
 static PyObject *
@@ -254,9 +251,8 @@ msbt_connect(PyObject *self, PyObject *args)
 
     _CHECK_OR_RAISE_WSA( NO_ERROR == status );
 
-    Py_INCREF(Py_None);
-    return Py_None;
-};
+    Py_RETURN_NONE;
+}
 PyDoc_STRVAR(msbt_connect_doc, "TODO");
 
 static PyObject *
@@ -274,12 +270,6 @@ msbt_send(PyObject *self, PyObject *args)
     Py_BEGIN_ALLOW_THREADS;
     sent = send(sockfd, data, datalen, flags);
     Py_END_ALLOW_THREADS;
-
-    if (WSAGetLastError() == WSAEWOULDBLOCK ||
-        WSAGetLastError() == WSAETIMEDOUT ) {
-		return PyInt_FromLong ( 0 );
-	}
-
 
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sent );
     
@@ -304,17 +294,10 @@ msbt_recv(PyObject *self, PyObject *args)
     received = recv(sockfd, PyString_AS_STRING(buf), datalen, flags);
     Py_END_ALLOW_THREADS;
 
-    if (WSAGetLastError() == WSAEWOULDBLOCK ||
-        WSAGetLastError() == WSAETIMEDOUT ) {
-        _PyString_Resize(&buf, 0); // XXX is this necessary? -albert
-
-        return buf;
-    }
-
     if( SOCKET_ERROR == received ){
         Py_DECREF(buf);
-        return 0;   
     }
+    _CHECK_OR_RAISE_WSA( SOCKET_ERROR != received );
     if( received != datalen ) _PyString_Resize(&buf, received);
 
     return buf;
@@ -332,9 +315,8 @@ msbt_close(PyObject *self, PyObject *args)
     status = closesocket(sockfd);
     Py_END_ALLOW_THREADS;
 
-    Py_INCREF(Py_None);
-    return Py_None;
-};
+    Py_RETURN_NONE;
+}
 PyDoc_STRVAR(msbt_close_doc, "TODO");
 
 static PyObject *
@@ -794,9 +776,7 @@ msbt_set_service(PyObject *self, PyObject *args)
         Err_SetFromWSALastError( PyExc_IOError );
         return 0;
     }
-
-    Py_INCREF( Py_None );
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(msbt_set_service_doc, "");
 
@@ -807,9 +787,7 @@ msbt_setblocking(PyObject *self, PyObject *args)
     int block = -1;
     PyObject* blockingArg;
 
-    if(!PyArg_ParseTuple(args, "iO", &sockfd, &blockingArg)) return 0;
-
-    block = PyInt_AsLong(blockingArg);
+    if(!PyArg_ParseTuple(args, "ii", &sockfd, &block)) return 0;
 
     if (block == -1 && PyErr_Occurred())
         return NULL;
@@ -822,8 +800,7 @@ msbt_setblocking(PyObject *self, PyObject *args)
         ioctlsocket( sockfd, FIONBIO, &block);
     }
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(msbt_setblocking_doc, "");
 
@@ -851,8 +828,7 @@ msbt_settimeout(PyObject *self, PyObject *args)
         return 0;
     }
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(msbt_settimeout_doc, "");
 
@@ -901,8 +877,7 @@ msbt_setsockopt(PyObject *s, PyObject *args)
         Err_SetFromWSALastError(PyExc_IOError);
         return 0;
     }
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(msbt_setsockopt_doc,
