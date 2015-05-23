@@ -785,20 +785,10 @@ msbt_setblocking(PyObject *self, PyObject *args)
 {
     int sockfd = -1;
     int block = -1;
-    PyObject* blockingArg;
 
     if(!PyArg_ParseTuple(args, "ii", &sockfd, &block)) return 0;
-
-    if (block == -1 && PyErr_Occurred())
-        return NULL;
-
-    if (block) {
-        block = 0;
-        ioctlsocket( sockfd, FIONBIO, &block);
-    } else {
-        block = 1;
-        ioctlsocket( sockfd, FIONBIO, &block);
-    }
+    block = !block; //set zero to non-zero and non-zero to zero
+    ioctlsocket( sockfd, FIONBIO, &block);
 
     Py_RETURN_NONE;
 }
