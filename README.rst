@@ -6,15 +6,15 @@ Python extension module allowing access to system Bluetooth resources.
 
 https://github.com/karulis/pybluez
 
-##BUILD REQUIREMENTS:
+## BUILD REQUIREMENTS:
 
-###GNU/Linux:
+### GNU/Linux:
  
 - Python 2.3 or more recent version
 - Python distutils (standard in most Python distros, separate package python-dev in Debian)
 - BlueZ libraries and header files
 
-###Windows:
+### Windows:
 
 - Microsoft Windows XP SP1 or Windows Vista/7/8/8.1
 - Visual C++ 2010 Express for build for Python 3.3 or newer 
@@ -23,12 +23,12 @@ https://github.com/karulis/pybluez
 - Widcomm BTW development kit 5.0 or later (Optional)
 - Python 2.3 or more recent version
 
-##INSTALLATION:
+## INSTALLATION:
 
 from a command shell:
 >python setup.py install
 
-##EXAMPLES:
+## EXAMPLES:
 
 .. code-block:: python
 
@@ -41,14 +41,14 @@ from a command shell:
     for addr, name in nearby_devices:
         print("  %s - %s" % (addr, name))
 
-###GNU/Linux and Windows XP examples:
+### GNU/Linux and Windows XP examples:
 
 - [examples/simple/inquiry.py](./examples/simple/inquiry.py) - Detecting nearby Bluetooth devices
 - [examples/simple/sdp-browse.py](./examples/simple/sdp-browse.py) - Browsing SDP services on a Bluetooth device.
 - [examples/simple/rfcomm-server.py](./examples/simple/rfcomm-server.py) - establishing an RFCOMM connection.
 - [examples/simple/rfcomm-client.py](./examples/simple/rfcomm-client.py) - establishing an RFCOMM connection.
 
-###GNU/Linux only examples:
+### GNU/Linux only examples:
 
 - [exmaples/simple/l2capserver.py](./examples/simple/l2capserver.py)
 - [exmaples/simple/l2capclient.py](./examples/simple/l2capclient.py)
@@ -60,12 +60,12 @@ from a command shell:
 - [examples/advanced/l2-unreliable-client.py](.examples/advanced/l2-unreliable-client.py)
 
 
-##CONTACT:
+## CONTACT:
 
 Please use the mailing list at
 http://groups.google.com/group/pybluez/
 
-##LICENSE:
+## LICENSE:
 
   PyBluez is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
