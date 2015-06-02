@@ -23,12 +23,12 @@ https://github.com/karulis/pybluez
 - Widcomm BTW development kit 5.0 or later (Optional)
 - Python 2.3 or more recent version
 
-## INSTALLATION:
+**INSTALLATION:**
 
 from a command shell:
 >python setup.py install
 
-## EXAMPLES:
+**EXAMPLES:**
 
 .. code-block:: python
 
@@ -41,31 +41,30 @@ from a command shell:
     for addr, name in nearby_devices:
         print("  %s - %s" % (addr, name))
 
-### GNU/Linux and Windows XP examples:
+*GNU/Linux and Windows XP examples:*
 
 - `examples/simple/inquiry.py`_ - Detecting nearby Bluetooth devices
-- [examples/simple/sdp-browse.py](./examples/simple/sdp-browse.py) - Browsing SDP services on a Bluetooth device.
-- [examples/simple/rfcomm-server.py](./examples/simple/rfcomm-server.py) - establishing an RFCOMM connection.
-- [examples/simple/rfcomm-client.py](./examples/simple/rfcomm-client.py) - establishing an RFCOMM connection.
+- `examples/simple/sdp-browse.py`_ - Browsing SDP services on a Bluetooth device.
+- `examples/simple/rfcomm-server.py`_ - establishing an RFCOMM connection.
+- `examples/simple/rfcomm-client.py`_ - establishing an RFCOMM connection.
 
-### GNU/Linux only examples:
+*GNU/Linux only examples:*
 
-- [exmaples/simple/l2capserver.py](./examples/simple/l2capserver.py)
-- [exmaples/simple/l2capclient.py](./examples/simple/l2capclient.py)
-- [examples/simple/asynchronous-inquiry.py](./examples/simple/asynchronous-inquiry.py)
+- `examples/simple/l2capserver.py`_
+- `examples/simple/l2capclient.py`_
+- `examples/simple/asynchronous-inquiry.py`_
 
-- [examples/bluezchat](./examples/bluezchat)
-- [examples/advanced/inquiry-with-rssi.py](./examples/advanced/inquiry-with-rssi.py)
-- [examples/advanced/l2-unreliable-server.py](./examples/advanced/l2-unreliable-server.py)
-- [examples/advanced/l2-unreliable-client.py](.examples/advanced/l2-unreliable-client.py)
+- `examples/bluezchat`_
+- `examples/advanced/inquiry-with-rssi.py`_
+- `examples/advanced/l2-unreliable-server.py`_
+- `examples/advanced/l2-unreliable-client.py`_
 
-
-## CONTACT:
+*CONTACT:*
 
 Please use the mailing list at
 http://groups.google.com/group/pybluez/
 
-## LICENSE:
+*LICENSE:*
 
   PyBluez is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -81,3 +80,15 @@ http://groups.google.com/group/pybluez/
   Fifth Floor, Boston, MA  02110-1301  USA
   
 .. _examples/simple/inquiry.py: https://github.com/karulis/pybluez/blob/master/examples/simple/inquiry.py
+.. _examples/simple/sdp-browse.py: https://github.com/karulis/pybluez/blob/master/examples/simple/sdp-browse.py
+.. _examples/simple/rfcomm-server.py: https://github.com/karulis/pybluez/blob/master/examples/simple/rfcomm-server.py
+.. _examples/simple/rfcomm-client.py: https://github.com/karulis/pybluez/blob/master/examples/simple/rfcomm-client.py
+
+.. _examples/simple/l2capserver.py: https://github.com/karulis/pybluez/blob/master/examples/simple/l2capserver.py
+.. _examples/simple/l2capclient.py: https://github.com/karulis/pybluez/blob/master/examples/simple/l2capclient.py
+.. _examples/simple/asynchronous-inquiry.py: https://github.com/karulis/pybluez/blob/master/examples/simple/asynchronous-inquiry.py
+
+.. _examples/bluezchat: https://github.com/karulis/pybluez/blob/master/examples/bluezchat
+.. _examples/advanced/inquiry-with-rssi.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/inquiry-with-rssi.py
+.. _examples/advanced/l2-unreliable-server.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/l2-unreliable-server.py
+.. _examples/advanced/l2-unreliable-client.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/l2-unreliable-client.py
