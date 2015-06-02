@@ -6,15 +6,15 @@ Python extension module allowing access to system Bluetooth resources.
 
 https://github.com/karulis/pybluez
 
-## BUILD REQUIREMENTS:
+**BUILD REQUIREMENTS:**
 
-### GNU/Linux:
+*GNU/Linux:*
  
 - Python 2.3 or more recent version
 - Python distutils (standard in most Python distros, separate package python-dev in Debian)
 - BlueZ libraries and header files
 
-### Windows:
+*Windows:*
 
 - Microsoft Windows XP SP1 or Windows Vista/7/8/8.1
 - Visual C++ 2010 Express for build for Python 3.3 or newer 
@@ -43,7 +43,7 @@ from a command shell:
 
 ### GNU/Linux and Windows XP examples:
 
-- [examples/simple/inquiry.py](./examples/simple/inquiry.py) - Detecting nearby Bluetooth devices
+- `examples/simple/inquiry.py`_ - Detecting nearby Bluetooth devices
 - [examples/simple/sdp-browse.py](./examples/simple/sdp-browse.py) - Browsing SDP services on a Bluetooth device.
 - [examples/simple/rfcomm-server.py](./examples/simple/rfcomm-server.py) - establishing an RFCOMM connection.
 - [examples/simple/rfcomm-client.py](./examples/simple/rfcomm-client.py) - establishing an RFCOMM connection.
@@ -79,3 +79,5 @@ http://groups.google.com/group/pybluez/
   You should have received a copy of the GNU General Public License along with
   PyBluez; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
   Fifth Floor, Boston, MA  02110-1301  USA
+  
+.. _examples/simple/inquiry.py: https://github.com/karulis/pybluez/blob/master/examples/simple/inquiry.py
