@@ -59,12 +59,12 @@ from a command shell:
 - `examples/advanced/l2-unreliable-server.py`_
 - `examples/advanced/l2-unreliable-client.py`_
 
-*CONTACT:*
+**CONTACT:**
 
 Please use the mailing list at
 http://groups.google.com/group/pybluez/
 
-*LICENSE:*
+**LICENSE:**
 
   PyBluez is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
