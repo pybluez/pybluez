@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 import sys
 import platform
 import os
@@ -104,4 +104,6 @@ setup ( name = 'PyBluez',
                 "with GNU/Linux and Windows XP.',
         maintainer = 'Piotr Karulis',
         license = 'GPL',
+        extras_require={'ble' : ['gattlib']},
+        dependency_links=["https://bitbucket.org/karulis/pygattlib/get/9c5573847291.zip"]
         )
