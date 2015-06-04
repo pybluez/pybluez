@@ -79,7 +79,7 @@ elif sys.platform.startswith('linux'):
         bluez_version = subprocess.check_output(["/usr/sbin/bluetoothd", "-v"])
         bluez_version = [int(i) for i in bluez_version.split(b".")]
         if gatt_req_version <= bluez_version:
-            install_req = ['gattlib']
+            install_req = {'ble' : ['gattlib']}
     except Exception as err:
         print("Gattlib will not be installed - " + str(err))
 elif sys.platform == 'darwin':
@@ -95,7 +95,7 @@ else:
 
 
 setup ( name = 'PyBluez',
-        version = '0.21',
+        version = '0.22',
         description = 'Bluetooth Python extension module',
         author="Albert Huang",
         author_email="ashuang@alum.mit.edu",
@@ -115,5 +115,6 @@ setup ( name = 'PyBluez',
                 "with GNU/Linux and Windows XP.',
         maintainer = 'Piotr Karulis',
         license = 'GPL',
-        install_requires=install_req
+        extras_require=install_req,
+        dependency_links=["https://bitbucket.org/karulis/pygattlib/get/9c5573847291.zip"]
         )
