@@ -691,31 +691,36 @@ The filter is\n initially cleared");
 static PyObject *
 sock_setsockopt(PySocketSockObject *s, PyObject *args)
 {
-	int level;
-	int optname;
-	int res;
-	void *buf;
-	int buflen;
-	int flag;
-	PyHciFilterObject *filter = NULL;
+    int level;
+    int optname;
+    int res;
+    void *buf;
+    int buflen;
+    int flag;
+    PyHciFilterObject *filter = NULL;
 
-	if (PyArg_ParseTuple(args, "iii:setsockopt", &level, &optname, &flag)) {
-		buf = (void *) &flag;
-		buflen = sizeof flag;
-	} else {
-		PyErr_Clear();
-		if (!PyArg_ParseTuple(args, "iiO!:setsockopt",
-				      &level, &optname,  &filter_type, &filter))
-			return NULL;
-		buf = (void *) &filter->filter;
-		buflen = sizeof filter->filter;
-
-	}
-	res = setsockopt(s->sock_fd, level, optname, buf, buflen);
-	if (res < 0)
-		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+    if (PyArg_ParseTuple(args, "iii:setsockopt", &level, &optname, &flag)) {
+        buf = (void *) &flag;
+        buflen = sizeof flag;
+    } else {
+        PyErr_Clear();
+        if (PyArg_ParseTuple(args, "iiO!:setsockopt",
+                &level, &optname,  &filter_type, &filter)) {
+            buf = (void *) &filter->filter;
+            buflen = sizeof filter->filter;
+        } else {
+            PyErr_Clear();
+            if (!PyArg_ParseTuple(args, "iis#:setsockopt",
+                    &level, &optname, &buf, &buflen)) {
+                return NULL;
+            }
+        }
+    }
+    res = setsockopt(s->sock_fd, level, optname, buf, buflen);
+    if (res < 0)
+        return s->errorhandler();
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 PyDoc_STRVAR(setsockopt_doc,
@@ -751,23 +756,36 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 		if (res < 0)
 			return s->errorhandler();
 		return PyInt_FromLong(flag);
-	}
-	if (buflen <= 0 || buflen > 1024) {
+    } else if (buflen == sizeof(struct hci_filter)) {
+        PyHciFilterObject * filter
+                = (PyHciFilterObject *)bt_hci_filter_new(NULL, NULL);
+        if (filter == NULL)
+            return NULL;
+        res = getsockopt(s->sock_fd, level, optname,
+                 (void *)&filter->filter, &buflen);
+        if (res < 0) {
+            Py_DECREF(filter);
+            return s->errorhandler();
+        }
+        return (PyObject *)filter;
+    } else if (buflen == sizeof(struct l2cap_options)) {
+        PyObject *buf = PyString_FromStringAndSize((char *)NULL, buflen);
+        if (buf == NULL)
+            return NULL;
+        res = getsockopt(s->sock_fd, level, optname,
+                 (void *)PyString_AS_STRING(buf), &buflen);
+        if (res < 0) {
+            Py_DECREF(buf);
+            return s->errorhandler();
+        }
+        _PyString_Resize(&buf, buflen);
+        return buf;
+    } else if (buflen <= 0 || buflen > 1024) {
 		PyErr_SetString(bluetooth_error,
 				"getsockopt buflen out of range");
 		return NULL;
 	}
-    PyHciFilterObject * filter
-            = (PyHciFilterObject *)bt_hci_filter_new(NULL, NULL);
-	if (filter == NULL)
-		return NULL;
-	res = getsockopt(s->sock_fd, level, optname,
-			 (void *)&filter->filter, &buflen);
-	if (res < 0) {
-		Py_DECREF(filter);
-		return s->errorhandler();
-	}
-	return (PyObject *)filter;
+    return NULL;
 }
 
 PyDoc_STRVAR(getsockopt_doc,
