@@ -28,6 +28,10 @@ https://github.com/karulis/pybluez
 from a command shell:
 >python setup.py install
 
+for experimental Bluetooth Low Energy support(only for Linux platform) use pip:
+>pip install -e .[ble]
+for additional dependencies please take look at: `ble-dependencies`_
+
 **EXAMPLES:**
 
 .. code-block:: python
@@ -92,3 +96,4 @@ http://groups.google.com/group/pybluez/
 .. _examples/advanced/inquiry-with-rssi.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/inquiry-with-rssi.py
 .. _examples/advanced/l2-unreliable-server.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/l2-unreliable-server.py
 .. _examples/advanced/l2-unreliable-client.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/l2-unreliable-client.py
+.. _ble-dependencies: https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default
