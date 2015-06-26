@@ -28,9 +28,8 @@ https://github.com/karulis/pybluez
 from a command shell:
 >python setup.py install
 
-for experimental Bluetooth Low Energy support(only for Linux platform) use pip:
+for experimental Bluetooth Low Energy support(only for Linux platform) use pip(for additional dependencies please take look at: `ble-dependencies`_):
 >pip install -e .[ble]
-for additional dependencies please take look at: `ble-dependencies`_
 
 **EXAMPLES:**
 
