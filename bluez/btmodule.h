@@ -36,15 +36,6 @@ typedef struct {
 } PySocketSockObject;
 
 
-/* Wrapper for hci filter.*/
-
-typedef struct {
-	PyObject_HEAD
-	struct hci_filter filter;
-} PyHciFilterObject;
-
-
-
 #ifdef __cplusplus
 }
 #endif
