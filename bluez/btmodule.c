@@ -646,21 +646,21 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 	int optname;
 	int res;
 	socklen_t buflen = 0;
-
-	if (!PyArg_ParseTuple(args, "ii|i:getsockopt",
-			      &level, &optname, &buflen))
+	if (!PyArg_ParseTuple(args, "ii|i:getsockopt", &level, &optname, &buflen))
 		return NULL;
 
 	if (buflen == 0) {
 		int flag = 0;
 		socklen_t flagsize = sizeof flag;
-		res = getsockopt(s->sock_fd, level, optname,
-				 (void *)&flag, &flagsize);
+		res = getsockopt(s->sock_fd, level, optname, (void *)&flag, &flagsize);
 		if (res < 0)
 			return s->errorhandler();
 		return PyInt_FromLong(flag);
-    } else if ((buflen == sizeof(struct hci_filter))
-            || (buflen == sizeof(struct l2cap_options))) {
+    } else if (buflen <= 0 || buflen > 1024) {
+		PyErr_SetString(bluetooth_error,
+				"getsockopt buflen out of range");
+		return NULL;
+    } else {
         PyObject *buf = PyString_FromStringAndSize((char *)NULL, buflen);
         if (buf == NULL)
             return NULL;
@@ -672,10 +672,6 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
         }
         _PyString_Resize(&buf, buflen);
         return buf;
-    } else if (buflen <= 0 || buflen > 1024) {
-		PyErr_SetString(bluetooth_error,
-				"getsockopt buflen out of range");
-		return NULL;
 	}
     return NULL;
 }
@@ -2125,8 +2121,7 @@ static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
         return 0; \
     } \
     hci_filter_ ## name ( arg, (struct hci_filter*)param ); \
-    len = sizeof(struct hci_filter); \
-    return Py_BuildValue("s#", param, len); \
+    return PyString_FromStringAndSize(param, len); \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
@@ -2155,8 +2150,7 @@ static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
         return 0; \
     } \
     hci_filter_ ## name ( (struct hci_filter*)param ); \
-    len = sizeof(struct hci_filter); \
-    return Py_BuildValue("s#", param, len); \
+    return PyString_FromStringAndSize(param, len); \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
