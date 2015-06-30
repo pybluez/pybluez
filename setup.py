@@ -105,5 +105,5 @@ setup ( name = 'PyBluez',
         maintainer = 'Piotr Karulis',
         license = 'GPL',
         extras_require={'ble' : ['gattlib']},
-        dependency_links=["https://bitbucket.org/OscarAcena/pygattlib/get/83cc994d1a29.zip"]
+        dependency_links=["https://bitbucket.org/OscarAcena/pygattlib/get/6af3e7e03ccc.zip"]
         )
