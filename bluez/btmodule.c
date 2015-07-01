@@ -595,94 +595,6 @@ Returns the timeout in floating seconds associated with socket \n\
 operations. A timeout of None indicates that timeouts on socket \n\
 operations are disabled.");
 
-
-static void
-filter_dealloc(PyHciFilterObject *s)
-{
-	Py_TYPE(s)->tp_free((PyObject *)s);
-}
-
-static PyMethodDef filter_methods[] = {
-    {NULL}  /* Sentinel */
-};
-
-static PyObject *
-filter_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
-{
-	PyHciFilterObject *self = (PyHciFilterObject *)type->tp_alloc(type, 0);
-    return (PyObject *)self;
-}
-
-static int
-filter_init(PyHciFilterObject *self, PyObject *args, PyObject *kwds)
-{
-    hci_filter_clear(&self->filter);
-    return 0;
-}
-
-static PyTypeObject filter_type = {
-#if PY_MAJOR_VERSION < 3
-	PyObject_HEAD_INIT(0)	/* Must fill in type value later */
-	0,					/* ob_size */
-#else
-    PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
-    "_bluetooth.hcifilter",    /*tp_name*/
-    sizeof(PyHciFilterObject), /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    (destructor)filter_dealloc,/*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "Hci filter object",           /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
-	filter_methods,            /* tp_methods */
-    0,                         /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    (initproc)filter_init,      /* tp_init */
-	PyType_GenericAlloc,       /* tp_alloc */
-	filter_new,                 /* tp_new */
-	PyObject_Del,              /* tp_free */
-};
-
-static PyObject *
-bt_hci_filter_new(PyObject *self, PyObject *args)
-{
-	PyHciFilterObject *filter
-			= (PyHciFilterObject *)PyType_GenericNew(&filter_type, NULL, NULL);
-
-	return (PyObject*)filter;
-}
-PyDoc_STRVAR(bt_hci_filter_new_doc,
-"hci_filter_new()\n\
-\n\
-Returns a new HCI filter python wrapper suitable for operating on with \
-the hci_filter_*\n methods, and for passing to getsockopt and setsockopt. \
-The filter is\n initially cleared");
-
-
 /* s.setsockopt() method.
    With an integer third argument, sets an integer option.
    With a string third argument, sets an option from a buffer;
@@ -691,31 +603,28 @@ The filter is\n initially cleared");
 static PyObject *
 sock_setsockopt(PySocketSockObject *s, PyObject *args)
 {
-	int level;
-	int optname;
-	int res;
-	void *buf;
-	int buflen;
-	int flag;
-	PyHciFilterObject *filter = NULL;
+    int level;
+    int optname;
+    int res;
+    void *buf;
+    int buflen;
+    int flag;
 
-	if (PyArg_ParseTuple(args, "iii:setsockopt", &level, &optname, &flag)) {
-		buf = (void *) &flag;
-		buflen = sizeof flag;
-	} else {
-		PyErr_Clear();
-		if (!PyArg_ParseTuple(args, "iiO!:setsockopt",
-				      &level, &optname,  &filter_type, &filter))
-			return NULL;
-		buf = (void *) &filter->filter;
-		buflen = sizeof filter->filter;
-
-	}
-	res = setsockopt(s->sock_fd, level, optname, buf, buflen);
-	if (res < 0)
-		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+    if (PyArg_ParseTuple(args, "iii:setsockopt", &level, &optname, &flag)) {
+        buf = (void *) &flag;
+        buflen = sizeof flag;
+    } else {
+        PyErr_Clear();
+        if (!PyArg_ParseTuple(args, "iis#:setsockopt",
+                &level, &optname, &buf, &buflen)) {
+            return NULL;
+        }
+    }
+    res = setsockopt(s->sock_fd, level, optname, buf, buflen);
+    if (res < 0)
+        return s->errorhandler();
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 PyDoc_STRVAR(setsockopt_doc,
@@ -737,37 +646,34 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 	int optname;
 	int res;
 	socklen_t buflen = 0;
-
-
-	if (!PyArg_ParseTuple(args, "ii|i:getsockopt",
-			      &level, &optname, &buflen))
+	if (!PyArg_ParseTuple(args, "ii|i:getsockopt", &level, &optname, &buflen))
 		return NULL;
 
 	if (buflen == 0) {
 		int flag = 0;
 		socklen_t flagsize = sizeof flag;
-		res = getsockopt(s->sock_fd, level, optname,
-				 (void *)&flag, &flagsize);
+		res = getsockopt(s->sock_fd, level, optname, (void *)&flag, &flagsize);
 		if (res < 0)
 			return s->errorhandler();
 		return PyInt_FromLong(flag);
-	}
-	if (buflen <= 0 || buflen > 1024) {
+    } else if (buflen <= 0 || buflen > 1024) {
 		PyErr_SetString(bluetooth_error,
 				"getsockopt buflen out of range");
 		return NULL;
+    } else {
+        PyObject *buf = PyString_FromStringAndSize((char *)NULL, buflen);
+        if (buf == NULL)
+            return NULL;
+        res = getsockopt(s->sock_fd, level, optname,
+                 (void *)PyString_AS_STRING(buf), &buflen);
+        if (res < 0) {
+            Py_DECREF(buf);
+            return s->errorhandler();
+        }
+        _PyString_Resize(&buf, buflen);
+        return buf;
 	}
-    PyHciFilterObject * filter
-            = (PyHciFilterObject *)bt_hci_filter_new(NULL, NULL);
-	if (filter == NULL)
-		return NULL;
-	res = getsockopt(s->sock_fd, level, optname,
-			 (void *)&filter->filter, &buflen);
-	if (res < 0) {
-		Py_DECREF(filter);
-		return s->errorhandler();
-	}
-	return (PyObject *)filter;
+    return NULL;
 }
 
 PyDoc_STRVAR(getsockopt_doc,
@@ -796,18 +702,18 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
 		return Py_None;
 	}
 
-        if (errno != ENOPROTOOPT)
-		return s->errorhandler();
+    if (errno != ENOPROTOOPT)
+    return s->errorhandler();
 
-        int lm_map[] = {
-                0,
-                L2CAP_LM_AUTH,
-                L2CAP_LM_AUTH | L2CAP_LM_ENCRYPT,
-                L2CAP_LM_AUTH | L2CAP_LM_ENCRYPT | L2CAP_LM_SECURE,
-        }, opt = lm_map[level];
+    int lm_map[] = {
+            0,
+            L2CAP_LM_AUTH,
+            L2CAP_LM_AUTH | L2CAP_LM_ENCRYPT,
+            L2CAP_LM_AUTH | L2CAP_LM_ENCRYPT | L2CAP_LM_SECURE,
+    }, opt = lm_map[level];
 
-        if (setsockopt(s->sock_fd, SOL_L2CAP, L2CAP_LM, &opt, sizeof(opt)) < 0)
-		return s->errorhandler();
+    if (setsockopt(s->sock_fd, SOL_L2CAP, L2CAP_LM, &opt, sizeof(opt)) < 0)
+    return s->errorhandler();
 
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -2206,13 +2112,16 @@ Returns the name of the device, or raises an error on failure");
 #define DECL_HCI_FILTER_OP_1(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
 { \
-   PyHciFilterObject *filter = NULL; \
-   int arg; \
-   if ( !PyArg_ParseTuple(args, "O!i", &filter_type, &filter, &arg) ) { \
-       return 0; \
-   } \
-   hci_filter_ ## name ( arg, &filter->filter ); \
-   Py_RETURN_NONE; \
+    char *param; \
+    int len, arg; \
+    if( !PyArg_ParseTuple(args,"s#i", &param, &len, &arg) ) \
+        return 0; \
+    if( len != sizeof(struct hci_filter) ) { \
+        PyErr_SetString(PyExc_ValueError, "bad filter"); \
+        return 0; \
+    } \
+    hci_filter_ ## name ( arg, (struct hci_filter*)param ); \
+    return PyString_FromStringAndSize(param, len); \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
@@ -2232,12 +2141,16 @@ DECL_HCI_FILTER_OP_1(test_opcode, "test opcode!")
 #define DECL_HCI_FILTER_OP_2(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
 { \
-   PyHciFilterObject *filter = NULL; \
-   if ( !PyArg_ParseTuple(args, "O!", &filter_type, &filter) ) { \
-       return 0; \
-   } \
-   hci_filter_ ## name ( &filter->filter ); \
-   Py_RETURN_NONE; \
+    char *param; \
+    int len; \
+    if( !PyArg_ParseTuple(args,"s#", &param, &len) ) \
+        return 0; \
+    if( len != sizeof(struct hci_filter) ) { \
+       PyErr_SetString(PyExc_ValueError, "bad filter"); \
+        return 0; \
+    } \
+    hci_filter_ ## name ( (struct hci_filter*)param ); \
+    return PyString_FromStringAndSize(param, len); \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
@@ -2478,6 +2391,21 @@ PyDoc_STRVAR( bt_hci_acl_conn_handle_doc,
 \n\
 get the ACL connection handle for the given remote device addr.\n\
 ");
+
+static PyObject *
+bt_hci_filter_new(PyObject *self, PyObject *args)
+{
+    struct hci_filter flt;
+    int len = sizeof(flt);
+    hci_filter_clear( &flt );
+    return Py_BuildValue("s#", (char*)&flt, len);
+}
+PyDoc_STRVAR(bt_hci_filter_new_doc,
+"hci_filter_new()\n\
+\n\
+Returns a new HCI filter suitable for operating on with the hci_filter_*\n\
+methods, and for passing to getsockopt and setsockopt.  The filter is\n\
+initially cleared");
 
 /*
  * -------------------
@@ -2872,7 +2800,6 @@ See the bluetooth module for documentation.");
 PyMODINIT_FUNC
 init_bluetooth(void)
 {
-	Py_TYPE(&filter_type) = &PyType_Type;
 	Py_TYPE(&sock_type) = &PyType_Type;
 	Py_TYPE(&sdp_session_type) = &PyType_Type;
 
@@ -2893,11 +2820,6 @@ init_bluetooth(void)
 	Py_INCREF(socket_timeout);
 	PyModule_AddObject(m, "timeout", socket_timeout);
 
-	Py_INCREF((PyObject *)&filter_type);
-	if (PyModule_AddObject(m, "hcifilter",
-			       (PyObject *)&filter_type) != 0)
-		return;
-
 	Py_INCREF((PyObject *)&sock_type);
 	if (PyModule_AddObject(m, "btsocket",
 			       (PyObject *)&sock_type) != 0)
@@ -2912,7 +2834,6 @@ init_bluetooth(void)
 PyMODINIT_FUNC
 PyInit__bluetooth(void)
 {
-	Py_TYPE(&filter_type) = &PyType_Type;
 	Py_TYPE(&sock_type) = &PyType_Type;
 	Py_TYPE(&sdp_session_type) = &PyType_Type;
 
@@ -2941,11 +2862,6 @@ PyInit__bluetooth(void)
 		return NULL;
 	Py_INCREF(socket_timeout);
 	PyModule_AddObject(m, "timeout", socket_timeout);
-
-	Py_INCREF((PyObject *)&filter_type);
-	if (PyModule_AddObject(m, "hcifilter",
-				   (PyObject *)&filter_type) != 0)
-		return NULL;
 
 	Py_INCREF((PyObject *)&sock_type);
 	if (PyModule_AddObject(m, "btsocket",
