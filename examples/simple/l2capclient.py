@@ -26,6 +26,8 @@ while True:
     data = input()
     if(len(data) == 0): break
     sock.send(data)
+    data = sock.recv(1024)
+    print("Data received:", str(data))
 
 sock.close()
 

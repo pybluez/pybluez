@@ -295,7 +295,7 @@ def get_acl_conn_handle (hci_sock, addr):
     hci_fd = hci_sock.fileno ()
     reqstr = struct.pack ("6sB17s", _bt.str2ba (addr), 
             _bt.ACL_LINK, b"\0" * 17)
-    request = array.array ("c", reqstr)
+    request = array.array ("b", reqstr)
     try:
         fcntl.ioctl (hci_fd, _bt.HCIGETCONNINFO, request, 1)
     except IOError:
