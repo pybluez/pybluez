@@ -1,13 +1,6 @@
 import sys
 import bluetooth
 
-if len(sys.argv) < 2:
-    print("usage: l2-unreliable-server")
-    sys.exit(2)
-
-timeout = int(sys.argv[1])
-assert timeout >= 0
-
 server_sock=bluetooth.BluetoothSocket( bluetooth.L2CAP )
 server_sock.bind(("",0x1001))
 server_sock.listen(1)
