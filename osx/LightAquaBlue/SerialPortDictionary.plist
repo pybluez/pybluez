@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>0001 - ServiceClassIDList</key>
+	<array>
+		<data>
+		EQE=
+		</data>
+	</array>
+	<key>0004 - ProtocolDescriptorList</key>
+	<array>
+		<array>
+			<data>
+			AQA=
+			</data>
+		</array>
+		<array>
+			<data>
+			AAM=
+			</data>
+			<dict>
+				<key>DataElementSize</key>
+				<integer>1</integer>
+				<key>DataElementType</key>
+				<integer>1</integer>
+				<key>DataElementValue</key>
+				<integer>3</integer>
+			</dict>
+		</array>
+	</array>
+	<key>0005 - BrowseGroupList*</key>
+	<array>
+		<data>
+		EAI=
+		</data>
+	</array>
+	<key>0006 - LanguageBaseAttributeIDList*</key>
+	<array>
+		<dict>
+			<key>DataElementSize</key>
+			<integer>2</integer>
+			<key>DataElementType</key>
+			<integer>1</integer>
+			<key>DataElementValue</key>
+			<integer>25966</integer>
+		</dict>
+		<dict>
+			<key>DataElementSize</key>
+			<integer>2</integer>
+			<key>DataElementType</key>
+			<integer>1</integer>
+			<key>DataElementValue</key>
+			<integer>106</integer>
+		</dict>
+		<dict>
+			<key>DataElementSize</key>
+			<integer>2</integer>
+			<key>DataElementType</key>
+			<integer>1</integer>
+			<key>DataElementValue</key>
+			<integer>256</integer>
+		</dict>
+	</array>
+	<key>0009 - BluetoothProfileDescriptorList</key>
+	<array>
+		<array>
+			<data>
+			EQE=
+			</data>
+			<dict>
+				<key>DataElementSize</key>
+				<integer>2</integer>
+				<key>DataElementType</key>
+				<integer>1</integer>
+				<key>DataElementValue</key>
+				<integer>256</integer>
+			</dict>
+		</array>
+	</array>
+	<key>0303 - Supported Formats List</key>
+	<array>
+		<dict>
+			<key>DataElementType</key>
+			<integer>1</integer>
+			<key>DataElementValue</key>
+			<data>
+			/w==
+			</data>
+		</dict>
+	</array>
+</dict>
+</plist>

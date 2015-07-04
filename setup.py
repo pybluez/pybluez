@@ -72,13 +72,15 @@ elif sys.platform.startswith('linux'):
                         sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
     mods = [ mod1 ]
 elif sys.platform == 'darwin':
-    mod1 = Extension('bluetooth._osxbt',
-                    include_dirs = ["/System/Library/Frameworks/IOBluetooth.framework/Headers",
-                    "/System/Library/Frameworks/CoreFoundation.framework/Headers"],
-                    extra_link_args = ['-framework IOBluetooth -framework CoreFoundation'],
-                    sources = ['osx/_osxbt.c']
-                    )
-    mods = [ mod1 ]
+    # On Mac, install LightAquaBlue framework
+    # if you want to install the framework somewhere other than /Library/Frameworks
+    # make sure the path is also changed in LightAquaBlue.py (in src/mac)
+    if "install" in sys.argv:
+        os.chdir("osx/LightAquaBlue")
+        os.system("xcodebuild install -arch '$(NATIVE_ARCH_ACTUAL)' " +
+                  "-target LightAquaBlue -configuration Release DSTROOT=/ " +
+                  "INSTALL_PATH=/Library/Frameworks DEPLOYMENT_LOCATION=YES")
+    mods = []
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
 
@@ -95,8 +97,9 @@ setup ( name = 'PyBluez',
         classifiers = [ 'Development Status :: 4 - Beta',
             'License :: OSI Approved :: GNU General Public License (GPL)',
             'Programming Language :: Python',
-            'Programming Language :: Python :: 2',
-            'Programming Language :: Python :: 3',
+            "Topic :: Software Development :: Libraries",
+            "Operating System :: MacOS :: MacOS X",
+            "Operating System :: POSIX :: Linux",
             'Topic :: Communications' ],
         download_url = 'https://github.com/karulis/pybluez',
         long_description = 'Bluetooth Python extension module to allow Python "\
@@ -107,3 +110,4 @@ setup ( name = 'PyBluez',
         extras_require={'ble' : ['gattlib']},
         dependency_links=["https://bitbucket.org/OscarAcena/pygattlib/get/6af3e7e03ccc.zip"]
         )
+

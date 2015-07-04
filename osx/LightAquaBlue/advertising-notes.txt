@@ -1,0 +1,19 @@
+SerialPortDictionary.plist is a modification of the same file in the OBEXSample project available in the Mac OS X Developer examples (under 'Bluetooth').
+
+I modified it by adding a 0x1101 (Serial Port Profile) in the ServiceClassIDList entry. Without this entry, the Nokia 6600 (and it seems Series 60 phones in general) could not find the service when searching for RFCOMM services. Other web resources seem to confirm that the 0x1101 is necessary for RFCOMM services.
+
+
+How does OBEXObjectPushDictionary.plist differ from SerialPortDictionary.plist?
+
+In OBEXObjectPushDictionary.plist:
+- ServiceClassIDList property has <1105> as a data object to represent the OBEX Object Push Profile.
+- BluetoothProfileDescriptorList has <1105> too as an entry.
+- ProtocolDescriptorList has <0008> (for OBEX protocol) along with the L2CAP (0x0100) and RFCOMM (0x0003) entries
+
+
+I used 0x1105 which is the UUID for the OBEX Object Push Profile. OBEXFileTransferDictionary uses 0x1106 instead which is the UUID for the File Transfer Profile.
+
+The thing to do is to build a server which supports particular operations and then choose the right profile depending on whether you support the corresponding operations. E.g. if you advertise the File Transfer Profile your server should support folder browsing, and Object Push servers might support some kind of business card exchange via vCards etc.
+
+
+See BluetoothAssignedNumbers.h in the IOBluetooth.framework headers for a list of all the appropriate UUIDs and numbers and what they mean.

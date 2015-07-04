@@ -1,0 +1,116 @@
+<?xml version='1.0'?>
+<!DOCTYPE signatures SYSTEM "file://localhost/System/Library/DTDs/BridgeSupport.dtd">
+<signatures version='0.9'>
+<depends_on path='/System/Library/Frameworks/Cocoa.framework'/>
+<depends_on path='/System/Library/Frameworks/IOBluetooth.framework'/>
+<depends_on path='/System/Library/Frameworks/CoreServices.framework'/>
+<depends_on path='/System/Library/Frameworks/CoreFoundation.framework'/>
+<depends_on path='/System/Library/Frameworks/Foundation.framework'/>
+<class name='BBBluetoothOBEXClient'>
+<method selector='hasConnectionID'>
+<retval type='B'/>
+</method>
+<method selector='isConnected'>
+<retval type='B'/>
+</method>
+<method selector='sendSetPathRequestWithHeaders:changeToParentDirectoryFirst:createDirectoriesIfNeeded:'>
+<arg type='B' index='1'/>
+<arg type='B' index='2'/>
+</method>
+<method class_method='true' selector='setDebug:'>
+<arg type='B' index='0'/>
+</method>
+<method selector='initWithRemoteDeviceAddress:channelID:delegate:'>
+<arg index='0' type_modifier='n'/>
+</method>
+</class>
+<class name='BBBluetoothOBEXServer'>
+<method class_method='true' selector='setDebug:'>
+<arg type='B' index='0'/>
+</method>
+</class>
+<class name='BBLocalDevice'>
+<method class_method='true' selector='isPoweredOn'>
+<retval type='B'/>
+</method>
+</class>
+<class name='BBMutableOBEXHeaderSet'>
+<method selector='addHeadersFromHeadersData:length:'>
+<retval type='B'/>
+</method>
+<method selector='setValueForTimeHeader:isUTCTime:'>
+<arg type='B' index='1'/>
+</method>
+</class>
+<class name='BBOBEXHeaderSet'>
+<method selector='containsValueForHeader:'>
+<retval type='B'/>
+</method>
+</class>
+<class name='BBOBEXRequest'>
+<method selector='isFinished'>
+<retval type='B'/>
+</method>
+<method selector='readOBEXResponseHeaders:andResponseCode:fromSessionEvent:'>
+<arg index='0' type_modifier='o'/>
+<arg index='1' type_modifier='o'/>
+<arg index='2' type_modifier='n'/>
+<retval type='B'/>
+</method>
+<method class_method='true' selector='setDebug:'>
+<arg type='B' index='0'/>
+</method>
+</class>
+<class name='BBOBEXRequestHandler'>
+<method selector='handleRequestEvent:'>
+<arg index='0' type_modifier='n'/>
+<retval type='B'/>
+</method>
+<method selector='prepareResponseForRequestWithHeaders:flags:isFinalRequestPacket:'>
+<arg type='B' index='2'/>
+</method>
+<method selector='readOBEXRequestHeaders:andRequestFlags:fromSessionEvent:'>
+<arg index='0' type_modifier='n'/>
+<arg index='2' type_modifier='n'/>
+<retval type='B'/>
+</method>
+<method class_method='true' selector='setDebug:'>
+<arg type='B' index='0'/>
+</method>
+</class>
+<class name='BBOBEXSetPathRequest'>
+<method selector='initWithClient:eventSelector:session:changeToParentDirectoryFirst:createDirectoriesIfNeeded:'>
+<arg type='B' index='3'/>
+<arg type='B' index='4'/>
+</method>
+</class>
+<class name='NSObject'>
+<method selector='server:didHandleGetRequestForStream:requestWasAborted:'>
+<arg type='B' index='2'/>
+</method>
+<method selector='server:didHandlePutRequestForStream:requestWasAborted:'>
+<arg type='B' index='2'/>
+</method>
+<method selector='server:didReceiveDataOfLength:isLastPacket:'>
+<arg type='B' index='2'/>
+</method>
+<method selector='server:shouldHandleConnectRequest:'>
+<retval type='B'/>
+</method>
+<method selector='server:shouldHandleDisconnectRequest:'>
+<retval type='B'/>
+</method>
+<method selector='server:shouldHandlePutDeleteRequest:'>
+<retval type='B'/>
+</method>
+<method selector='server:shouldHandleSetPathRequest:withFlags:'>
+<retval type='B'/>
+</method>
+</class>
+<class name='BBServiceAdvertiser'>
+<method class_method='true' selector='addRFCOMMServiceDictionary:withName:UUID:channelID:serviceRecordHandle:'>
+<arg index='3' type_modifier='o'/>
+<arg index='4' type_modifier='o'/>
+</method>
+</class>
+</signatures>
