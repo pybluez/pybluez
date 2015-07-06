@@ -1946,7 +1946,7 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
 
     if( err< 0 ) return socko->errorhandler();
 
-    return Py_BuildValue("s#", rparam, req.rlen);
+    return PyString_FromStringAndSize(rparam, req.rlen);
 }
 PyDoc_STRVAR(bt_hci_send_req_doc,
 "hci_send_req(sock, ogf, ocf, event, rlen, params=None, timeout=0)\n\
