@@ -71,16 +71,40 @@ elif sys.platform.startswith('linux'):
                         #extra_compile_args=['-O0'],
                         sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
     mods = [ mod1 ]
-elif sys.platform == 'darwin':
+
+elif sys.platform.startswith("darwin"):
     # On Mac, install LightAquaBlue framework
     # if you want to install the framework somewhere other than /Library/Frameworks
     # make sure the path is also changed in LightAquaBlue.py (in src/mac)
     if "install" in sys.argv:
+        # Change to LightAquaBlue framework dir.
         os.chdir("osx/LightAquaBlue")
-        os.system("xcodebuild install -arch '$(NATIVE_ARCH_ACTUAL)' " +
-                  "-target LightAquaBlue -configuration Release DSTROOT=/ " +
-                  "INSTALL_PATH=/Library/Frameworks DEPLOYMENT_LOCATION=YES")
-    mods = []
+
+        #
+        # NOTE: our solution is based on these posts:
+        #  - http://stackoverflow.com/questions/22279913/how-to-install-either-pybluez-or-lightblue-on-osx-10-9-mavericks
+        #  - https://github.com/0-1-0/lightblue-0.4/issues/7
+        # We need to verify that the arch(itecture) param is specified accurately 
+        # otherwise the compilation will fail.
+        #
+        arch = None
+        if "NATIVE_ARCH_ACTUAL" in os.environ:
+            arch = "$(NATIVE_ARCH_ACTUAL)"
+        elif "64bit" in platform.architecture():
+            arch = "x86_64"
+        elif "32bit" in platform.architecture():
+            arch = "i386"
+        else:
+            raise Exception("Unrecognized architecture")
+
+        build_str = "xcodebuild install -arch '%s' -target LightAquaBlue -configuration Release DSTROOT=/ INSTALL_PATH=/Library/Frameworks DEPLOYMENT_LOCATION=YES" % (arch)
+        print build_str ### DEBUG ###
+        os.system(build_str)
+
+        # Change back to top-level (need this otherwise setup.py script gets confused on install?).
+        os.chdir("../..")
+
+        mods = []
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
 
@@ -104,10 +128,9 @@ setup ( name = 'PyBluez',
         download_url = 'https://github.com/karulis/pybluez',
         long_description = 'Bluetooth Python extension module to allow Python "\
                 "developers to use system Bluetooth resources. PyBluez works "\
-                "with GNU/Linux and Windows XP.',
+                "with GNU/Linux and Windows XP; Mac OS X is in early development.',
         maintainer = 'Piotr Karulis',
         license = 'GPL',
         extras_require={'ble' : ['gattlib']},
         dependency_links=["https://bitbucket.org/OscarAcena/pygattlib/get/6af3e7e03ccc.zip"]
         )
-
