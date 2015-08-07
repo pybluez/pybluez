@@ -4,10 +4,6 @@
 import lightblue
 from .btcommon import *
 
-def lookup_name(address, timeout=10):
-    print "TODO: implement"
-
-
 def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1):
     # This is order of discovered device attributes in C-code.
     btAddresIndex = 0
@@ -30,6 +26,9 @@ def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_cl
         else:
             ret.append(tuple(i for i in item))
     return ret
+
+def lookup_name(address, timeout=10):
+    print "TODO: implement"
 
 def find_service(name=None, uuid=None, address=None):
     if uuid:
