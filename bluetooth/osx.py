@@ -1,20 +1,35 @@
-# OLD:
-
-# from .btcommon import *
-
-# raise NotImplementedError
-
-################################################################################
-
 ####################################
 # MINIMAL IMPLEMENTATION OF osx.py:
 ####################################
-
 import lightblue
 from .btcommon import *
 
+def lookup_name(address, timeout=10):
+    print "TODO: implement"
+
+
 def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1):
-    return lightblue.finddevices(getnames=lookup_names, length=duration)
+    # This is order of discovered device attributes in C-code.
+    btAddresIndex = 0
+    namesIndex = 1
+    classIndex = 2
+
+    # Use lightblue to discover devices on OSX.
+    devices = lightblue.finddevices(getnames=lookup_names, length=duration)
+
+    ret = list()
+    for device in devices:
+        item = [device[btAddresIndex],]
+        if lookup_names:
+            item.append(device[namesIndex])
+        if lookup_class:
+            item.append(device[classIndex])
+
+        if len(item) == 1: # in case of address-only we return string not tuple
+            ret.append(item[0])
+        else:
+            ret.append(tuple(i for i in item))
+    return ret
 
 def find_service(name=None, uuid=None, address=None):
     if uuid:
@@ -81,17 +96,24 @@ def find_service(name=None, uuid=None, address=None):
 
 # # THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
 # #def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
-# def advertise_service(sock, name, service_id = "", service_class = None, profiles = None, provider = "", description = "", protocols = None):
-#     lightblue.advertise(name, sock, protocols[0])
+def advertise_service(sock, name, service_id="", service_class=None, profiles=None, provider="", description="", protocols=None):
+    if service_class is None:
+        service_class = []
+    if profiles is None:
+        profiles = []
+    if protocols is None:
+        protocols = []
 
-# def stop_advertise(sock):
-#     lightblue.stopadvertise(sock)
+    lightblue.advertise(name, sock, protocols[0])
+
+def stop_advertising(sock):
+    lightblue.stop_advertising(sock)
 
 # def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1):
 #     return lightblue.finddevices(getnames=lookup_names, length=duration)
 
-# def find_service(name=None, uuid=None, address=None):
-#     if uuid:
-#         raise NotImplementedError("UUID argument is not supported on OS X.")
-#     return lightblue.findservices(addr=address, name=name)
+def find_service(name=None, uuid=None, address=None):
+    if uuid:
+        raise NotImplementedError("UUID argument is not supported on OS X.")
+    return lightblue.findservices(addr=address, name=name)
 
