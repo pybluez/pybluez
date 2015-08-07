@@ -5,7 +5,21 @@ import sys
 import platform
 import os
 
+WIN32 = sys.platform.startswith("win32")
+LINUX = sys.platform.startswith("linux")
+MAC   = sys.platform.startswith("darwin")
+
 mods = []
+
+def getpackagedir():
+    if WIN32:
+        return "TODO" #"src/win"
+    elif LINUX:
+        return "TODO" #"src/linux"
+    elif MAC:
+        return "osx"
+    else:
+        raise Exception("Unsupported platform")
 
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
@@ -116,7 +130,10 @@ setup ( name = 'PyBluez',
         author_email="ashuang@alum.mit.edu",
         url="http://karulis.github.io/pybluez/",
         ext_modules = mods,
-        packages = [ "bluetooth" ],
+        packages = [ "bluetooth", "lightblue" ],
+        package_dir = { 'lightblue': 'osx' }, 
+        # packages = [ "bluetooth", "lightblue" ],
+        # package_dir = { 'lightblue': getpackagedir() }, 
 # for the python cheese shop
         classifiers = [ 'Development Status :: 4 - Beta',
             'License :: OSI Approved :: GNU General Public License (GPL)',
