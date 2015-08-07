@@ -13,9 +13,9 @@ mods = []
 
 def getpackagedir():
     if WIN32:
-        return "TODO" #"src/win"
+        return "TODO" #"src/win" -- piotrek can you address this?
     elif LINUX:
-        return "TODO" #"src/linux"
+        return "TODO" #"src/linux"  -- piotrek can you address this?
     elif MAC:
         return "osx"
     else:
@@ -131,10 +131,8 @@ setup ( name = 'PyBluez',
         url="http://karulis.github.io/pybluez/",
         ext_modules = mods,
         packages = [ "bluetooth", "lightblue" ],
-        package_dir = { 'lightblue': 'osx' }, 
-        # packages = [ "bluetooth", "lightblue" ],
-        # package_dir = { 'lightblue': getpackagedir() }, 
-# for the python cheese shop
+        package_dir = { 'lightblue': getpackagedir() }, 
+        # for the python cheese shop
         classifiers = [ 'Development Status :: 4 - Beta',
             'License :: OSI Approved :: GNU General Public License (GPL)',
             'Programming Language :: Python',
