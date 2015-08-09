@@ -1,8 +1,7 @@
-####################################
-# MINIMAL IMPLEMENTATION OF osx.py:
-####################################
 import lightblue
 from .btcommon import *
+
+BLUETOOTH_INSTALL_FLAG = 3
 
 def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1):
     # This is order of discovered device attributes in C-code.
@@ -30,15 +29,64 @@ def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_cl
 def lookup_name(address, timeout=10):
     print "TODO: implement"
 
+# TODO: After a little looking around, it seems that we can go into some of the 
+# lightblue internals and enhance the amount of SDP information that is returned 
+# (e.g., CID/PSM, protocol, provider information).
+#
+# See: _searchservices() in _lightblue.py
 def find_service(name=None, uuid=None, address=None):
     if uuid:
         raise NotImplementedError("UUID argument is not supported on OS X.")
-    return lightblue.findservices(addr=address, name=name)
 
-################################################################################
+    if address is not None:
+        addresses = [ address ]
+    else:
+        addresses = discover_devices(lookup_names=False)
 
-# import lightblue
-# from .btcommon import *
+    results = []
+
+    for addr in addresses:
+        # print "[DEBUG] Browsing services on %s..." % (addr)
+
+        dresults = lightblue.findservices(addr=address, name=name)
+
+        for tup in dresults:
+            service = {}
+
+            # LightBlue performs a service discovery and returns the found services 
+            # as a list of (device-address, service-port, service-name) tuples. 
+            service["host"] = tup[0]
+            service["port"] = tup[1]
+            service["name"] = tup[2]
+
+            # Add extra keys for compatibility with PyBluez API. 
+            service["description"] = None
+            service["provider"] = None
+            service["protocol"] = None
+            service["service-classes"] = []
+            service["profiles"] = []
+            service["service-id"] = None
+
+            results.append(service)
+
+    return results
+
+# THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
+#def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
+def advertise_service(sock, name, service_id="", service_class=None, profiles=None, provider="", description="", protocols=None):
+    if service_class is None:
+        service_class = []
+    if profiles is None:
+        profiles = []
+    if protocols is None:
+        protocols = []
+
+    lightblue.advertise(name, sock, protocols[0])
+
+def stop_advertising(sock):
+    lightblue.stop_advertising(sock)
+
+# ============================= BluetoothSocket ============================== #
 
 # class BluetoothSocket:
     
@@ -93,26 +141,8 @@ def find_service(name=None, uuid=None, address=None):
 #     def makefile(self, mode, bufsize):
 #         return self.makefile(mode, bufsize)
 
-# # THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
-# #def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
-def advertise_service(sock, name, service_id="", service_class=None, profiles=None, provider="", description="", protocols=None):
-    if service_class is None:
-        service_class = []
-    if profiles is None:
-        profiles = []
-    if protocols is None:
-        protocols = []
+# ============================= DeviceDiscoverer ============================= #
 
-    lightblue.advertise(name, sock, protocols[0])
-
-def stop_advertising(sock):
-    lightblue.stop_advertising(sock)
-
-# def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1):
-#     return lightblue.finddevices(getnames=lookup_names, length=duration)
-
-def find_service(name=None, uuid=None, address=None):
-    if uuid:
-        raise NotImplementedError("UUID argument is not supported on OS X.")
-    return lightblue.findservices(addr=address, name=name)
-
+class DeviceDiscoverer:
+    def __init__ (self):
+        raise NotImplementedError
