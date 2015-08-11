@@ -1,8 +1,6 @@
 import lightblue
 from .btcommon import *
 
-BLUETOOTH_INSTALL_FLAG = 3
-
 def discover_devices(duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1):
     # This is order of discovered device attributes in C-code.
     btAddresIndex = 0
@@ -71,6 +69,10 @@ def find_service(name=None, uuid=None, address=None):
 
     return results
 
+def read_local_bdaddr():
+    # NOTE: This function is only supported on osx.
+    return lightblue.gethostaddr()
+
 # THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
 #def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
 def advertise_service(sock, name, service_id="", service_class=None, profiles=None, provider="", description="", protocols=None):
@@ -85,6 +87,7 @@ def advertise_service(sock, name, service_id="", service_class=None, profiles=No
 
 def stop_advertising(sock):
     lightblue.stop_advertising(sock)
+
 
 # ============================= BluetoothSocket ============================== #
 
