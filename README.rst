@@ -29,19 +29,20 @@ https://github.com/karulis/pybluez
 - Xcode
 - PyObjc 3.0.4 or later (https://pythonhosted.org/pyobjc/install.html)
 
-```
-$ brew install hg  # If you don't have hg already.
-$ hg clone https://bitbucket.org/ronaldoussoren/pyobjc
-$ cd pyobjc/
-$ sudo python install.py
-```
-- PyBluez: https://github.com/karulis/pybluezs
+.. code-block:: python
 
-```
-$ git clone https://github.com/karulis/pybluez.git
-$ cd pybluez
-$ python setup.py install  # <-- you may need to use 'sudo'
-```
+    $ brew install hg  # If you don't have hg already.
+    $ hg clone https://bitbucket.org/ronaldoussoren/pyobjc
+    $ cd pyobjc/
+    $ sudo python install.py
+
+- PyBluez: https://github.com/karulis/pybluez
+
+.. code-block:: python
+
+    $ git clone https://github.com/karulis/pybluez.git
+    $ cd pybluez
+    $ python setup.py install  # <-- you may need to use 'sudo'
 
 **INSTALLATION:**
 
