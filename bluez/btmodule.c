@@ -23,6 +23,7 @@ Local naming conventions:
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -329,6 +330,143 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
     }
 }
 
+/* Determin device can be advertisable.
+   If advertisable, return 0. Else, return -1.
+   XXX  if di->dev_id == -1, this function does not work correctly.
+        so device must be specified. */
+static int
+_adv_available(struct hci_dev_info *di)
+{
+    assert(di->dev_id >= 0);
+
+    uint32_t *flags = &di->flags;
+
+    return (hci_test_bit(HCI_UP, flags) &&
+             hci_test_bit(HCI_RUNNING, flags) &&
+             hci_test_bit(HCI_PSCAN, flags) &&
+             hci_test_bit(HCI_ISCAN, flags)) != 0 ? 0 : -1;
+}
+
+/* Inspect all devices in order to know whether advertisable device exists. */
+static int
+_all_adv_available(void)
+{
+    struct hci_dev_list_req *dl    = NULL;
+    struct hci_dev_req      *dr    = NULL;
+    struct hci_dev_info     di     = {0,};
+    int                     result = -1;
+    int                     ctl    = -1;
+    int i;
+
+    if ((ctl = socket(AF_BLUETOOTH, SOCK_RAW, BTPROTO_HCI)) < 0) {
+        perror("Can't open HCI socket.");
+        return -1;
+    }
+
+    if (!(dl = malloc(HCI_MAX_DEV * sizeof(struct hci_dev_req) +
+        sizeof(uint16_t)))) {
+        perror("Can't allocate memory");
+        goto CLEAN_UP_RETURN;
+    }
+    dl->dev_num = HCI_MAX_DEV;
+    dr = dl->dev_req;
+
+    if (ioctl(ctl, HCIGETDEVLIST, (void *) dl) < 0) {
+        perror("Can't get device list");
+        goto CLEAN_UP_RETURN;
+    }
+
+    for (i = 0; i< dl->dev_num; i++) {
+        di.dev_id = (dr+i)->dev_id;
+        if (ioctl(ctl, HCIGETDEVINFO, (void *) &di) < 0)
+            continue;
+        if (hci_test_bit(HCI_RAW, &di.flags) &&
+                !bacmp(&di.bdaddr, BDADDR_ANY)) {
+            int dd = hci_open_dev(di.dev_id);
+            hci_read_bd_addr(dd, &di.bdaddr, 1000);
+            hci_close_dev(dd);
+        }
+
+        /* if find adv-available deive, return */
+        if(_adv_available(&di) == 0)
+        {
+            result = 0;
+            goto CLEAN_UP_RETURN;
+        }
+    }
+
+CLEAN_UP_RETURN:
+    close(ctl);
+    free(dl);
+    return result;
+}
+
+/* Determine the socket can be advertisable or not.
+   It will work if socket is bound to specific device or not.
+   If advertisable, return 0. Else, return -1 */
+static int
+adv_available(PySocketSockObject *socko)
+{
+    bdaddr_t        ba;
+    struct sockaddr addr;
+    char            str[18];
+    int             dev_id      = -1;
+    socklen_t       alen        = sizeof(addr);
+
+    memset(&ba, 0, sizeof(ba));
+    memset(&addr, 0, sizeof(addr));
+    memset(str, 0, sizeof(str));
+
+    if(getsockname(socko->sock_fd, &addr, &alen) < 0)
+        return -1;
+
+    /* get ba */
+    switch(socko->sock_proto){
+        case BTPROTO_L2CAP:
+        {
+            struct sockaddr_l2 *addr_l2 = (struct sockaddr_l2 *)&addr;
+            ba = addr_l2->l2_bdaddr;
+        }
+        break;
+
+        case BTPROTO_RFCOMM:
+        {
+            struct sockaddr_rc *addr_rc = (struct sockaddr_rc *)&addr;
+            ba = addr_rc->rc_bdaddr;
+        }
+        break;
+
+        default:
+            /* The otehr protocol famliy is not yet implmented.
+               to have compatibility with old version, return 0(success). */
+            return 0;
+    }
+
+    /* get dev_id from ba */
+    if(ba2str(&ba, str) < 0)
+    {
+        perror("str2ba(): ");
+        return -1;
+    }
+    dev_id = hci_devid(str);
+    
+
+    if(dev_id <0)
+    /* if dev_id is not specified, inspect all devices. */
+    {
+        return _all_adv_available();
+    }
+    else
+    /* if device specified, inspect it. */
+    {
+        struct hci_dev_info     di;
+        if(hci_devinfo(dev_id, &di))
+            return -1;
+
+        return _adv_available(&di);
+    }
+
+}
 
 /* Get the address length according to the socket object's address family.
    Return 1 if the family is known, 0 otherwise.  The length is returned
@@ -2533,6 +2671,13 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     if( ! socko->is_listening_socket ) {
         PyErr_SetString(bluetooth_error, 
                 "must have already called socket.listen()");
+        return 0;
+    }
+
+    // verify whether device can be advertiable
+    if(adv_available(socko) < 0) {
+        PyErr_SetString(bluetooth_error, 
+                "error no advertisable device.");
         return 0;
     }
 
