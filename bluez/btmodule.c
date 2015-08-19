@@ -330,16 +330,21 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
     }
 }
 
-/* Determin device can be advertisable.
-   If advertisable, return 0. Else, return -1.
-   XXX  if di->dev_id == -1, this function does not work correctly.
-        so device must be specified. */
+/* Determin device can be advertisable('UP, RUNNING, PSCAN, ISCAN' state).
+   If advertisable, return 0. Else, return -1. */
 static int
 _adv_available(struct hci_dev_info *di)
 {
-    assert(di->dev_id >= 0);
-
     uint32_t *flags = &di->flags;
+
+    if (hci_test_bit(HCI_RAW, &flags) &&
+            !bacmp(&di->bdaddr, BDADDR_ANY)) {
+        int dd = hci_open_dev(di->dev_id);
+        if (dd < 0)
+            return -1;
+        hci_read_bd_addr(dd, &di->bdaddr, 1000);
+        hci_close_dev(dd);
+    }
 
     return (hci_test_bit(HCI_UP, flags) &&
              hci_test_bit(HCI_RUNNING, flags) &&
@@ -349,30 +354,27 @@ _adv_available(struct hci_dev_info *di)
 
 /* Inspect all devices in order to know whether advertisable device exists. */
 static int
-_all_adv_available(void)
+_any_adv_available(void)
 {
     struct hci_dev_list_req *dl    = NULL;
     struct hci_dev_req      *dr    = NULL;
     struct hci_dev_info     di     = {0,};
     int                     result = -1;
     int                     ctl    = -1;
-    int i;
+    int                     i;
 
     if ((ctl = socket(AF_BLUETOOTH, SOCK_RAW, BTPROTO_HCI)) < 0) {
-        perror("Can't open HCI socket.");
         return -1;
     }
 
     if (!(dl = malloc(HCI_MAX_DEV * sizeof(struct hci_dev_req) +
         sizeof(uint16_t)))) {
-        perror("Can't allocate memory");
         goto CLEAN_UP_RETURN;
     }
     dl->dev_num = HCI_MAX_DEV;
     dr = dl->dev_req;
 
     if (ioctl(ctl, HCIGETDEVLIST, (void *) dl) < 0) {
-        perror("Can't get device list");
         goto CLEAN_UP_RETURN;
     }
 
@@ -380,14 +382,8 @@ _all_adv_available(void)
         di.dev_id = (dr+i)->dev_id;
         if (ioctl(ctl, HCIGETDEVINFO, (void *) &di) < 0)
             continue;
-        if (hci_test_bit(HCI_RAW, &di.flags) &&
-                !bacmp(&di.bdaddr, BDADDR_ANY)) {
-            int dd = hci_open_dev(di.dev_id);
-            hci_read_bd_addr(dd, &di.bdaddr, 1000);
-            hci_close_dev(dd);
-        }
 
-        /* if find adv-available deive, return */
+        /* if find adv-available device, return */
         if(_adv_available(&di) == 0)
         {
             result = 0;
@@ -407,50 +403,47 @@ CLEAN_UP_RETURN:
 static int
 adv_available(PySocketSockObject *socko)
 {
-    bdaddr_t        ba          = {{0, }}; /* GCC bug? */
-    struct sockaddr addr        = {0, };
-    char            str[18]     = {0, };
-    int             dev_id      = -1;
-    socklen_t       alen        = sizeof(addr);
-
-    if(getsockname(socko->sock_fd, &addr, &alen) < 0)
-        return -1;
+    bdaddr_t           ba       = {{0, }}; /* GCC bug? */
+    struct sockaddr    addr     = {0, };
+    int                dev_id   = -1;
+    socklen_t          alen     = sizeof(addr);
+    struct sockaddr_l2 const *
+                       addr_l2  = (struct sockaddr_l2 const *)&addr;
+    struct sockaddr_rc const *
+                       addr_rc  = (struct sockaddr_rc const *)&addr;
 
     /* get ba */
-    switch(socko->sock_proto){
-        case BTPROTO_L2CAP:
-        {
-            struct sockaddr_l2 *addr_l2 = (struct sockaddr_l2 *)&addr;
-            ba = addr_l2->l2_bdaddr;
-        }
+    if(getsockname(socko->sock_fd, &addr, &alen) < 0)
+        return -1;
+        
+    switch(socko->sock_proto)
+    {
+    case BTPROTO_L2CAP:
+        ba = addr_l2->l2_bdaddr;
         break;
 
-        case BTPROTO_RFCOMM:
-        {
-            struct sockaddr_rc *addr_rc = (struct sockaddr_rc *)&addr;
-            ba = addr_rc->rc_bdaddr;
-        }
+    case BTPROTO_RFCOMM:
+        ba = addr_rc->rc_bdaddr;
         break;
 
-        default:
-            /* The otehr protocol famliy is not yet implmented.
-               to have compatibility with old version, return 0(success). */
-            return 0;
+    default:
+        /* The others are not yet implmented.
+           In fact, I don't spec of the others.
+           To have compatibility with old version, return 0(success). */
+        return 0;
     }
 
     /* get dev_id from ba */
-    if(ba2str(&ba, str) < 0)
-    {
-        perror("str2ba(): ");
-        return -1;
-    }
-    dev_id = hci_devid(str);
-    
+    if(bacmp(&ba, BDADDR_ANY) == 0)
+        dev_id = -1;
+    else
+        dev_id = hci_get_route(&ba);
 
-    if(dev_id <0)
+    /**/
+    if(dev_id == -1)
     /* if dev_id is not specified, inspect all devices. */
     {
-        return _all_adv_available();
+        return _any_adv_available();
     }
     else
     /* if device specified, inspect it. */
@@ -461,7 +454,6 @@ adv_available(PySocketSockObject *socko)
 
         return _adv_available(&di);
     }
-
 }
 
 /* Get the address length according to the socket object's address family.
