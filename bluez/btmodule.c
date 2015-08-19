@@ -407,15 +407,11 @@ CLEAN_UP_RETURN:
 static int
 adv_available(PySocketSockObject *socko)
 {
-    bdaddr_t        ba;
-    struct sockaddr addr;
-    char            str[18];
+    bdaddr_t        ba          = {{0, }}; /* GCC bug? */
+    struct sockaddr addr        = {0, };
+    char            str[18]     = {0, };
     int             dev_id      = -1;
     socklen_t       alen        = sizeof(addr);
-
-    memset(&ba, 0, sizeof(ba));
-    memset(&addr, 0, sizeof(addr));
-    memset(str, 0, sizeof(str));
 
     if(getsockname(socko->sock_fd, &addr, &alen) < 0)
         return -1;
