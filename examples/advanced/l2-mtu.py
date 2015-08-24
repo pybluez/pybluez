@@ -42,14 +42,14 @@ if mode == "server":
     server_sock.close()
 else:
     sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
+    print("connected.  Adjusting link parameters.")
+    bluetooth.set_l2cap_mtu( sock, 65535 )
 
     bt_addr = sys.argv[2]
     print("trying to connect to %s:1001" % bt_addr)
     port = 0x1001
     sock.connect((bt_addr, port))
 
-    print("connected.  Adjusting link parameters.")
-    bluetooth.set_l2cap_mtu( sock, 65535 )
 
     totalsent = 0 
     for i in range(1, 65535, 100):
