@@ -22,6 +22,7 @@ static void dbg(const char *fmt, ...)
 }
 #endif
 
+
 static void Err_SetFromWSALastError(PyObject *exc)
 {
 	LPVOID lpMsgBuf;
@@ -461,6 +462,55 @@ PyDoc_STRVAR(msbt_discover_devices_doc,
 	If flush_cache is True, then new inquiry will be performed,\
 	else cashed devices will be returned(plus paired devices).)");
 
+
+static PyObject *
+msbt_list_local(PyObject *self)
+{
+    HANDLE m_radio = NULL;
+    HBLUETOOTH_RADIO_FIND m_bt = NULL;
+    PyObject * toreturn = NULL;
+    BOOL next = TRUE;
+    BLUETOOTH_FIND_RADIO_PARAMS
+            find_radio = {sizeof(BLUETOOTH_FIND_RADIO_PARAMS)};
+    // Iterate for available bluetooth radio devices in range
+    // Starting from the local
+    Py_BEGIN_ALLOW_THREADS;
+    m_bt = BluetoothFindFirstRadio(&find_radio, &m_radio);
+    Py_END_ALLOW_THREADS;
+    if(m_bt == NULL)
+        printf("BluetoothFindFirstRadio() failed with error code %d\n", GetLastError());
+
+    while(next) {
+        int m_radio_id = 0;
+        int m_device_id = 0;
+        BLUETOOTH_RADIO_INFO m_bt_info = {sizeof(BLUETOOTH_RADIO_INFO), 0,};
+
+        // Then get the radio device info....
+        DWORD mbtinfo_ret = BluetoothGetRadioInfo(m_radio, &m_bt_info);
+        if(mbtinfo_ret == ERROR_SUCCESS)
+            printf("BluetoothGetRadioInfo() looks fine!\n");
+        else
+            printf("BluetoothGetRadioInfo() failed wit herror code %d\n", mbtinfo_ret);
+        wprintf(L"Radio %d:\r\n", m_radio_id);
+        wprintf(L"\tInstance Name: %s\r\n", m_bt_info.szName);
+        wprintf(L"\tAddress: %02X:%02X:%02X:%02X:%02X:%02X\r\n", m_bt_info.address.rgBytes[5],
+                    m_bt_info.address.rgBytes[4], m_bt_info.address.rgBytes[3], m_bt_info.address.rgBytes[2],
+                        m_bt_info.address.rgBytes[1], m_bt_info.address.rgBytes[0]);
+        wprintf(L"\tClass: 0x%08x\r\n", m_bt_info.ulClassofDevice);
+        wprintf(L"\tManufacturer: 0x%04x\r\n", m_bt_info.manufacturer);
+
+        next = BluetoothFindNextRadio(&find_radio, &m_radio);
+    }
+
+    // No more radio, close the radio handle
+    if(BluetoothFindRadioClose(m_bt) == TRUE)
+        printf("BluetoothFindRadioClose(m_bt) is OK!\n");
+    else
+        printf("BluetoothFindRadioClose(m_bt) failed with error code %d\n", GetLastError());
+
+}
+
+
 static PyObject *
 msbt_lookup_name(PyObject *self, PyObject *args)
 {
@@ -728,6 +778,8 @@ msbt_set_service_raw(PyObject *self, PyObject *args)
     return PyInt_FromLong( (unsigned long) rh );
 }
 PyDoc_STRVAR(msbt_set_service_raw_doc, "");
+
+
 
 static PyObject *
 msbt_set_service(PyObject *self, PyObject *args)
