@@ -2038,7 +2038,7 @@ bt_hci_send_cmd(PyObject *self, PyObject *args)
 }
 
 PyDoc_STRVAR(bt_hci_send_cmd_doc, 
-"hci_send_command(sock, ogf, ocf, params)\n\
+"hci_send_cmd(sock, ogf, ocf, params)\n\
 \n\
 Transmits the specified HCI command to the socket.\n\
     sock     - the btoscket object to use\n\
@@ -2427,7 +2427,7 @@ bt_hci_devid(PyObject *self, PyObject *args)
 
     return Py_BuildValue("i",devid);
 }
-PyDoc_STRVAR( bt_hci_role_doc,
+PyDoc_STRVAR( bt_hci_devid_doc,
 "hci_devid(address)\n\
 \n\
 get the device id for the local device with specified address.\n\
@@ -2457,7 +2457,7 @@ bt_hci_role(PyObject *self, PyObject *args)
 
     return Py_BuildValue("i", role);
 }
-PyDoc_STRVAR( bt_hci_devid_doc,
+PyDoc_STRVAR( bt_hci_role_doc,
 "hci_role(hci_fd, dev_id)\n\
 \n\
 get the role (master or slave) of the device id.\n\
