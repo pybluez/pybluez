@@ -2234,6 +2234,28 @@ Performs a remote name request to the specified bluetooth device.\n\
 \n\
 Returns the name of the device, or raises an error on failure");
 
+static char *opcode2str(uint16_t opcode);
+
+static PyObject*
+bt_hci_opcode_name(PyObject *self, PyObject *args)
+{
+        int opcode;
+        PyArg_ParseTuple(args,"i", &opcode);
+        // DPRINTF("opcode = %x\n", opcode);
+        const char* cmd_name = opcode2str (opcode);
+
+    return PyString_FromString( cmd_name );
+}
+PyDoc_STRVAR(bt_hci_opcode_name_doc,
+"hci_opcode_name(opcode)\n\
+\n\
+Performs a remote name request to the specified bluetooth device.\n\
+   sock - the HCI socket object to use\n\
+   bdaddr - the bluetooth address of the remote device\n\
+   timeout - maximum amount of time, in milliseconds, to wait\n\
+\n\
+Returns the name of the device, or raises an error on failure");
+
 // lot of repetitive code... yay macros!!
 #define DECL_HCI_FILTER_OP_1(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
@@ -2904,6 +2926,7 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( cmd_opcode_ocf, METH_VARARGS ),
     DECL_BT_METHOD( ba2str, METH_VARARGS ),
     DECL_BT_METHOD( str2ba, METH_VARARGS ),
+    DECL_BT_METHOD( hci_opcode_name, METH_VARARGS), /* METH_VARARGS */
 #ifndef NO_DUP
     DECL_BT_METHOD( fromfd, METH_VARARGS ),
 #endif
@@ -3651,3 +3674,348 @@ PyInit__bluetooth(void)
  * by Carlos Chinea
  * (C) Nokia Research Center, 2004
 */
+#define CMD_LINKCTL_NUM 60
+static char *cmd_linkctl_str[CMD_LINKCTL_NUM + 1] = {
+	"Unknown",
+	"Inquiry",
+	"Inquiry Cancel",
+	"Periodic Inquiry Mode",
+	"Exit Periodic Inquiry Mode",
+	"Create Connection",
+	"Disconnect",
+	"Add SCO Connection",
+	"Create Connection Cancel",
+	"Accept Connection Request",
+	"Reject Connection Request",
+	"Link Key Request Reply",
+	"Link Key Request Negative Reply",
+	"PIN Code Request Reply",
+	"PIN Code Request Negative Reply",
+	"Change Connection Packet Type",
+        //
+	"Unknown",
+	"Authentication Requested",
+	"Unknown",
+	"Set Connection Encryption",
+	"Unknown",
+	"Change Connection Link Key",
+	"Unknown",
+	"Master Link Key",
+	"Unknown",
+	"Remote Name Request",
+	"Remote Name Request Cancel",
+	"Read Remote Supported Features",
+	"Read Remote Extended Features",
+	"Read Remote Version Information",
+	"Unknown",
+	"Read Clock Offset",
+	"Read LMP Handle",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Setup Synchronous Connection",
+	"Accept Synchronous Connection",
+	"Reject Synchronous Connection",
+	"IO Capability Request Reply",
+	"User Confirmation Request Reply",
+	"User Confirmation Request Negative Reply",
+	"User Passkey Request Reply",
+	"User Passkey Request Negative Reply",
+	"Remote OOB Data Request Reply",
+	"Unknown",
+	"Unknown",
+	"Remote OOB Data Request Negative Reply",
+	"IO Capability Request Negative Reply",
+	"Create Physical Link",
+	"Accept Physical Link",
+	"Disconnect Physical Link",
+	"Create Logical Link",
+	"Accept Logical Link",
+	"Disconnect Logical Link",
+	"Logical Link Cancel",
+	"Flow Spec Modify",
+};
+
+#define CMD_LINKPOL_NUM 17
+static char *cmd_linkpol_str[CMD_LINKPOL_NUM + 1] = {
+	"Unknown",
+	"Hold Mode",
+	"Unknown",
+	"Sniff Mode",
+	"Exit Sniff Mode",
+	"Park State",
+	"Exit Park State",
+	"QoS Setup",
+	"Unknown",
+	"Role Discovery",
+	"Unknown",
+	"Switch Role",
+	"Read Link Policy Settings",
+	"Write Link Policy Settings",
+	"Read Default Link Policy Settings",
+	"Write Default Link Policy Settings",
+	"Flow Specification",
+	"Sniff Subrating",
+};
+
+#define CMD_HOSTCTL_NUM 109
+static char *cmd_hostctl_str[CMD_HOSTCTL_NUM + 1] = {
+	"Unknown",
+	"Set Event Mask",
+	"Unknown",
+	"Reset",
+	"Unknown",
+	"Set Event Filter",
+	"Unknown",
+	"Unknown",
+	"Flush",
+	"Read PIN Type ",
+	"Write PIN Type",
+	"Create New Unit Key",
+	"Unknown",
+	"Read Stored Link Key",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Write Stored Link Key",
+	"Delete Stored Link Key",
+	"Write Local Name",
+	"Read Local Name",
+	"Read Connection Accept Timeout",
+	"Write Connection Accept Timeout",
+	"Read Page Timeout",
+	"Write Page Timeout",
+	"Read Scan Enable",
+	"Write Scan Enable",
+	"Read Page Scan Activity",
+	"Write Page Scan Activity",
+	"Read Inquiry Scan Activity",
+	"Write Inquiry Scan Activity",
+	"Read Authentication Enable",
+	"Write Authentication Enable",
+	"Read Encryption Mode",
+	"Write Encryption Mode",
+	"Read Class of Device",
+	"Write Class of Device",
+	"Read Voice Setting",
+	"Write Voice Setting",
+	"Read Automatic Flush Timeout",
+	"Write Automatic Flush Timeout",
+	"Read Num Broadcast Retransmissions",
+	"Write Num Broadcast Retransmissions",
+	"Read Hold Mode Activity ",
+	"Write Hold Mode Activity",
+	"Read Transmit Power Level",
+	"Read Synchronous Flow Control Enable",
+	"Write Synchronous Flow Control Enable",
+	"Unknown",
+	"Set Host Controller To Host Flow Control",
+	"Unknown",
+	"Host Buffer Size",
+	"Unknown",
+	"Host Number of Completed Packets",
+	"Read Link Supervision Timeout",
+	"Write Link Supervision Timeout",
+	"Read Number of Supported IAC",
+	"Read Current IAC LAP",
+	"Write Current IAC LAP",
+	"Read Page Scan Period Mode",
+	"Write Page Scan Period Mode",
+	"Read Page Scan Mode",
+	"Write Page Scan Mode",
+	"Set AFH Host Channel Classification",
+	"Unknown",
+	"Unknown",
+	"Read Inquiry Scan Type",
+	"Write Inquiry Scan Type",
+	"Read Inquiry Mode",
+	"Write Inquiry Mode",
+	"Read Page Scan Type",
+	"Write Page Scan Type",
+	"Read AFH Channel Assessment Mode",
+	"Write AFH Channel Assessment Mode",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Read Extended Inquiry Response",
+	"Write Extended Inquiry Response",
+	"Refresh Encryption Key",
+	"Unknown",
+	"Read Simple Pairing Mode",
+	"Write Simple Pairing Mode",
+	"Read Local OOB Data",
+	"Read Inquiry Response Transmit Power Level",
+	"Write Inquiry Transmit Power Level",
+	"Read Default Erroneous Data Reporting",
+	"Write Default Erroneous Data Reporting",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Enhanced Flush",
+	"Unknown",
+	"Read Logical Link Accept Timeout",
+	"Write Logical Link Accept Timeout",
+	"Set Event Mask Page 2",
+	"Read Location Data",
+	"Write Location Data",
+	"Read Flow Control Mode",
+	"Write Flow Control Mode",
+	"Read Enhanced Transmit Power Level",
+	"Read Best Effort Flush Timeout",
+	"Write Best Effort Flush Timeout",
+	"Short Range Mode",
+	"Read LE Host Supported",
+	"Write LE Host Supported",
+};
+
+#define CMD_INFO_NUM 10
+static char *cmd_info_str[CMD_INFO_NUM + 1] = {
+	"Unknown",
+	"Read Local Version Information",
+	"Read Local Supported Commands",
+	"Read Local Supported Features",
+	"Read Local Extended Features",
+	"Read Buffer Size",
+	"Unknown",
+	"Read Country Code",
+	"Unknown",
+	"Read BD ADDR",
+	"Read Data Block Size",
+};
+
+#define CMD_STATUS_NUM 11
+static char *cmd_status_str[CMD_STATUS_NUM + 1] = {
+	"Unknown",
+	"Read Failed Contact Counter",
+	"Reset Failed Contact Counter",
+	"Read Link Quality",
+	"Unknown",
+	"Read RSSI",
+	"Read AFH Channel Map",
+	"Read Clock",
+	"Read Encryption Key Size",
+	"Read Local AMP Info",
+	"Read Local AMP ASSOC",
+	"Write Remote AMP ASSOC"
+};
+
+#define CMD_TESTING_NUM 4
+static char *cmd_testing_str[CMD_TESTING_NUM + 1] = {
+	"Unknown",
+	"Read Loopback Mode",
+	"Write Loopback Mode",
+	"Enable Device Under Test mode",
+	"Unknown",
+};
+
+#define CMD_LE_NUM 31
+static char *cmd_le_str[CMD_LE_NUM + 1] = {
+	"Unknown",
+	"LE Set Event Mask",
+	"LE Read Buffer Size",
+	"LE Read Local Supported Features",
+	"Unknown",
+	"LE Set Random Address",
+	"LE Set Advertising Parameters",
+	"LE Read Advertising Channel Tx Power",
+	"LE Set Advertising Data",
+	"LE Set Scan Response Data",
+	"LE Set Advertise Enable",
+	"LE Set Scan Parameters",
+	"LE Set Scan Enable",
+	"LE Create Connection",
+	"LE Create Connection Cancel",
+	"LE Read White List Size",
+	"LE Clear White List",
+	"LE Add Device To White List",
+	"LE Remove Device From White List",
+	"LE Connection Update",
+	"LE Set Host Channel Classification",
+	"LE Read Channel Map",
+	"LE Read Remote Used Features",
+	"LE Encrypt",
+	"LE Rand",
+	"LE Start Encryption",
+	"LE Long Term Key Request Reply",
+	"LE Long Term Key Request Negative Reply",
+	"LE Read Supported States",
+	"LE Receiver Test",
+	"LE Transmitter Test",
+	"LE Test End",
+};
+
+static char *opcode2str(uint16_t opcode)
+{
+	uint16_t ogf = cmd_opcode_ogf(opcode);
+	uint16_t ocf = cmd_opcode_ocf(opcode);
+	char *cmd;
+
+	switch (ogf) {
+	case OGF_INFO_PARAM:
+		if (ocf <= CMD_INFO_NUM)
+			cmd = cmd_info_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_HOST_CTL:
+		if (ocf <= CMD_HOSTCTL_NUM)
+			cmd = cmd_hostctl_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_LINK_CTL:
+		if (ocf <= CMD_LINKCTL_NUM)
+			cmd = cmd_linkctl_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_LINK_POLICY:
+		if (ocf <= CMD_LINKPOL_NUM)
+			cmd = cmd_linkpol_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_STATUS_PARAM:
+		if (ocf <= CMD_STATUS_NUM)
+			cmd = cmd_status_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_TESTING_CMD:
+		if (ocf <= CMD_TESTING_NUM)
+			cmd = cmd_testing_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_LE_CTL:
+		if (ocf <= CMD_LE_NUM)
+			cmd = cmd_le_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_VENDOR_CMD:
+		cmd = "Vendor";
+		break;
+
+	default:
+		cmd = "Unknown";
+		break;
+	}
+
+	return cmd;
+}
