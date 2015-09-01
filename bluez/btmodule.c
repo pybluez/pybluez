@@ -261,10 +261,18 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
         case BTPROTO_HCI:
             {
                 struct sockaddr_hci *addr = (struct sockaddr_hci*) addr_ret;
-
-                if ( !PyArg_ParseTuple(args, "H", &addr->hci_dev) ) {
-                    return 0;
+                int device;
+                int channel = HCI_CHANNEL_RAW;
+                if ( !PyArg_ParseTuple(args, "i|H", &device, &channel) ) {
+                        return 0;
                 }
+                if (device == -1) {
+                        addr->hci_dev = HCI_DEV_NONE;
+                } else {
+                        addr->hci_dev = device;
+                }
+
+                addr->hci_channel = channel;
 
                 *len_ret = sizeof(struct sockaddr_hci);
                 return 1;
@@ -876,7 +884,7 @@ PyDoc_STRVAR(bind_doc,
 "bind(address)\n\
 \n\
 Bind the socket to a local address.  address must always be a tuple.\n\
-  HCI sockets:    ( device number, )\n\
+  HCI sockets:    ( device number, channel )\n\
                   device number should be 0, 1, 2, etc.\n\
   L2CAP sockets:  ( host, psm )\n\
                   host should be an address e.g. \"01:23:45:67:89:ab\"\n\
@@ -3650,6 +3658,11 @@ PyInit__bluetooth(void)
 	ADD_INT_CONST(m, SOL_SCO);
 	ADD_INT_CONST(m, SCO_OPTIONS);
 	ADD_INT_CONST(m, L2CAP_OPTIONS);
+
+    /* special channels to bind() */
+    ADD_INT_CONST(m, HCI_CHANNEL_CONTROL);
+    ADD_INT_CONST(m, HCI_CHANNEL_USER);
+    ADD_INT_CONST(m, HCI_DEV_NONE);
 
     /* ioctl */
     ADD_INT_CONST(m, HCIDEVUP);
