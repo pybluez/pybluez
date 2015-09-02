@@ -1,7 +1,6 @@
 import os
 import sys
 import struct
-import bluetooth._bluetooth as _bt
 
 if sys.version < '3':
     get_byte = str
@@ -35,7 +34,15 @@ def read_local_bdaddr(hci_sock):
     return bdaddr
 
 if __name__ == "__main__":
-    dev_id = 0
-    hci_sock = _bt.hci_open_dev(dev_id)
-    bdaddr = read_local_bdaddr(hci_sock)
+    if sys.platform.startswith("darwin"):
+        # On OSX, lightblue uses the LightAquaBlue framework to access
+        # information about the local bluetooth device.
+        import bluetooth
+        bdaddr = bluetooth.read_local_bdaddr()
+    else:
+        import bluetooth._bluetooth as _bt
+        dev_id = 0
+        hci_sock = _bt.hci_open_dev(dev_id)
+        bdaddr = read_local_bdaddr(hci_sock)
+
     print(bdaddr)

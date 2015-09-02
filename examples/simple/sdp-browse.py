@@ -18,7 +18,7 @@ services = bluetooth.find_service(address=target)
 
 if len(services) > 0:
     print("found %d services on %s" % (len(services), sys.argv[1]))
-    print()
+    print("")
 else:
     print("no services found")
 
@@ -32,4 +32,4 @@ for svc in services:
     print("    svc classes: %s "% svc["service-classes"])
     print("    profiles:    %s "% svc["profiles"])
     print("    service id:  %s "% svc["service-id"])
-    print()
+    print("")
