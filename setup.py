@@ -5,21 +5,8 @@ import sys
 import platform
 import os
 
-WIN32 = sys.platform.startswith("win32")
-LINUX = sys.platform.startswith("linux")
-MAC   = sys.platform.startswith("darwin")
-
+pack_dir = dict()
 mods = []
-
-def getpackagedir():
-    if WIN32:
-        return "TODO" #"src/win" -- piotrek can you address this?
-    elif LINUX:
-        return "TODO" #"src/linux"  -- piotrek can you address this?
-    elif MAC:
-        return "osx"
-    else:
-        raise Exception("Unsupported platform")
 
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
@@ -91,6 +78,8 @@ elif sys.platform.startswith("darwin"):
     # if you want to install the framework somewhere other than /Library/Frameworks
     # make sure the path is also changed in LightAquaBlue.py (in src/mac)
     if "install" in sys.argv:
+        pack_dir = { 'lightblue': "osx" }
+        
         # Change to LightAquaBlue framework dir.
         os.chdir("osx/LightAquaBlue")
 
@@ -131,7 +120,7 @@ setup ( name = 'PyBluez',
         url="http://karulis.github.io/pybluez/",
         ext_modules = mods,
         packages = [ "bluetooth", "lightblue" ],
-        package_dir = { 'lightblue': getpackagedir() }, 
+        package_dir = pack_dir, 
         # for the python cheese shop
         classifiers = [ 'Development Status :: 4 - Beta',
             'License :: OSI Approved :: GNU General Public License (GPL)',
