@@ -101,7 +101,6 @@ elif sys.platform.startswith("darwin"):
             raise Exception("Unrecognized architecture")
 
         build_str = "xcodebuild install -arch '%s' -target LightAquaBlue -configuration Release DSTROOT=/ INSTALL_PATH=/Library/Frameworks DEPLOYMENT_LOCATION=YES" % (arch)
-        print build_str ### DEBUG ###
         os.system(build_str)
 
         # Change back to top-level (need this otherwise setup.py script gets confused on install?).
