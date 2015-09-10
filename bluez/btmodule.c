@@ -23,6 +23,7 @@ Local naming conventions:
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -329,6 +330,131 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
     }
 }
 
+/* Determin device can be advertisable('UP, RUNNING, PSCAN, ISCAN' state).
+   If advertisable, return 0. Else, return -1. */
+static int
+_adv_available(struct hci_dev_info *di)
+{
+    uint32_t *flags = &di->flags;
+
+    if (hci_test_bit(HCI_RAW, &flags) &&
+            !bacmp(&di->bdaddr, BDADDR_ANY)) {
+        int dd = hci_open_dev(di->dev_id);
+        if (dd < 0)
+            return -1;
+        hci_read_bd_addr(dd, &di->bdaddr, 1000);
+        hci_close_dev(dd);
+    }
+
+    return (hci_test_bit(HCI_UP, flags) &&
+             hci_test_bit(HCI_RUNNING, flags) &&
+             hci_test_bit(HCI_PSCAN, flags) &&
+             hci_test_bit(HCI_ISCAN, flags)) != 0 ? 0 : -1;
+}
+
+/* Inspect all devices in order to know whether advertisable device exists. */
+static int
+_any_adv_available(void)
+{
+    struct hci_dev_list_req *dl    = NULL;
+    struct hci_dev_req      *dr    = NULL;
+    struct hci_dev_info     di     = {0,};
+    int                     result = -1;
+    int                     ctl    = -1;
+    int                     i;
+
+    if ((ctl = socket(AF_BLUETOOTH, SOCK_RAW, BTPROTO_HCI)) < 0) {
+        return -1;
+    }
+
+    if (!(dl = malloc(HCI_MAX_DEV * sizeof(struct hci_dev_req) +
+        sizeof(uint16_t)))) {
+        goto CLEAN_UP_RETURN;
+    }
+    dl->dev_num = HCI_MAX_DEV;
+    dr = dl->dev_req;
+
+    if (ioctl(ctl, HCIGETDEVLIST, (void *) dl) < 0) {
+        goto CLEAN_UP_RETURN;
+    }
+
+    for (i = 0; i< dl->dev_num; i++) {
+        di.dev_id = (dr+i)->dev_id;
+        if (ioctl(ctl, HCIGETDEVINFO, (void *) &di) < 0)
+            continue;
+
+        /* if find adv-available device, return */
+        if(_adv_available(&di) == 0)
+        {
+            result = 0;
+            goto CLEAN_UP_RETURN;
+        }
+    }
+
+CLEAN_UP_RETURN:
+    close(ctl);
+    free(dl);
+    return result;
+}
+
+/* Determine the socket can be advertisable or not.
+   It will work if socket is bound to specific device or not.
+   If advertisable, return 0. Else, return -1 */
+static int
+adv_available(PySocketSockObject *socko)
+{
+    bdaddr_t           ba       = {{0, }}; /* GCC bug? */
+    struct sockaddr    addr     = {0, };
+    int                dev_id   = -1;
+    socklen_t          alen     = sizeof(addr);
+    struct sockaddr_l2 const *
+                       addr_l2  = (struct sockaddr_l2 const *)&addr;
+    struct sockaddr_rc const *
+                       addr_rc  = (struct sockaddr_rc const *)&addr;
+
+    /* get ba */
+    if(getsockname(socko->sock_fd, &addr, &alen) < 0)
+        return -1;
+        
+    switch(socko->sock_proto)
+    {
+    case BTPROTO_L2CAP:
+        ba = addr_l2->l2_bdaddr;
+        break;
+
+    case BTPROTO_RFCOMM:
+        ba = addr_rc->rc_bdaddr;
+        break;
+
+    default:
+        /* The others are not yet implmented.
+           In fact, I don't spec of the others.
+           To have compatibility with old version, return 0(success). */
+        return 0;
+    }
+
+    /* get dev_id from ba */
+    if(bacmp(&ba, BDADDR_ANY) == 0)
+        dev_id = -1;
+    else
+        dev_id = hci_get_route(&ba);
+
+    /**/
+    if(dev_id == -1)
+    /* if dev_id is not specified, inspect all devices. */
+    {
+        return _any_adv_available();
+    }
+    else
+    /* if device specified, inspect it. */
+    {
+        struct hci_dev_info     di;
+        if(hci_devinfo(dev_id, &di))
+            return -1;
+
+        return _adv_available(&di);
+    }
+}
 
 /* Get the address length according to the socket object's address family.
    Return 1 if the family is known, 0 otherwise.  The length is returned
@@ -1946,7 +2072,7 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
 
     if( err< 0 ) return socko->errorhandler();
 
-    return Py_BuildValue("s#", rparam, req.rlen);
+    return PyString_FromStringAndSize(rparam, req.rlen);
 }
 PyDoc_STRVAR(bt_hci_send_req_doc,
 "hci_send_req(sock, ogf, ocf, event, rlen, params=None, timeout=0)\n\
@@ -2533,6 +2659,13 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     if( ! socko->is_listening_socket ) {
         PyErr_SetString(bluetooth_error, 
                 "must have already called socket.listen()");
+        return 0;
+    }
+
+    // verify whether device can be advertiable
+    if(adv_available(socko) < 0) {
+        PyErr_SetString(bluetooth_error, 
+                "error no advertisable device.");
         return 0;
     }
 

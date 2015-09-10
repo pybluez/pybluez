@@ -313,7 +313,7 @@ def write_flush_timeout (addr, timeout):
     pkt = struct.pack ("HH", handle, _bt.htobs (timeout))
     response = _bt.hci_send_req (hci_sock, _bt.OGF_HOST_CTL, 
         0x0028, _bt.EVT_CMD_COMPLETE, 3, pkt)
-    status = struct.unpack ("B", response[0])[0]
+    status = get_byte(response[0])
     rhandle = struct.unpack ("H", response[1:3])[0]
     assert rhandle == handle 
     assert status == 0
@@ -326,7 +326,7 @@ def read_flush_timeout (addr):
     pkt = struct.pack ("H", handle)
     response = _bt.hci_send_req (hci_sock, _bt.OGF_HOST_CTL, 
         0x0027, _bt.EVT_CMD_COMPLETE, 5, pkt)
-    status = struct.unpack ("B", response[0])[0]
+    status = get_byte(response[0])
     rhandle = struct.unpack ("H", response[1:3])[0]
     assert rhandle == handle
     assert status == 0

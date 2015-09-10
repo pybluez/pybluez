@@ -17,13 +17,13 @@ if mode not in [ "client", "server" ]: usage()
 if mode == "server":
     server_sock=bluetooth.BluetoothSocket( bluetooth.L2CAP )
     server_sock.bind(("",0x1001))
+    bluetooth.set_l2cap_mtu( server_sock, 65535 )
     server_sock.listen(1)
     while True:
         print("waiting for incoming connection")
         client_sock,address = server_sock.accept()
         print("Accepted connection from %s" % str(address))
 
-        bluetooth.set_l2cap_mtu( client_sock, 65535 )
 
         print("waiting for data")
         total = 0
@@ -42,14 +42,14 @@ if mode == "server":
     server_sock.close()
 else:
     sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
+    print("connected.  Adjusting link parameters.")
+    bluetooth.set_l2cap_mtu( sock, 65535 )
 
     bt_addr = sys.argv[2]
     print("trying to connect to %s:1001" % bt_addr)
     port = 0x1001
     sock.connect((bt_addr, port))
 
-    print("connected.  Adjusting link parameters.")
-    bluetooth.set_l2cap_mtu( sock, 65535 )
 
     totalsent = 0 
     for i in range(1, 65535, 100):

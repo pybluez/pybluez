@@ -2,7 +2,29 @@ PyBluez CHANGELOG file
 
 this file contains a list of changes through the different versions of PyBluez.
 
-changes from 0.19 to 0.20(Apr 05, 2015)
+changes from 0.21 to 0.22(August 05, 2015)
+-------------------------
+
+GNU/Linux:
+    Features:
+        - experimental support for Bluetooth Low Energy, based on pygattlib
+            implementation
+    Bugs:
+        - l2cap options issue #88
+        -  When cancelling device discovery, DeviceDiscoverer does not call
+            inquiry_complete() #85
+        -  No way to select device id for device discovery #77
+        - _get_available_port() should try to bind() with
+            a supplied address instead of "" #45
+
+Windows:
+    Bugs:
+        - No adapter detected - WP8.1 #72
+        - Non-blocking sockets and blocking sockets with a timeout
+            do not work correctly when using WinSock backend #40
+        - Need to setsockopt in Windows #10
+
+changes from 0.20 to 0.21(Apr 05, 2015)
 -------------------------
 
 GNU/Linux:
