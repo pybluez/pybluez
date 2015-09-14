@@ -2256,6 +2256,31 @@ Performs a remote name request to the specified bluetooth device.\n\
 \n\
 Returns the name of the device, or raises an error on failure");
 
+#define EVENT_NUM 77
+static char *event_str[];
+
+static PyObject*
+bt_hci_event_name(PyObject *self, PyObject *args)
+{
+   int eventNum;
+   PyArg_ParseTuple(args,"i", &eventNum);
+   if ((eventNum > EVENT_NUM) || (eventNum < 0)) {
+           PyErr_SetString(bluetooth_error,
+                           "hci_event_name: invalid event number");
+           return 0;
+   }
+   const char* event_name = event_str[eventNum];
+   return PyString_FromString( event_name );
+}
+PyDoc_STRVAR(bt_hci_event_name_doc,
+"hci_event_name(eventNum)\n\
+\n\
+Returns a string withe description of the HCI event.\n\
+   sock - the HCI socket object to use\n\
+   eventNum - valid number\n\
+\n\
+Returns the name of the device, or raises an error on failure");
+
 // lot of repetitive code... yay macros!!
 #define DECL_HCI_FILTER_OP_1(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
@@ -2926,7 +2951,8 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( cmd_opcode_ocf, METH_VARARGS ),
     DECL_BT_METHOD( ba2str, METH_VARARGS ),
     DECL_BT_METHOD( str2ba, METH_VARARGS ),
-    DECL_BT_METHOD( hci_opcode_name, METH_VARARGS), /* METH_VARARGS */
+    DECL_BT_METHOD( hci_opcode_name, METH_VARARGS),
+    DECL_BT_METHOD( hci_event_name, METH_VARARGS),
 #ifndef NO_DUP
     DECL_BT_METHOD( fromfd, METH_VARARGS ),
 #endif
@@ -3674,6 +3700,87 @@ PyInit__bluetooth(void)
  * by Carlos Chinea
  * (C) Nokia Research Center, 2004
 */
+static char *event_str[EVENT_NUM + 1] = {
+	"Unknown",
+	"Inquiry Complete",
+	"Inquiry Result",
+	"Connect Complete",
+	"Connect Request",
+	"Disconn Complete",
+	"Auth Complete",
+	"Remote Name Req Complete",
+	"Encrypt Change",
+	"Change Connection Link Key Complete",
+	"Master Link Key Complete",
+	"Read Remote Supported Features",
+	"Read Remote Ver Info Complete",
+	"QoS Setup Complete",
+	"Command Complete",
+	"Command Status",
+	"Hardware Error",
+	"Flush Occurred",
+	"Role Change",
+	"Number of Completed Packets",
+	"Mode Change",
+	"Return Link Keys",
+	"PIN Code Request",
+	"Link Key Request",
+	"Link Key Notification",
+	"Loopback Command",
+	"Data Buffer Overflow",
+	"Max Slots Change",
+	"Read Clock Offset Complete",
+	"Connection Packet Type Changed",
+	"QoS Violation",
+	"Page Scan Mode Change",
+	"Page Scan Repetition Mode Change",
+	"Flow Specification Complete",
+	"Inquiry Result with RSSI",
+	"Read Remote Extended Features",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Synchronous Connect Complete",
+	"Synchronous Connect Changed",
+	"Sniff Subrate",
+	"Extended Inquiry Result",
+	"Encryption Key Refresh Complete",
+	"IO Capability Request",
+	"IO Capability Response",
+	"User Confirmation Request",
+	"User Passkey Request",
+	"Remote OOB Data Request",
+	"Simple Pairing Complete",
+	"Unknown",
+	"Link Supervision Timeout Change",
+	"Enhanced Flush Complete",
+	"Unknown",
+	"User Passkey Notification",
+	"Keypress Notification",
+	"Remote Host Supported Features Notification",
+	"LE Meta Event",
+	"Unknown",
+	"Physical Link Complete",
+	"Channel Selected",
+	"Disconnection Physical Link Complete",
+	"Physical Link Loss Early Warning",
+	"Physical Link Recovery",
+	"Logical Link Complete",
+	"Disconnection Logical Link Complete",
+	"Flow Spec Modify Complete",
+	"Number Of Completed Data Blocks",
+	"AMP Start Test",
+	"AMP Test End",
+	"AMP Receiver Report",
+	"Short Range Mode Change Complete",
+	"AMP Status Change",
+};
+
 #define CMD_LINKCTL_NUM 60
 static char *cmd_linkctl_str[CMD_LINKCTL_NUM + 1] = {
 	"Unknown",
