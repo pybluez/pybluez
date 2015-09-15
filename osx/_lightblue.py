@@ -23,6 +23,7 @@ import warnings
 import Foundation
 import AppKit
 import objc
+from objc import super
 
 import _IOBluetooth
 import _LightAquaBlue
