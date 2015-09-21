@@ -535,6 +535,10 @@ def _getservicetuple(servicerecord):
     """
     addr = _macutil.formatdevaddr(servicerecord.getDevice().getAddressString())            
     name = servicerecord.getServiceName()
+    # TODO
+    # here we should pass 'pointer' to rfcommChannelID
+    # the location that will get the found RFCOMM channel ID.
+    # see: https://developer.apple.com/library/mac/documentation/IOBluetooth/Reference/IOBluetoothSDPServiceRecord_reference/#//apple_ref/occ/instm/IOBluetoothSDPServiceRecord/getRFCOMMChannelID:
     try:
         channel = servicerecord.getRFCOMMChannelID_(None)
     except TypeError:
