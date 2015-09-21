@@ -536,15 +536,8 @@ def _getservicetuple(servicerecord):
     addr = _macutil.formatdevaddr(servicerecord.getDevice().getAddressString())            
     name = servicerecord.getServiceName()
     try:
-        result, channel = servicerecord.getRFCOMMChannelID_(None) # pyobjc 2.0
+        channel = servicerecord.getRFCOMMChannelID_(None)
     except TypeError:
-        result, channel = servicerecord.getRFCOMMChannelID_()
-    if result != _macutil.kIOReturnSuccess:
-        try:
-            result, channel = servicerecord.getL2CAPPSM_(None) # pyobjc 2.0
-        except:
-            result, channel = servicerecord.getL2CAPPSM_()            
-        if result != _macutil.kIOReturnSuccess:    
-            channel = None
+        channel = servicerecord.getL2CAPPSM_(None)
     return (addr, channel, name)    
          
