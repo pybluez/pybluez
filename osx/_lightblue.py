@@ -70,8 +70,7 @@ def findservices(addr=None, name=None, servicetype=None):
 
     services = []
     for devaddr in addresses:
-        iobtdevice = _IOBluetooth.IOBluetoothDevice.withAddress_(
-            _macutil.createbtdevaddr(devaddr))
+        iobtdevice = _IOBluetooth.IOBluetoothDevice.withAddressString_(devaddr)
             
         try:
             lastseen = iobtdevice.getLastServicesUpdate()
@@ -465,7 +464,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
         if self.cb_completed:
             self.cb_completed(err, aborted)
     deviceInquiryComplete_error_aborted_ = objc.selector(
-        deviceInquiryComplete_error_aborted_, signature="v@:@iB")
+        deviceInquiryComplete_error_aborted_, signature="v@:@iZ")
              
     # - (void)deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender;             
     def deviceInquiryStarted_(self, inquiry):
