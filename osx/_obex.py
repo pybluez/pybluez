@@ -22,17 +22,17 @@ import types
 import objc
 from Foundation import NSObject, NSDate
 
-from _IOBluetooth import OBEXSession, IOBluetoothDevice, \
+from ._IOBluetooth import OBEXSession, IOBluetoothDevice, \
         IOBluetoothRFCOMMChannel
-from _LightAquaBlue import BBBluetoothOBEXClient, BBBluetoothOBEXServer, \
+from ._LightAquaBlue import BBBluetoothOBEXClient, BBBluetoothOBEXServer, \
         BBStreamingInputStream, BBStreamingOutputStream, \
         BBMutableOBEXHeaderSet, \
         BBLocalDevice
-import _lightbluecommon
-import _obexcommon
-import _macutil
+from . import _lightbluecommon
+from . import _obexcommon
+from . import _macutil
 
-from _obexcommon import OBEXError
+from ._obexcommon import OBEXError
 
 # from <IOBluetooth/OBEX.h>
 _kOBEXSuccess = 0
@@ -67,8 +67,8 @@ def _cutresponsefinalbit(responsecode):
     
 def _headersdicttoset(headers):
     headerset = BBMutableOBEXHeaderSet.alloc().init()
-    for header, value in headers.items():
-        if isinstance(header, types.StringTypes):
+    for header, value in list(headers.items()):
+        if isinstance(header, str):
             hid = _obexcommon._HEADER_STRINGS_TO_IDS.get(header.lower())
         else:
             hid = header
@@ -78,7 +78,7 @@ def _headersdicttoset(headers):
             value = value.strftime("%Y%m%dT%H%M%S")
         mask = hid & _HEADER_MASK
         if mask == _HEADER_UNICODE:
-            if not isinstance(value, types.StringTypes):
+            if not isinstance(value, str):
                 raise TypeError("value for '%s' must be string, was %s" %
                     (str(header), type(value)))
             headerset.setValue_forUnicodeHeader_(value, hid)
@@ -94,7 +94,7 @@ def _headersdicttoset(headers):
                     (str(header), type(value)))
             headerset.setValue_for1ByteHeader_(value, hid)
         elif mask == _HEADER_4BYTE:
-            if not isinstance(value, int) and not isinstance(value, long):
+            if not isinstance(value, int) and not isinstance(value, int):
                 raise TypeError("value for '%s' must be int, was %s" %
                     (str(header), type(value)))
             headerset.setValue_for4ByteHeader_(value, hid)
@@ -327,7 +327,7 @@ class OBEXClient(object):
 
     # set method docstrings
     definedmethods = locals()   # i.e. defined methods in OBEXClient
-    for name, doc in _obexcommon._obexclientdocs.items():
+    for name, doc in list(_obexcommon._obexclientdocs.items()):
         try:
             definedmethods[name].__doc__ = doc
         except KeyError:
@@ -410,11 +410,11 @@ def sendfile(address, channel, source):
                 address)
     if not isinstance(channel, int):
         raise TypeError("channel must be int, was %s" % type(channel))
-    if not isinstance(source, types.StringTypes) and \
+    if not isinstance(source, str) and \
             not hasattr(source, "read"):
         raise TypeError("source must be string or file-like object with read() method")
               
-    if isinstance(source, types.StringTypes):
+    if isinstance(source, str):
         headers = {"name": source}
         fileobj = file(source, "rb")
         closefileobj = True                    
@@ -567,10 +567,10 @@ class BBOBEXObjectPushServer(NSObject):
 def recvfile(sock, dest):
     if sock is None:
         raise TypeError("Given socket is None")
-    if not isinstance(dest, (types.StringTypes, types.FileType)):
+    if not isinstance(dest, (str, types.FileType)):
         raise TypeError("dest must be string or file-like object with write() method")
         
-    if isinstance(dest, types.StringTypes):
+    if isinstance(dest, str):
         fileobj = open(dest, "wb")
         closefileobj = True
     else:

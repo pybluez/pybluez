@@ -16,7 +16,7 @@
 # along with LightBlue.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import _lightbluecommon
+from . import _lightbluecommon
 
 __all__ = ('OBEXResponse', 'OBEXError',
      'CONTINUE', 'OK', 'CREATED', 'ACCEPTED', 'NON_AUTHORITATIVE_INFORMATION',
@@ -96,14 +96,14 @@ class OBEXResponse:
 
         Returns the specified default value if the header is not present.
         '''
-        if isinstance(header, types.StringTypes):
+        if isinstance(header, str):
             return self.headers.get(header.lower(), default)
         return self.__rawheaders.get(header, default)
 
     def __getheaders(self):
         if self.__headers is None:
             self.__headers = {}
-            for headerid, value in self.__rawheaders.items():
+            for headerid, value in list(self.__rawheaders.items()):
                 if headerid in _HEADER_IDS_TO_STRINGS:
                     self.__headers[_HEADER_IDS_TO_STRINGS[headerid]] = value
                 else:
@@ -169,7 +169,7 @@ _HEADER_STRINGS_TO_IDS = {
 }
 
 _HEADER_IDS_TO_STRINGS = {}
-for key, value in _HEADER_STRINGS_TO_IDS.items():
+for key, value in list(_HEADER_STRINGS_TO_IDS.items()):
     _HEADER_IDS_TO_STRINGS[value] = key
 
 assert len(_HEADER_IDS_TO_STRINGS) == len(_HEADER_STRINGS_TO_IDS)

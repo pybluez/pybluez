@@ -25,11 +25,11 @@ import AppKit
 import objc
 from objc import super
 
-import _IOBluetooth
-import _LightAquaBlue
-import _lightbluecommon
-import _macutil
-import _bluetoothsockets
+from . import _IOBluetooth
+from . import _LightAquaBlue
+from . import _lightbluecommon
+from . import _macutil
+from . import _bluetoothsockets
 
 
 # public attributes
@@ -58,7 +58,7 @@ def findservices(addr=None, name=None, servicetype=None):
     if addr is None:
         try:
             founddevices = finddevices()
-        except _lightbluecommon.BluetoothError, e:
+        except _lightbluecommon.BluetoothError as e:
             msg = "findservices() failed, " +\
                     "error while finding devices: " + str(e)
             raise _lightbluecommon.BluetoothError(msg)
@@ -82,7 +82,7 @@ def findservices(addr=None, name=None, servicetype=None):
                 serviceupdater = _SDPQueryRunner.alloc().init()
                 try:
                     serviceupdater.query(iobtdevice)  # blocks until updated
-                except _lightbluecommon.BluetoothError, e:
+                except _lightbluecommon.BluetoothError as e:
                     msg = "findservices() couldn't get services for %s: %s" % \
                         (iobtdevice.getNameOrAddress(), str(e))
                     warnings.warn(msg)
@@ -165,7 +165,7 @@ def socket(proto=_lightbluecommon.RFCOMM):
 
 
 def advertise(name, sock, servicetype):
-    if not isinstance(name, types.StringTypes):
+    if not isinstance(name, str):
         raise TypeError("name must be string, was %s" % \
             type(name))
         
@@ -228,7 +228,7 @@ def stopadvertise(sock):
 
 
 def selectdevice():
-    import _IOBluetoothUI
+    from . import _IOBluetoothUI
     gui = _IOBluetoothUI.IOBluetoothDeviceSelectorController.deviceSelector()
     
     # try to bring GUI to foreground by setting it as floating panel
@@ -260,7 +260,7 @@ def selectdevice():
 
 
 def selectservice():
-    import _IOBluetoothUI
+    from . import _IOBluetoothUI
     gui = _IOBluetoothUI.IOBluetoothServiceBrowserController.serviceBrowserController_(
             _macutil.kIOBluetoothServiceBrowserControllerOptionsNone)
             

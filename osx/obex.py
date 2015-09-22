@@ -80,11 +80,11 @@ _docstrings = {
 
 
 # import implementation modules
-from _obex import *
-from _obexcommon import *
+from ._obex import *
+from ._obexcommon import *
 
-import _obex
-import _obexcommon
+from . import _obex
+from . import _obexcommon
 __all__ = _obex.__all__ + _obexcommon.__all__
 
 # set docstrings

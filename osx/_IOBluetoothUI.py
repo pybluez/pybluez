@@ -51,7 +51,7 @@ except (AttributeError, ValueError):
     # earlier versions use loadBundle() and setSignatureForSelector()            
     
     objc.loadBundle("IOBluetoothUI", globals(), 
-       bundle_path=objc.pathForFramework(u'/System/Library/Frameworks/IOBluetoothUI.framework'))
+       bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetoothUI.framework'))
 
 del objc
     

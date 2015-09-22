@@ -157,12 +157,12 @@ _docstrings = {
 
 
 # import implementation modules
-from _lightblue import *
-from _lightbluecommon import *
-import obex     # plus submodule
+from ._lightblue import *
+from ._lightbluecommon import *
+from . import obex     # plus submodule
 
 # set docstrings
-import _lightblue
+from . import _lightblue
 localattrs = locals()
 for attr in _lightblue.__all__:
     try:

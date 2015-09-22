@@ -50,7 +50,7 @@ except (AttributeError, ValueError):
     # earlier versions use loadBundle() and setSignatureForSelector()
     
     objc.loadBundle("IOBluetooth", globals(), 
-       bundle_path=objc.pathForFramework(u'/System/Library/Frameworks/IOBluetooth.framework'))
+       bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetooth.framework'))
 
     # Sets selector signatures in order to receive arguments correctly from
     # PyObjC methods. These MUST be set, otherwise the method calls won't work
