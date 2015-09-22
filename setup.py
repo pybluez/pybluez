@@ -13,6 +13,8 @@ def find_MS_SDK():
 
     if sys.version < '3.3':
         MS_SDK = r'Microsoft SDKs\Windows\v6.0A'  # Visual Studio 9
+    if sys.version >= '3.5':
+        MS_SDK = r'Microsoft SDKs\Windows\v10.0A'  # Visual Studio 14
     else:
         MS_SDK = r'Microsoft SDKs\Windows\v7.0A'  # Visual Studio 10
 
