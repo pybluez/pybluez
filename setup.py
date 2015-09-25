@@ -74,7 +74,7 @@ elif sys.platform.startswith("darwin"):
     # make sure the path is also changed in LightAquaBlue.py (in src/mac)
     if "install" in sys.argv:
         pack_dir = { 'lightblue': 'osx' }
-        install_req = ['pyobjc>=3.0.4']
+        # install_req = ['pyobjc>=3.1'] this version is not on pypi yet
         # Change to LightAquaBlue framework dir.
         os.chdir("osx/LightAquaBlue")
 
