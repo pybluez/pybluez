@@ -71,17 +71,15 @@ def find_service(name=None, uuid=None, address=None):
     return results
 
 def read_local_bdaddr():
-    # NOTE: This function is only supported on osx.
     return lightblue.gethostaddr()
 
 # THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
 #def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
 def advertise_service(sock, name, service_id="", service_classes=None,
         profiles=None, provider="", description="", protocols=None):
-    if service_classes is None:
-        service_class = []
-    if protocols is None:
-        protocols = [RFCOMM]
+
+    if protocols is None or protocols == RFCOMM:
+        protocols = [lightblue.RFCOMM]
 
     lightblue.advertise(name, sock, protocols[0])
 
@@ -92,15 +90,16 @@ def stop_advertising(sock):
 # ============================= BluetoothSocket ============================== #
 
 class BluetoothSocket:
-    
-    def __init__ (self, proto=RFCOMM, _sock=None):
+
+    def __init__(self, proto=RFCOMM, _sock=None):
         if _sock is None:
             _sock = lightblue.socket()
         self._sock = _sock
 
         if proto != RFCOMM:
-            raise NotImplementedError("Not supported protocol") ### name the protocol
-        self._proto = proto
+            # name the protocol
+            raise NotImplementedError("Not supported protocol")
+        self._proto = lightblue.RFCOMM
         self._addrport = None
 
     def _getport(self):
