@@ -101,8 +101,13 @@ class BluetoothSocket:
         if proto != RFCOMM:
             raise NotImplementedError("Not supported protocol") ### name the protocol
         self._proto = proto
+        self._addrport = None
+
+    def _getport(self):
+        return self._addrport[1]
 
     def bind(self, addrport):
+        self._addrport = addrport
         return self._sock.bind(addrport)
 
     def listen(self, backlog):
