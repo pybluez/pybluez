@@ -201,7 +201,7 @@ def advertise(name, sock, servicetype):
     if result != _macutil.kIOReturnSuccess:
         raise _lightbluecommon.BluetoothError(
             result, "Error advertising service")
-    if boundchannelID != finalchannelID:
+    if boundchannelID and boundchannelID != finalchannelID:
         msg = "socket bound to unavailable channel (%d), " % boundchannelID +\
               "use channel value of 0 to bind to dynamically assigned channel"
         raise _lightbluecommon.BluetoothError(msg)
