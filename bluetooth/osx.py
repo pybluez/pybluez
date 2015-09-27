@@ -34,9 +34,6 @@ def lookup_name(address, timeout=10):
 #
 # See: _searchservices() in _lightblue.py
 def find_service(name=None, uuid=None, address=None):
-    if uuid:
-        raise NotImplementedError("UUID argument is not supported on OS X.")
-
     if address is not None:
         addresses = [ address ]
     else:
