@@ -173,7 +173,7 @@ def advertise(name, sock, servicetype):
     boundchannelID = sock._getport()
     
     # advertise the service
-    if servicetype == _lightbluecommon.RFCOMM:
+    if servicetype == _lightbluecommon.RFCOMM or servicetype == _lightbluecommon.OBEX:
         try:
             result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
                 _LightAquaBlue.BBServiceAdvertiser.serialPortProfileDictionary(), 
@@ -182,17 +182,6 @@ def advertise(name, sock, servicetype):
         except:
             result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
                 _LightAquaBlue.BBServiceAdvertiser.serialPortProfileDictionary(), 
-                name, 
-                None)       
-    elif servicetype == _lightbluecommon.OBEX:
-        try:
-            result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
-                _LightAquaBlue.BBServiceAdvertiser.objectPushProfileDictionary(), 
-                name, 
-                None, None, None)
-        except:
-            result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
-                _LightAquaBlue.BBServiceAdvertiser.objectPushProfileDictionary(), 
                 name, 
                 None)       
     else:
