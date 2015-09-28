@@ -65,7 +65,7 @@
  */
 + (IOReturn)addRFCOMMServiceDictionary:(NSDictionary *)dict
 							  withName:(NSString *)serviceName
-								  UUID:(IOBluetoothSDPUUID *)uuid
+								  UUID:(NSString *)uuid
 							 channelID:(BluetoothRFCOMMChannelID *)outChannelID
 				   serviceRecordHandle:(BluetoothSDPServiceRecordHandle *)outServiceRecordHandle;
 

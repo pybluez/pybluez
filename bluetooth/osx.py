@@ -43,7 +43,7 @@ def find_service(name=None, uuid=None, address=None):
 
     results = []
 
-    for addr in addresses:
+    for address in addresses:
         # print "[DEBUG] Browsing services on %s..." % (addr)
 
         dresults = lightblue.findservices(addr=address, name=name)
@@ -75,15 +75,13 @@ def read_local_bdaddr():
     return lightblue.gethostaddr()
 
 
-# THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
-#def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
 def advertise_service(sock, name, service_id="", service_classes=None,
         profiles=None, provider="", description="", protocols=None):
 
     if protocols is None or protocols == RFCOMM:
         protocols = [lightblue.RFCOMM]
 
-    lightblue.advertise(name, sock, protocols[0])
+    lightblue.advertise(name, sock, protocols[0], service_id.remove("-"))
 
 
 def stop_advertising(sock):

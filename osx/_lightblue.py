@@ -164,41 +164,40 @@ def socket(proto=_lightbluecommon.RFCOMM):
 ### advertising services ###
 
 
-def advertise(name, sock, servicetype):
+def advertise(name, sock, servicetype, uuid=None):
     if not isinstance(name, str):
-        raise TypeError("name must be string, was %s" % \
-            type(name))
-        
+        raise TypeError("name must be string, was %s" % type(name))
+
     # raises exception if socket is not bound
     boundchannelID = sock._getport()
-    
+
     # advertise the service
     if servicetype == _lightbluecommon.RFCOMM or servicetype == _lightbluecommon.OBEX:
         try:
-            result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
-                _LightAquaBlue.BBServiceAdvertiser.serialPortProfileDictionary(), 
-                name, 
-                None, None, None)
+            result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser\
+                    .addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
+                            _LightAquaBlue.BBServiceAdvertiser.serialPortProfileDictionary(),
+                name, uuid, None, None)
         except:
-            result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
-                _LightAquaBlue.BBServiceAdvertiser.serialPortProfileDictionary(), 
-                name, 
-                None)       
+            result, finalchannelID, servicerecordhandle = _LightAquaBlue.BBServiceAdvertiser\
+                    .addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
+                            _LightAquaBlue.BBServiceAdvertiser.serialPortProfileDictionary(),
+                name, uuid)
     else:
         raise ValueError("servicetype must be either RFCOMM or OBEX")
 
     if result != _macutil.kIOReturnSuccess:
         raise _lightbluecommon.BluetoothError(
-            result, "Error advertising service")
+                result, "Error advertising service")
     if boundchannelID and boundchannelID != finalchannelID:
         msg = "socket bound to unavailable channel (%d), " % boundchannelID +\
               "use channel value of 0 to bind to dynamically assigned channel"
         raise _lightbluecommon.BluetoothError(msg)
-    
+
     # note service record handle, so that the service can be stopped later
     __advertised[id(sock)] = servicerecordhandle
-    
-    
+
+
 def stopadvertise(sock):
     if sock is None:
         raise TypeError("Given socket is None")

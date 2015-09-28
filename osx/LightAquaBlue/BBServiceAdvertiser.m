@@ -111,7 +111,7 @@ static NSDictionary *fileTransferProfileDict;
 
 + (IOReturn)addRFCOMMServiceDictionary:(NSDictionary *)dict
 							  withName:(NSString *)serviceName
-								  UUID:(IOBluetoothSDPUUID *)uuid
+								  UUID:(NSString *)uuid
 							 channelID:(BluetoothRFCOMMChannelID *)outChannelID
 				   serviceRecordHandle:(BluetoothSDPServiceRecordHandle *)outServiceRecordHandle
 {	
@@ -119,9 +119,13 @@ static NSDictionary *fileTransferProfileDict;
 		return kIOReturnError;
 	
 	NSMutableDictionary *sdpEntries = [NSMutableDictionary dictionaryWithDictionary:dict];
+
+    NSData *uuidBytes = [uuid dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *uuidLength = [uuid length];
+    IOBluetoothSDPUUID *bt_uuid = [IOBluetoothSDPUUID uuidWithBytes:uuidBytes length:uuidLength];
 	[BBServiceAdvertiser updateServiceDictionary:sdpEntries
 										withName:serviceName
-										withUUID:uuid];
+										withUUID:bt_uuid];
 	
 	// publish the service
 	IOBluetoothSDPServiceRecordRef serviceRecordRef;
