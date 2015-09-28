@@ -13,17 +13,19 @@ def discover_devices(duration=8, flush_cache=True, lookup_names=False,
 
     ret = list()
     for device in devices:
-        item = [device[btAddresIndex],]
+        item = [device[btAddresIndex], ]
         if lookup_names:
             item.append(device[namesIndex])
         if lookup_class:
             item.append(device[classIndex])
 
-        if len(item) == 1: # in case of address-only we return string not tuple
+        # in case of address-only we return string not tuple
+        if len(item) == 1:
             ret.append(item[0])
         else:
             ret.append(tuple(item))
     return ret
+
 
 def lookup_name(address, timeout=10):
     print("TODO: implement")
@@ -35,7 +37,7 @@ def lookup_name(address, timeout=10):
 # See: _searchservices() in _lightblue.py
 def find_service(name=None, uuid=None, address=None):
     if address is not None:
-        addresses = [ address ]
+        addresses = [address]
     else:
         addresses = discover_devices(lookup_names=False)
 
@@ -49,13 +51,14 @@ def find_service(name=None, uuid=None, address=None):
         for tup in dresults:
             service = {}
 
-            # LightBlue performs a service discovery and returns the found services 
-            # as a list of (device-address, service-port, service-name) tuples. 
+            # LightBlue performs a service discovery and returns the found
+            # services as a list of (device-address, service-port,
+            # service-name) tuples.
             service["host"] = tup[0]
             service["port"] = tup[1]
             service["name"] = tup[2]
 
-            # Add extra keys for compatibility with PyBluez API. 
+            # Add extra keys for compatibility with PyBluez API.
             service["description"] = None
             service["provider"] = None
             service["protocol"] = None
@@ -67,8 +70,10 @@ def find_service(name=None, uuid=None, address=None):
 
     return results
 
+
 def read_local_bdaddr():
     return lightblue.gethostaddr()
+
 
 # THIS HEADER IS BAD -- SHOULD NOT INIT VAR. TO [] IN HEADER DEFINITION -- WILL GET WEIRD BUGS.....
 #def advertise_service(sock, name, service_id = "", service_class = [], profiles = [], provider = "", description = "", protocols = []):
@@ -80,12 +85,12 @@ def advertise_service(sock, name, service_id="", service_classes=None,
 
     lightblue.advertise(name, sock, protocols[0])
 
+
 def stop_advertising(sock):
     lightblue.stop_advertising(sock)
 
 
 # ============================= BluetoothSocket ============================== #
-
 class BluetoothSocket:
 
     def __init__(self, proto=RFCOMM, _sock=None):
