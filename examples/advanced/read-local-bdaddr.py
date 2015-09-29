@@ -8,8 +8,9 @@ else:
     get_byte = chr
 
 
-def read_local_bdaddr(hci_sock):
+def read_local_bdaddr():
     import bluetooth._bluetooth as _bt
+    hci_sock = _bt.hci_open_dev(0)
     old_filter = hci_sock.getsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, 14)
     flt = _bt.hci_filter_new()
     opcode = _bt.cmd_opcode_pack(_bt.OGF_INFO_PARAM, 
@@ -40,6 +41,5 @@ if __name__ == "__main__":
         import bluetooth
         bdaddr = bluetooth.read_local_bdaddr()        
     except:
-        hci_sock = _bt.hci_open_dev(0)
-        bdaddr = read_local_bdaddr(hci_sock)
+        bdaddr = read_local_bdaddr()
     print(bdaddr)
