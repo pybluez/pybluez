@@ -1,7 +1,6 @@
 import os
 import sys
 import struct
-import bluetooth._bluetooth as _bt
 
 if sys.version < '3':
     get_byte = str
@@ -10,6 +9,7 @@ else:
 
 
 def read_local_bdaddr(hci_sock):
+    import bluetooth._bluetooth as _bt
     old_filter = hci_sock.getsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, 14)
     flt = _bt.hci_filter_new()
     opcode = _bt.cmd_opcode_pack(_bt.OGF_INFO_PARAM, 
@@ -34,8 +34,12 @@ def read_local_bdaddr(hci_sock):
     hci_sock.setsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, old_filter )
     return bdaddr
 
+
 if __name__ == "__main__":
-    dev_id = 0
-    hci_sock = _bt.hci_open_dev(dev_id)
-    bdaddr = read_local_bdaddr(hci_sock)
+    try:
+        import bluetooth
+        bdaddr = bluetooth.read_local_bdaddr()        
+    except:
+        hci_sock = _bt.hci_open_dev(0)
+        bdaddr = read_local_bdaddr(hci_sock)
     print(bdaddr)
