@@ -22,6 +22,7 @@ static void dbg(const char *fmt, ...)
 }
 #endif
 
+
 static void Err_SetFromWSALastError(PyObject *exc)
 {
 	LPVOID lpMsgBuf;
@@ -461,6 +462,48 @@ PyDoc_STRVAR(msbt_discover_devices_doc,
 	If flush_cache is True, then new inquiry will be performed,\
 	else cashed devices will be returned(plus paired devices).)");
 
+
+static PyObject *
+msbt_list_local(PyObject *self)
+{
+    HANDLE m_radio = NULL;
+    HBLUETOOTH_RADIO_FIND m_bt = NULL;
+    BOOL next = TRUE;
+    BLUETOOTH_FIND_RADIO_PARAMS
+            find_radio = {sizeof(BLUETOOTH_FIND_RADIO_PARAMS)};
+    PyObject * toreturn = PyList_New(0);
+
+    Py_BEGIN_ALLOW_THREADS;
+    m_bt = BluetoothFindFirstRadio(&find_radio, &m_radio);
+    Py_END_ALLOW_THREADS;
+    _CHECK_OR_RAISE_WSA(m_bt != NULL);
+
+    while(next) {
+        PyObject *item = NULL;
+        char buf[40] = {0};
+        BLUETOOTH_RADIO_INFO m_bt_info = {sizeof(BLUETOOTH_RADIO_INFO), 0,};
+
+        // Then get the radio device info....
+        DWORD mbtinfo_ret = BluetoothGetRadioInfo(m_radio, &m_bt_info);
+        _CHECK_OR_RAISE_WSA(mbtinfo_ret == ERROR_SUCCESS);
+
+        ba2str(m_bt_info.address.ullLong, buf, _countof(buf));
+        item = PyString_FromString(buf);
+        PyList_Append(toreturn, item);
+        Py_DECREF(item);
+
+        next = BluetoothFindNextRadio(&find_radio, &m_radio);
+    }
+
+    // No more radio, close the radio handle
+    _CHECK_OR_RAISE_WSA(BluetoothFindRadioClose(m_bt) == TRUE);
+
+    return toreturn;
+}
+PyDoc_STRVAR(msbt_list_local_doc,
+    "msbt_list_local - List local BT adapters addresses");
+
+
 static PyObject *
 msbt_lookup_name(PyObject *self, PyObject *args)
 {
@@ -729,6 +772,8 @@ msbt_set_service_raw(PyObject *self, PyObject *args)
 }
 PyDoc_STRVAR(msbt_set_service_raw_doc, "");
 
+
+
 static PyObject *
 msbt_set_service(PyObject *self, PyObject *args)
 {
@@ -929,6 +974,8 @@ static PyMethodDef msbt_methods[] = {
     { "dup", (PyCFunction)msbt_dup, METH_VARARGS, msbt_dup_doc },
     { "discover_devices", (PyCFunction)msbt_discover_devices,
             METH_VARARGS | METH_KEYWORDS, msbt_discover_devices_doc },
+    { "list_local", (PyCFunction)msbt_list_local,
+            METH_NOARGS, msbt_list_local_doc },
     { "lookup_name", (PyCFunction)msbt_lookup_name, METH_VARARGS, msbt_lookup_name_doc },
     { "find_service", (PyCFunction)msbt_find_service, METH_VARARGS, msbt_find_service_doc },
     { "set_service", (PyCFunction)msbt_set_service, METH_VARARGS, msbt_set_service_doc },
