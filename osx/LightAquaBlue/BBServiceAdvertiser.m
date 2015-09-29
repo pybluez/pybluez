@@ -120,17 +120,24 @@ static NSDictionary *fileTransferProfileDict;
 	
 	NSMutableDictionary *sdpEntries = [NSMutableDictionary dictionaryWithDictionary:dict];
 
-    NSData *uuidBytes = [uuid dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *uuidLength = [uuid length];
-    IOBluetoothSDPUUID *bt_uuid = [IOBluetoothSDPUUID uuidWithBytes:uuidBytes length:uuidLength];
+
+	NSUUID * uuid_ = [[NSUUID alloc] initWithUUIDString:uuid];
+	uuid_t uuidbuf;
+	[uuid_ getUUIDBytes:uuidbuf];
+	IOBluetoothSDPUUID * uuidBlutooth = [IOBluetoothSDPUUID uuidWithBytes:uuidbuf length:16];
+//    NSLog(@"%tu", uuid.length);
+//    NSLog(@"string %@", uuid);
+//    NSLog(@"uuid %@", uuid_);
+//    NSLog(@"bt_uuid %@", uuidBlutooth);
 	[BBServiceAdvertiser updateServiceDictionary:sdpEntries
 										withName:serviceName
-										withUUID:bt_uuid];
+										withUUID:uuidBlutooth];
 	
 	// publish the service
 	IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	IOReturn status = IOBluetoothAddServiceDict((CFDictionaryRef) sdpEntries, &serviceRecordRef);
-	
+	[uuid_ autorelease];
+
 	if (status == kIOReturnSuccess) {
 		
 		IOBluetoothSDPServiceRecord *serviceRecord =

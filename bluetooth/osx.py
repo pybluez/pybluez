@@ -81,7 +81,7 @@ def advertise_service(sock, name, service_id="", service_classes=None,
     if protocols is None or protocols == RFCOMM:
         protocols = [lightblue.RFCOMM]
 
-    lightblue.advertise(name, sock, protocols[0], service_id.remove("-"))
+    lightblue.advertise(name, sock, protocols[0], service_id)
 
 
 def stop_advertising(sock):
