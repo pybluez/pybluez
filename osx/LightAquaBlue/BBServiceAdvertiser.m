@@ -125,10 +125,6 @@ static NSDictionary *fileTransferProfileDict;
 	uuid_t uuidbuf;
 	[uuid_ getUUIDBytes:uuidbuf];
 	IOBluetoothSDPUUID * uuidBlutooth = [IOBluetoothSDPUUID uuidWithBytes:uuidbuf length:16];
-//    NSLog(@"%tu", uuid.length);
-//    NSLog(@"string %@", uuid);
-//    NSLog(@"uuid %@", uuid_);
-//    NSLog(@"bt_uuid %@", uuidBlutooth);
 	[BBServiceAdvertiser updateServiceDictionary:sdpEntries
 										withName:serviceName
 										withUUID:uuidBlutooth];
