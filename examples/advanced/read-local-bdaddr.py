@@ -8,7 +8,9 @@ else:
     get_byte = chr
 
 
-def read_local_bdaddr(hci_sock):
+def read_local_bdaddr():
+    import bluetooth._bluetooth as _bt
+    hci_sock = _bt.hci_open_dev(0)
     old_filter = hci_sock.getsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, 14)
     flt = _bt.hci_filter_new()
     opcode = _bt.cmd_opcode_pack(_bt.OGF_INFO_PARAM, 
@@ -33,16 +35,11 @@ def read_local_bdaddr(hci_sock):
     hci_sock.setsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, old_filter )
     return bdaddr
 
-if __name__ == "__main__":
-    if sys.platform.startswith("darwin"):
-        # On OSX, lightblue uses the LightAquaBlue framework to access
-        # information about the local bluetooth device.
-        import bluetooth
-        bdaddr = bluetooth.read_local_bdaddr()
-    else:
-        import bluetooth._bluetooth as _bt
-        dev_id = 0
-        hci_sock = _bt.hci_open_dev(dev_id)
-        bdaddr = read_local_bdaddr(hci_sock)
 
+if __name__ == "__main__":
+    try:
+        import bluetooth
+        bdaddr = bluetooth.read_local_bdaddr()        
+    except:
+        bdaddr = read_local_bdaddr()
     print(bdaddr)
