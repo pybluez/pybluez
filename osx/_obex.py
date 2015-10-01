@@ -341,7 +341,7 @@ class _BBOBEXClientDelegate(NSObject):
         self = super(_BBOBEXClientDelegate, self).init()
         self._cb_requestdone = cb_requestdone
         return self
-    initWithCallback_ = objc.selector(initWithCallback_, signature="@@:@")
+    initWithCallback_ = objc.selector(initWithCallback_, signature=b"@@:@")
 
     def __del__(self):
         super(_BBOBEXClientDelegate, self).dealloc()
@@ -358,7 +358,7 @@ class _BBOBEXClientDelegate(NSObject):
             response):
         self._cb_requestdone(error, response)
     client_didFinishConnectRequestWithError_response_ = objc.selector(
-        client_didFinishConnectRequestWithError_response_, signature="v@:@i@")
+        client_didFinishConnectRequestWithError_response_, signature=b"v@:@i@")
             
     # - (void)client:(BBBluetoothOBEXClient *)client 
     #    didFinishDisconnectRequestWithError:(OBEXError)error 
@@ -367,7 +367,7 @@ class _BBOBEXClientDelegate(NSObject):
             error, response):
         self._cb_requestdone(error, response)
     client_didFinishDisconnectRequestWithError_response_ = objc.selector(
-        client_didFinishDisconnectRequestWithError_response_,signature="v@:@i@")
+        client_didFinishDisconnectRequestWithError_response_,signature=b"v@:@i@")
             
     # - (void)client:(BBBluetoothOBEXClient *)client
     # didFinishPutRequestForStream:(NSInputStream *)inputStream
@@ -377,7 +377,7 @@ class _BBOBEXClientDelegate(NSObject):
             instream, error, response):
         self._cb_requestdone(error, response)
     client_didFinishPutRequestForStream_error_response_ = objc.selector(
-        client_didFinishPutRequestForStream_error_response_,signature="v@:@@i@")
+        client_didFinishPutRequestForStream_error_response_,signature=b"v@:@@i@")
             
     # - (void)client:(BBBluetoothOBEXClient *)client
     # didFinishGetRequestForStream:(NSOutputStream *)outputStream
@@ -387,7 +387,7 @@ class _BBOBEXClientDelegate(NSObject):
             outstream, error, response):
         self._cb_requestdone(error, response)
     client_didFinishGetRequestForStream_error_response_ = objc.selector(
-        client_didFinishGetRequestForStream_error_response_,signature="v@:@@i@")
+        client_didFinishGetRequestForStream_error_response_,signature=b"v@:@@i@")
             
     # - (void)client:(BBBluetoothOBEXClient *)client
     #    didFinishSetPathRequestWithError:(OBEXError)error 
@@ -396,7 +396,7 @@ class _BBOBEXClientDelegate(NSObject):
             response):
         self._cb_requestdone(error, response)
     client_didFinishSetPathRequestWithError_response_ = objc.selector(
-        client_didFinishSetPathRequestWithError_response_, signature="v@:@i@")
+        client_didFinishSetPathRequestWithError_response_, signature=b"v@:@i@")
             
     # client:didAbortRequestWithStream:error:response: not
     # implemented since OBEXClient does not allow abort requests
@@ -470,7 +470,7 @@ class BBOBEXObjectPushServer(NSObject):
                     channel)
         return self
     initWithChannel_fileLikeObject_ = objc.selector(
-        initWithChannel_fileLikeObject_, signature="@@:i@")
+        initWithChannel_fileLikeObject_, signature=b"@@:i@")
         
         
     def run(self):
@@ -508,7 +508,7 @@ class BBOBEXObjectPushServer(NSObject):
     def server_shouldHandleConnectRequest_(self, server, requestheaders):
         return True
     server_shouldHandleConnectRequest_ = objc.selector(   
-        server_shouldHandleConnectRequest_, signature="c@:@@")        
+        server_shouldHandleConnectRequest_, signature=b"c@:@@")        
     
     # - (BOOL)server:(BBBluetoothOBEXServer *)server
     # shouldHandleDisconnectRequest:(BBOBEXHeaderSet *)requestHeaders;    
@@ -517,14 +517,14 @@ class BBOBEXObjectPushServer(NSObject):
         _macutil.interruptwait()
         return True
     server_shouldHandleDisconnectRequest_ = objc.selector(   
-        server_shouldHandleDisconnectRequest_, signature="c@:@@")
+        server_shouldHandleDisconnectRequest_, signature=b"c@:@@")
         
     # - (void)serverDidHandleDisconnectRequest:(BBBluetoothOBEXServer *)server;
     def serverDidHandleDisconnectRequest_(self, server):
         self.__disconnected = True
         _macutil.interruptwait()
     serverDidHandleDisconnectRequest_ = objc.selector(
-        serverDidHandleDisconnectRequest_, signature="v@:@")
+        serverDidHandleDisconnectRequest_, signature=b"v@:@")
         
     # - (NSOutputStream *)server:(BBBluetoothOBEXServer *)server
     # shouldHandlePutRequest:(BBOBEXHeaderSet *)requestHeaders;        
@@ -535,7 +535,7 @@ class BBOBEXObjectPushServer(NSObject):
         outstream.open()
         return outstream
     server_shouldHandlePutRequest_ = objc.selector(   
-        server_shouldHandlePutRequest_, signature="@@:@@")
+        server_shouldHandlePutRequest_, signature=b"@@:@@")
         
     # - (void)server:(BBBluetoothOBEXServer *)server
     # didHandlePutRequestForStream:(NSOutputStream *)outputStream
@@ -549,7 +549,7 @@ class BBOBEXObjectPushServer(NSObject):
         _macutil.interruptwait()
     server_didHandlePutRequestForStream_requestWasAborted_ = objc.selector(
         server_didHandlePutRequestForStream_requestWasAborted_, 
-        signature="v@:@@c")        
+        signature=b"v@:@@c")        
         
     # - (void)server:(BBBluetoothOBEXServer *)server
     # errorOccurred:(OBEXError)error
@@ -558,7 +558,7 @@ class BBOBEXObjectPushServer(NSObject):
         self.__error = (error, desc)
         _macutil.interruptwait()
     server_errorOccurred_description_ = objc.selector(
-        server_errorOccurred_description_, signature="v@:@i@")        
+        server_errorOccurred_description_, signature=b"v@:@i@")        
 
 
 
