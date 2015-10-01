@@ -310,7 +310,7 @@ class _SDPQueryRunner(Foundation.NSObject):
         self._queryresult = status
         _macutil.interruptwait()
     sdpQueryComplete_status_ = objc.selector(
-        sdpQueryComplete_status_, signature="v@:@i")    # accept object, int
+        sdpQueryComplete_status_, signature=b"v@:@i")    # accept object, int
             
     def _errmsg(self, device):
         return "Error getting services for %s" % device.getNameOrAddress()
@@ -445,14 +445,14 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
         if self.cb_founddevice:
             self.cb_founddevice(device)
     deviceInquiryDeviceFound_device_ = objc.selector(
-        deviceInquiryDeviceFound_device_, signature="v@:@@")
+        deviceInquiryDeviceFound_device_, signature=b"v@:@@")
     
     # - (void)deviceInquiryComplete:error:aborted;
     def deviceInquiryComplete_error_aborted_(self, inquiry, err, aborted):
         if self.cb_completed:
             self.cb_completed(err, aborted)
     deviceInquiryComplete_error_aborted_ = objc.selector(
-        deviceInquiryComplete_error_aborted_, signature="v@:@iZ")
+        deviceInquiryComplete_error_aborted_, signature=b"v@:@iZ")
              
     # - (void)deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender;             
     def deviceInquiryStarted_(self, inquiry):
