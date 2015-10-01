@@ -39,7 +39,7 @@ from . import _lightbluecommon
 from . import _macutil
 from ._LightAquaBlue import BBServiceAdvertiser, BBBluetoothChannelDelegate
 
-import sets     # python 2.3
+#import sets     # python 2.3
 
 try:
     SHUT_RD, SHUT_WR, SHUT_RDWR = \
@@ -231,8 +231,8 @@ class _SocketWrapper(object):
 # internal _sock object for RFCOMM and L2CAP sockets
 class _BluetoothSocket(object):
 
-    _boundports = { _lightbluecommon.L2CAP: sets.Set(),
-                    _lightbluecommon.RFCOMM: sets.Set() }
+    _boundports = { _lightbluecommon.L2CAP: set(),
+                    _lightbluecommon.RFCOMM: set() }
 
     # conn is the associated _RFCOMMConnection or _L2CAPConnection
     def __init__(self, conn):    
@@ -813,7 +813,7 @@ class _ChannelEventListener(Foundation.NSObject):
         self.__channelDelegate = \
                 BBBluetoothChannelDelegate.alloc().initWithDelegate_(self)
         return self
-    initWithDelegate_ = objc.selector(initWithDelegate_, signature="@@:@")
+    initWithDelegate_ = objc.selector(initWithDelegate_, signature=b"@@:@")
         
     def delegate(self):
         return self.__channelDelegate
@@ -834,21 +834,21 @@ class _ChannelEventListener(Foundation.NSObject):
         if hasattr(self.__cb_obj, '_handle_channelclosed'):
             self.__cb_obj._handle_channelclosed(channel)        
     channelClosedEvent_channel_ = objc.selector(
-            channelClosedEvent_channel_, signature="v@:@@")            
+            channelClosedEvent_channel_, signature=b"v@:@@")
     
     # implement method from BBBluetoothChannelDelegateObserver protocol:
     # - (void)channelData:(id)channel data:(NSData *)data;
     def channelData_data_(self, channel, data):
         if hasattr(self.__cb_obj, '_handle_channeldata'):
             self.__cb_obj._handle_channeldata(channel, data[:])
-    channelData_data_ = objc.selector(channelData_data_, signature="v@:@@")
+    channelData_data_ = objc.selector(channelData_data_, signature=b"v@:@@")
 
     # implement method from BBBluetoothChannelDelegateObserver protocol:        
     # - (void)channelClosed:(id)channel;
     def channelClosed_(self, channel):
         if hasattr(self.__cb_obj, '_handle_channelclosed'):
             self.__cb_obj._handle_channelclosed(channel)
-    channelClosed_ = objc.selector(channelClosed_, signature="v@:@")            
+    channelClosed_ = objc.selector(channelClosed_, signature=b"v@:@")            
     
     
 class _ChannelServerEventListener(Foundation.NSObject):
@@ -887,7 +887,7 @@ class _ChannelServerEventListener(Foundation.NSObject):
         self.__usernotif = usernotif
         return self
     initWithDelegate_port_protocol_ = objc.selector(
-        initWithDelegate_port_protocol_, signature="@@:@ii")
+        initWithDelegate_port_protocol_, signature=b"@@:@ii")
 
     def close(self):
         if self.__usernotif is not None:
@@ -906,7 +906,7 @@ class _ChannelServerEventListener(Foundation.NSObject):
                 self.__cb_obj._handle_channelopened(newChannel)
     # makes this method receive notif and channel as objects                
     newChannelOpened_channel_ = objc.selector(
-            newChannelOpened_channel_, signature="v@:@@")
+            newChannelOpened_channel_, signature=b"v@:@@")
 
 
 # -----------------------------------------------------------

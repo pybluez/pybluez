@@ -181,7 +181,7 @@ class BBCocoaSleeper(NSObject):
     def timedOut_(self, timer):
         self.timedout = True                
         interruptwait()
-    timedOut_ = objc.selector(timedOut_, signature="v@:@")        
+    timedOut_ = objc.selector(timedOut_, signature=b"v@:@")        
     
 def waitfor(timeout):
     sleeper = BBCocoaSleeper.alloc().init()
@@ -202,7 +202,7 @@ class BBFileLikeObjectReader(NSObject):
         self.__fileobj = fileobj
         return self
     initWithFileLikeObject_ = objc.selector(initWithFileLikeObject_, 
-        signature="@@:@")
+        signature=b"@@:@")
         
     def readDataWithMaxLength_(self, maxlength):
         try:
@@ -211,7 +211,7 @@ class BBFileLikeObjectReader(NSObject):
             return None
         return buffer(data)
     readDataWithMaxLength_ = objc.selector(readDataWithMaxLength_,
-            signature="@@:I")    #"@12@0:4I8"    #"@:I"
+            signature=b"@@:I")    #"@12@0:4I8"    #"@:I"
     
 
 class BBFileLikeObjectWriter(NSObject):
@@ -228,7 +228,7 @@ class BBFileLikeObjectWriter(NSObject):
         self.__fileobj = fileobj
         return self
     initWithFileLikeObject_ = objc.selector(initWithFileLikeObject_, 
-        signature="@@:@")        
+        signature=b"@@:@")
         
     def write_(self, data):
         try:
@@ -236,5 +236,5 @@ class BBFileLikeObjectWriter(NSObject):
         except Exception:
             return -1
         return data.length()
-    write_ = objc.selector(write_, signature="i12@0:4@8")    #i12@0:4@8  #i@:@
+    write_ = objc.selector(write_, signature=b"i12@0:4@8")    #i12@0:4@8  #i@:@
 
