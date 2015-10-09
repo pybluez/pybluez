@@ -46,12 +46,12 @@ static SEL channelClosedSelector;
     return self;
 }
 
-- (void)rfcommChannelData:(IOBluetoothRFCOMMChannel *)rfcommChannel 
-                     data:(void *)dataPointer 
+- (void)rfcommChannelData:(IOBluetoothRFCOMMChannel *)rfcommChannel
+                     data:(void *)dataPointer
                    length:(size_t)dataLength
 {
     if (m_delegate && [m_delegate respondsToSelector:channelDataSelector]) {
-        [m_delegate channelData:rfcommChannel 
+        [m_delegate channelData:rfcommChannel
                            data:[NSData dataWithBytes:dataPointer length:dataLength]];
     }
 }
@@ -60,24 +60,24 @@ static SEL channelClosedSelector;
 {
     if (m_delegate && [m_delegate respondsToSelector:channelClosedSelector]) {
         [m_delegate channelClosed:rfcommChannel];
-    }        
+    }
 }
 
-- (void)l2capChannelData:(IOBluetoothL2CAPChannel *)l2capChannel 
-                    data:(void *)dataPointer 
+- (void)l2capChannelData:(IOBluetoothL2CAPChannel *)l2capChannel
+                    data:(void *)dataPointer
                   length:(size_t)dataLength
 {
     if (m_delegate && [m_delegate respondsToSelector:channelDataSelector]) {
-        [m_delegate channelData:l2capChannel 
+        [m_delegate channelData:l2capChannel
                            data:[NSData dataWithBytes:dataPointer length:dataLength]];
-    }    
+    }
 }
 
 - (void)l2capChannelClosed:(IOBluetoothL2CAPChannel *)l2capChannel
 {
     if (m_delegate && [m_delegate respondsToSelector:channelClosedSelector]) {
         [m_delegate channelClosed:l2capChannel];
-    }            
+    }
 }
 
 + (IOReturn)synchronouslyWriteData:(NSData *)data
@@ -85,7 +85,7 @@ static SEL channelClosedSelector;
 {
     return [channel writeSync:(void *)[data bytes] length:[data length]];
 }
-                   
+
 + (IOReturn)synchronouslyWriteData:(NSData *)data
                     toL2CAPChannel:(IOBluetoothL2CAPChannel *)channel
 {

@@ -21,7 +21,7 @@
 //  BBOBEXResponse.h
 //  LightAquaBlue
 //
-//  Contains the details for an OBEX server response. 
+//  Contains the details for an OBEX server response.
 //
 //  This is used by BBBluetoothOBEXClient to pass the details of an OBEX
 //  server response to its delegate.
@@ -47,14 +47,14 @@
  *
  * Use the response codes listed in the OBEXOpCodeResponseValues enum in
  * <IOBluetooth/OBEX.h> to match against this response code. If the client
- * request was accepted by the OBEX server, this response code will be 
+ * request was accepted by the OBEX server, this response code will be
  * kOBEXResponseCodeSuccessWithFinalBit. Otherwise, it will be set to one of
  * the other response codes that end with "WithFinalBit".
  */
 - (int)responseCode;
 
 /*
- * Returns a string description of the response code. E.g. 
+ * Returns a string description of the response code. E.g.
  * kOBEXResponseCodeSuccessWithFinalBit translates to "Success".
  */
 - (NSString *)responseCodeDescription;

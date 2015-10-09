@@ -32,19 +32,19 @@
 }
 
 /*
- * Returns a ready-made dictionary for advertising a service with the Serial 
+ * Returns a ready-made dictionary for advertising a service with the Serial
  * Port Profile.
- */ 
+ */
 + (NSDictionary *)serialPortProfileDictionary;
 
 /*
- * Returns a ready-made dictionary for advertising a service with the OBEX 
+ * Returns a ready-made dictionary for advertising a service with the OBEX
  * Object Push Profile.
  */
 + (NSDictionary *)objectPushProfileDictionary;
 
 /*
- * Returns a ready-made dictionary for advertising a service with the OBEX 
+ * Returns a ready-made dictionary for advertising a service with the OBEX
  * File Transfer Profile.
  */
 + (NSDictionary *)fileTransferProfileDictionary;
@@ -56,11 +56,11 @@
  *	- dict: the dictionary containing the service details.
  *	- serviceName: the service name to advertise, which will be added to the
  *	  dictionary. Can be nil.
- *	- uuid: the custom UUID to advertise for the service, which will be added to 
+ *	- uuid: the custom UUID to advertise for the service, which will be added to
  *	  the dictionary. Can be nil.
  *	- outChannelID: once the service is advertised, this will be set to the
  *	  RFCOMM channel ID that was used to advertise the service.
- *	- outServiceRecordHandle: once the service is advertised, this will be set 
+ *	- outServiceRecordHandle: once the service is advertised, this will be set
  *    to the service record handle which identifies the service.
  */
 + (IOReturn)addRFCOMMServiceDictionary:(NSDictionary *)dict

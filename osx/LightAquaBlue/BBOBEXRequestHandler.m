@@ -41,7 +41,7 @@ static BOOL _debug = NO;
     _debug = debug;
 }
 
-- (id)initWithServer:(BBBluetoothOBEXServer *)server 
+- (id)initWithServer:(BBBluetoothOBEXServer *)server
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
 {
@@ -67,7 +67,7 @@ static BOOL _debug = NO;
 {
     if (!mNextResponseHeaders)
         mNextResponseHeaders = [[BBMutableOBEXHeaderSet alloc] init];
-    
+
     [mNextResponseHeaders addHeadersFromHeaderSet:responseHeaders];
 }
 
@@ -85,13 +85,13 @@ static BOOL _debug = NO;
         [mNextResponseHeaders release];
         mNextResponseHeaders = nil;
     }
-    
+
     // read the client request
-    if (_debug) NSLog(@"[BBOBEXRequestHandler] handleRequestEvent read headers");    
-    if (![self readOBEXRequestHeaders:&requestHeaders 
-                      andRequestFlags:&requestFlags 
+    if (_debug) NSLog(@"[BBOBEXRequestHandler] handleRequestEvent read headers");
+    if (![self readOBEXRequestHeaders:&requestHeaders
+                      andRequestFlags:&requestFlags
                      fromSessionEvent:event]) {
-        [self errorOccurred:kOBEXInternalError 
+        [self errorOccurred:kOBEXInternalError
                 description:@"Wrong request handler assigned to read request headers!"];
                         // OR we got a new request before the last one finished???
         mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
@@ -99,37 +99,37 @@ static BOOL _debug = NO;
         [self notifyRequestFinished];
         return YES;
     }
-    
+
     if (!requestHeaders) {
-        [self errorOccurred:kOBEXInternalError 
+        [self errorOccurred:kOBEXInternalError
                 description:@"Can't read request headers!"];
         mNextResponseCode = kOBEXResponseCodeBadRequestWithFinalBit;
         [self sendNextResponsePacket];
         [self notifyRequestFinished];
-        return YES;    
+        return YES;
     }
-    
+
     // get the response for this request
     if (_debug) NSLog(@"[BBOBEXRequestHandler] handleRequestEvent getting response");
     [self prepareResponseForRequestWithHeaders:requestHeaders
                                          flags:requestFlags
                           isFinalRequestPacket:event->isEndOfEventData];
-    
+
     // send the response
     if (_debug) NSLog(@"[BBOBEXRequestHandler] handleRequestEvent sending response 0x%x", mNextResponseCode);
     OBEXError status = [self sendNextResponsePacket];
-    
-    if (status != kOBEXSuccess) {       
-        [self errorOccurred:status 
+
+    if (status != kOBEXSuccess) {
+        [self errorOccurred:status
                 description:@"Error sending server response"];
         return YES;
     }
-    
+
     if (mNextResponseCode != kOBEXResponseCodeContinueWithFinalBit) {
         [self notifyRequestFinished];
         return YES;
     }
-    
+
     return NO;
 }
 
@@ -139,7 +139,7 @@ static BOOL _debug = NO;
         [[mServer delegate] server:mServer
                      errorOccurred:error
                        description:description];
-    }    
+    }
 }
 
 /*** methods below are to be overriden ***/
@@ -161,10 +161,10 @@ static BOOL _debug = NO;
 - (void)handleRequestAborted
 {
     [mSession OBEXAbortResponse:kOBEXResponseCodeSuccessWithFinalBit
-                optionalHeaders:NULL 
+                optionalHeaders:NULL
           optionalHeadersLength:0
                   eventSelector:mServerEventSelector
-                 selectorTarget:mServer 
+                 selectorTarget:mServer
                          refCon:NULL];
 }
 
@@ -199,14 +199,14 @@ static BOOL _debug = NO;
     const OBEXConnectCommandData *request = &event->u.connectCommandData;
     *flags = request->flags;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:request->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:request->headerDataPtr
                                     length:request->headerDataLength]) {
         *requestHeaders = headers;
     }
-    
+
     // note the request max packet size
     mMaxPacketLength = request->maxPacketSize;
-    
+
     return YES;
 }
 
@@ -220,41 +220,41 @@ static BOOL _debug = NO;
         mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;
         return;
     }
-    
+
     // ask delegate to accept/deny request and set the response code & headers
     mNextResponseCode = -1;
     BOOL accept = [[mServer delegate] server:mServer
                   shouldHandleConnectRequest:requestHeaders];
     if (mNextResponseCode == -1) {
-        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit : 
+        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit :
                 kOBEXResponseCodeForbiddenWithFinalBit);
     }
 }
 
 
 - (OBEXError)sendNextResponsePacket
-{ 
+{
     if (_debug) NSLog(@"[BBOBEXConnectRequestHandler] sendNextResponsePacket");
-    
+
     CFMutableDataRef bytes = NULL;
     if (mNextResponseHeaders) {
         bytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
         if (!bytes && [mNextResponseHeaders count] > 0)
             return kOBEXInternalError;
     }
-    
-    OBEXError status = 
+
+    OBEXError status =
         [mSession OBEXConnectResponse:mNextResponseCode
                                 flags:0
                       maxPacketLength:mMaxPacketLength
                       optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
                 optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
                         eventSelector:mServerEventSelector
-                       selectorTarget:mServer 
+                       selectorTarget:mServer
                                refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;
-    return status;    
+    return status;
 }
 
 - (void)notifyRequestFinished
@@ -288,7 +288,7 @@ static BOOL _debug = NO;
         return NO;
     const OBEXDisconnectCommandData *request = &event->u.disconnectCommandData;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:request->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:request->headerDataPtr
                                     length:request->headerDataLength]) {
         *requestHeaders = headers;
     }
@@ -305,13 +305,13 @@ static BOOL _debug = NO;
         mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;
         return;
     }
-    
+
     // ask delegate to accept/deny request and set the response code & headers
     mNextResponseCode = -1;
     BOOL accept = [[mServer delegate] server:mServer
                shouldHandleDisconnectRequest:requestHeaders];
     if (mNextResponseCode == -1) {
-        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit : 
+        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit :
                              kOBEXResponseCodeForbiddenWithFinalBit);
     }
 }
@@ -319,20 +319,20 @@ static BOOL _debug = NO;
 - (OBEXError)sendNextResponsePacket
 {
     if (_debug) NSLog(@"[BBOBEXDisconnectRequestHandler] sendNextResponsePacket");
-    
+
     CFMutableDataRef bytes = NULL;
     if (mNextResponseHeaders) {
         bytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
         if (!bytes && [mNextResponseHeaders count] > 0)
             return kOBEXInternalError;
     }
-    
-    OBEXError status = 
+
+    OBEXError status =
         [mSession OBEXDisconnectResponse:mNextResponseCode
                          optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
                    optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
                            eventSelector:mServerEventSelector
-                          selectorTarget:mServer 
+                          selectorTarget:mServer
                                   refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;
@@ -358,7 +358,7 @@ static BOOL _debug = NO;
 
 @implementation BBOBEXPutRequestHandler
 
-- (id)initWithServer:(BBBluetoothOBEXServer *)server 
+- (id)initWithServer:(BBBluetoothOBEXServer *)server
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
 {
@@ -377,33 +377,33 @@ static BOOL _debug = NO;
     if (event->type != kOBEXSessionEventTypePutCommandReceived)
         return NO;
     const OBEXPutCommandData *request = &event->u.putCommandData;
-    
+
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:request->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:request->headerDataPtr
                                     length:request->headerDataLength]) {
         *requestHeaders = headers;
     }
-    
+
     return YES;
 }
 
 - (void)preparePutResponseForRequestWithHeaders:(BBMutableOBEXHeaderSet *)requestHeaders
                            isFinalRequestPacket:(BOOL)isFinalRequestPacket
 {
-    if (_debug) NSLog(@"[BBOBEXPutRequestHandler] preparePutResponseForRequestWithHeaders");    
-    
+    if (_debug) NSLog(@"[BBOBEXPutRequestHandler] preparePutResponseForRequestWithHeaders");
+
     // don't pass body & end of body headers onto delegate
     NSData *bodyData = [requestHeaders valueForByteSequenceHeader:kOBEXHeaderIDBody];
     NSData *endOfBodyData = [requestHeaders valueForByteSequenceHeader:kOBEXHeaderIDEndOfBody];
     [requestHeaders removeValueForHeader:kOBEXHeaderIDBody];
     [requestHeaders removeValueForHeader:kOBEXHeaderIDEndOfBody];
-    
+
     if (!mOutputStream) {
         if (![[mServer delegate] respondsToSelector:@selector(server:shouldHandlePutRequest:)]) {
             mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;
             return;
         }
-        
+
         // ask delegate to accept/deny request and set the response code & headers
         BBOBEXHeaderSet *allRequestHeaders;
         if (mPreviousRequestHeaders) {
@@ -417,40 +417,40 @@ static BOOL _debug = NO;
                                            shouldHandlePutRequest:allRequestHeaders];
         [mPreviousRequestHeaders release];
         mPreviousRequestHeaders = nil;
-        
+
         // see if delegate accepted request
         BOOL accept = (outputStream != nil);
         if (mNextResponseCode == -1) {
             if (accept) {
-                mNextResponseCode = (isFinalRequestPacket ? 
+                mNextResponseCode = (isFinalRequestPacket ?
                      kOBEXResponseCodeSuccessWithFinalBit : kOBEXResponseCodeContinueWithFinalBit);
             } else {
                 mNextResponseCode = kOBEXResponseCodeForbiddenWithFinalBit;
             }
         }
-        
+
         // delegate refused request?
         if (mNextResponseCode != kOBEXResponseCodeContinueWithFinalBit
                 && mNextResponseCode != kOBEXResponseCodeSuccessWithFinalBit) {
             outputStream = nil;
             return;
         }
-        
+
         if (!outputStream) {
-            [self errorOccurred:kOBEXInternalError 
+            [self errorOccurred:kOBEXInternalError
                     description:@"Put request error: delegate accepted request but returned nil NSOutputStream"];
             mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
             return;
         }
         if ([outputStream streamStatus] != NSStreamStatusOpen) {
-            [self errorOccurred:kOBEXInternalError 
+            [self errorOccurred:kOBEXInternalError
                     description:@"Put request error: output stream specified by delegate must be opened"];
             mNextResponseCode =  kOBEXResponseCodeInternalServerErrorWithFinalBit;
             return;
-        }        
+        }
         mOutputStream = [outputStream retain];
     }
-    
+
     int dataLength = 0;
     if (bodyData) {
         if ([mOutputStream write:[bodyData bytes] maxLength:[bodyData length]] < 0)
@@ -458,21 +458,21 @@ static BOOL _debug = NO;
         else
             dataLength += [bodyData length];
     }
-    
+
     if (endOfBodyData && dataLength != -1) {
         if ([mOutputStream write:[endOfBodyData bytes] maxLength:[endOfBodyData length]] < 0)
             dataLength = -1;
         else
             dataLength += [endOfBodyData length];
-    }    
-    
+    }
+
     if (dataLength < 0) {
-        [self errorOccurred:kOBEXGeneralError 
-                description:@"Put request error: can't write body data to output stream"];        
+        [self errorOccurred:kOBEXGeneralError
+                description:@"Put request error: can't write body data to output stream"];
         mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
         return;
     }
-    
+
     // will notify delegate even if data length is zero
     if ([[mServer delegate] respondsToSelector:@selector(server:didReceiveDataOfLength:isLastPacket:)]) {
         [[mServer delegate] server:mServer
@@ -482,8 +482,8 @@ static BOOL _debug = NO;
 
     if (mNextResponseCode == -1 || mNextResponseCode == kOBEXResponseCodeContinueWithFinalBit ||
                 mNextResponseCode == kOBEXResponseCodeSuccessWithFinalBit) {
-        mNextResponseCode = (isFinalRequestPacket ? 
-             kOBEXResponseCodeSuccessWithFinalBit : kOBEXResponseCodeContinueWithFinalBit);        
+        mNextResponseCode = (isFinalRequestPacket ?
+             kOBEXResponseCodeSuccessWithFinalBit : kOBEXResponseCodeContinueWithFinalBit);
     }
 }
 
@@ -493,8 +493,8 @@ static BOOL _debug = NO;
     if (![[mServer delegate] respondsToSelector:@selector(server:shouldHandlePutDeleteRequest:)]) {
         mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;
         return;
-    }    
-    
+    }
+
     // ask delegate to accept/deny request and set the response code & headers
     BBOBEXHeaderSet *allRequestHeaders;
     if (mPreviousRequestHeaders) {
@@ -503,16 +503,16 @@ static BOOL _debug = NO;
     } else {
         allRequestHeaders = requestHeaders;
     }
-    
+
     BOOL accept = [[mServer delegate] server:mServer
                 shouldHandlePutDeleteRequest:allRequestHeaders];
-    
+
     [mPreviousRequestHeaders release];
     mPreviousRequestHeaders = nil;
-    
+
     if (mNextResponseCode == -1 || mNextResponseCode == kOBEXResponseCodeContinueWithFinalBit ||
                 mNextResponseCode == kOBEXResponseCodeSuccessWithFinalBit) {
-        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit : 
+        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit :
                              kOBEXResponseCodeForbiddenWithFinalBit);
     }
 }
@@ -520,15 +520,15 @@ static BOOL _debug = NO;
 - (void)prepareResponseForRequestWithHeaders:(BBMutableOBEXHeaderSet *)requestHeaders
                                        flags:(OBEXFlags)flags
                         isFinalRequestPacket:(BOOL)isFinalRequestPacket
-{    
+{
     if (_debug) NSLog(@"[BBOBEXPutRequestHandler] prepareResponseForRequestWithHeaders");
-    
+
     BOOL hasBodyData = ( requestHeaders &&
                         ([requestHeaders containsValueForHeader:kOBEXHeaderIDBody] ||
                         [requestHeaders containsValueForHeader:kOBEXHeaderIDEndOfBody]) );
     if (hasBodyData)
         mDefinitelyIsPut = YES;
-    
+
     if (mDefinitelyIsPut) {
         [self preparePutResponseForRequestWithHeaders:requestHeaders
                                  isFinalRequestPacket:isFinalRequestPacket];
@@ -538,7 +538,7 @@ static BOOL _debug = NO;
         } else {
             if (_debug) NSLog(@"[BBOBEXPutRequestHandler] don't know if it's a Put or Put-Delete, so just continue");
             mNextResponseCode = kOBEXResponseCodeContinueWithFinalBit;
-            
+
             // keep request headers so they can be passed to delegate later
             if (!mPreviousRequestHeaders)
                 mPreviousRequestHeaders = [[BBMutableOBEXHeaderSet alloc] init];
@@ -550,20 +550,20 @@ static BOOL _debug = NO;
 - (OBEXError)sendNextResponsePacket
 {
     if (_debug) NSLog(@"[BBOBEXPutRequestHandler] sendNextResponsePacket");
-    
+
     CFMutableDataRef bytes = NULL;
     if (mNextResponseHeaders) {
         bytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
         if (!bytes && [mNextResponseHeaders count] > 0)
             return kOBEXInternalError;
-    }  
-    
-    OBEXError status = 
+    }
+
+    OBEXError status =
         [mSession OBEXPutResponse:mNextResponseCode
                   optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
             optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
-                    eventSelector:mServerEventSelector 
-                   selectorTarget:mServer 
+                    eventSelector:mServerEventSelector
+                   selectorTarget:mServer
                            refCon:NULL];
     if (bytes) {
         if (mHeadersDataRef)
@@ -579,7 +579,7 @@ static BOOL _debug = NO;
 
     mAborted = YES;
     mDefinitelyIsPut = YES; // can't abort Delete ops, so this must be a Put
-    
+
     [super handleRequestAborted];
     [self notifyRequestFinished];
 }
@@ -599,7 +599,7 @@ static BOOL _debug = NO;
             [[mServer delegate] serverDidHandlePutDeleteRequest:mServer];
         }
     }
-    
+
     [mOutputStream release];
     mOutputStream = nil;
     mDefinitelyIsPut = NO;
@@ -621,7 +621,7 @@ static BOOL _debug = NO;
 
 @implementation BBOBEXGetRequestHandler
 
-- (id)initWithServer:(BBBluetoothOBEXServer *)server 
+- (id)initWithServer:(BBBluetoothOBEXServer *)server
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
 {
@@ -640,7 +640,7 @@ static BOOL _debug = NO;
         return NO;
     const OBEXGetCommandData *request = &event->u.getCommandData;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:request->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:request->headerDataPtr
                                     length:request->headerDataLength]) {
         *requestHeaders = headers;
     }
@@ -649,29 +649,29 @@ static BOOL _debug = NO;
 
 - (NSMutableData *)readNextChunkForHeaderLength:(size_t)headersLength
                                     isLastChunk:(BOOL *)outIsLastChunk
-{ 
+{
     if (_debug) NSLog(@"[BBOBEXGetRequestHandler] readNextChunkForHeaderLength");
 
     if (mInputStream == nil)
         return nil;
-    
-    OBEXMaxPacketLength	maxPacketSize = 
+
+    OBEXMaxPacketLength	maxPacketSize =
         [mSession getAvailableCommandPayloadLength:kOBEXOpCodePut];
     if (maxPacketSize == 0 || headersLength > maxPacketSize)
         return nil;
-    
+
 	OBEXMaxPacketLength maxBodySize = maxPacketSize - headersLength;
-    
+
     NSMutableData *data = [NSMutableData dataWithLength:maxBodySize];
     int len = [mInputStream read:[data mutableBytes]
                        maxLength:maxBodySize];
-    
+
     if (_debug) NSLog(@"[BBOBEXGetRequestHandler] read %d bytes (maxBodySize = %d)", len, maxBodySize);
-    
+
     // is last packet if there wasn't enough body data to fill up the packet
     if (len >= 0)
         *outIsLastChunk = (len < maxBodySize);
-    
+
     [data setLength:len];
     return data;
 }
@@ -687,14 +687,14 @@ static BOOL _debug = NO;
             mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;
             return;
         }
-        
+
         // ask delegate to accept/deny request and set the response code & headers
         mNextResponseCode = -1;
         NSInputStream *inputStream = [[mServer delegate] server:mServer
                                          shouldHandleGetRequest:requestHeaders];
         BOOL accept = (inputStream != nil);
         if (mNextResponseCode == -1) {
-            mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit : 
+            mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit :
                     kOBEXResponseCodeForbiddenWithFinalBit);
         }
 
@@ -704,54 +704,54 @@ static BOOL _debug = NO;
             inputStream = nil;
             return;
         }
-        
+
         if (!inputStream) {
-            [self errorOccurred:kOBEXInternalError 
+            [self errorOccurred:kOBEXInternalError
                     description:@"Get request error: delegate accepted request but returned nil NSInputStream"];
             mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
             return;
         }
         if ([inputStream streamStatus] != NSStreamStatusOpen) {
-            [self errorOccurred:kOBEXInternalError 
+            [self errorOccurred:kOBEXInternalError
                     description:@"Get request error: input stream specified by delegate must be opened"];
             mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
             return;
-        }                
+        }
         mInputStream = [inputStream retain];
     }
-    
+
     if (!mNextResponseHeaders)
         mNextResponseHeaders = [[BBMutableOBEXHeaderSet alloc] init];
     CFMutableDataRef tempHeaderBytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
-    int currentHeaderLength = 0; 
+    int currentHeaderLength = 0;
     if (tempHeaderBytes) {
         currentHeaderLength = CFDataGetLength(tempHeaderBytes);
         CFRelease(tempHeaderBytes);
     }
-    
+
     BOOL isLastChunk = YES;
-    
+
     // the GET headers seem to need 3 bytes padding, maybe for the response code
     // plus packet length in the headers.
     NSMutableData *mutableData = [self readNextChunkForHeaderLength:currentHeaderLength + 3
                                                         isLastChunk:&isLastChunk];
-    
+
     if (!mutableData) {
-        [self errorOccurred:kOBEXInternalError 
+        [self errorOccurred:kOBEXInternalError
                 description:@"Get request error: can't read data from input stream"];
         mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
         return;
     }
-    
+
     uint8_t headerID = (isLastChunk ? kOBEXHeaderIDBody : kOBEXHeaderIDEndOfBody);
     [mNextResponseHeaders setValue:mutableData forByteSequenceHeader:headerID];
     if (![mNextResponseHeaders containsValueForHeader:headerID]) {
-        [self errorOccurred:kOBEXInternalError 
-                description:@"Get request error: can't add body data to response headers"];                    
+        [self errorOccurred:kOBEXInternalError
+                description:@"Get request error: can't add body data to response headers"];
         mNextResponseCode = kOBEXResponseCodeInternalServerErrorWithFinalBit;
         return;
     }
-    
+
     [mutableData retain];
     [mSentBodyData release];
     mSentBodyData = mutableData;
@@ -766,7 +766,7 @@ static BOOL _debug = NO;
 }
 
 - (OBEXError)sendNextResponsePacket
-{   
+{
     if (_debug) NSLog(@"[BBOBEXGetRequestHandler] sendNextResponsePacket");
 
     CFMutableDataRef bytes = NULL;
@@ -774,28 +774,28 @@ static BOOL _debug = NO;
         bytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
         if (!bytes && [mNextResponseHeaders count] > 0)
             return kOBEXInternalError;
-    }   
-    
-    OBEXError status = 
-        [mSession OBEXGetResponse:mNextResponseCode 
-                  optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL) 
+    }
+
+    OBEXError status =
+        [mSession OBEXGetResponse:mNextResponseCode
+                  optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
             optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
-                    eventSelector:mServerEventSelector 
-                   selectorTarget:mServer 
+                    eventSelector:mServerEventSelector
+                   selectorTarget:mServer
                            refCon:NULL];
-    
+
     if (bytes) {
-        if (mHeadersDataRef) 
+        if (mHeadersDataRef)
             CFRelease(mHeadersDataRef);
         mHeadersDataRef = bytes;
     }
-    
-    
+
+
     if (mSentBodyData && [[mServer delegate] respondsToSelector:@selector(server:didSendDataOfLength:)]) {
-        [[mServer delegate] server:mServer 
+        [[mServer delegate] server:mServer
                didSendDataOfLength:[mSentBodyData length]];
-    }    
-    
+    }
+
     return status;
 }
 
@@ -804,7 +804,7 @@ static BOOL _debug = NO;
     if (_debug) NSLog(@"[BBOBEXGetRequestHandler] handleRequestAborted");
 
     mAborted = YES;
-    [super handleRequestAborted];    
+    [super handleRequestAborted];
     [self notifyRequestFinished];
 }
 
@@ -815,7 +815,7 @@ static BOOL _debug = NO;
       didHandleGetRequestForStream:mInputStream
                  requestWasAborted:mAborted];
     }
-    
+
     [mInputStream release];
     mInputStream = nil;
     mAborted = NO;
@@ -847,7 +847,7 @@ static BOOL _debug = NO;
     const OBEXSetPathCommandData *request = &event->u.setPathCommandData;
     *flags = request->flags;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:request->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:request->headerDataPtr
                                     length:request->headerDataLength]) {
         *requestHeaders = headers;
     }
@@ -857,45 +857,45 @@ static BOOL _debug = NO;
 - (void)prepareResponseForRequestWithHeaders:(BBMutableOBEXHeaderSet *)requestHeaders
                                        flags:(OBEXFlags)flags
                         isFinalRequestPacket:(BOOL)isFinalRequestPacket
-{   
+{
     if (_debug) NSLog(@"[BBOBEXSetPathRequestHandler] prepareResponseForRequestWithHeaders");
 
-    if (![[mServer delegate] respondsToSelector:@selector(server:shouldHandleSetPathRequest:withFlags:)]) {    
-        mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;    
+    if (![[mServer delegate] respondsToSelector:@selector(server:shouldHandleSetPathRequest:withFlags:)]) {
+        mNextResponseCode = kOBEXResponseCodeNotImplementedWithFinalBit;
         return;
     }
-    
+
     //BOOL changeToParentDirectoryFirst = (flags & 1) != 0;
     //BOOL createDirectoriesIfNeeded = (flags & 2) == 0;
-    
+
     // ask delegate to accept/deny request and set the response code & headers
     mNextResponseCode = -1;
     BOOL accept = [[mServer delegate] server:mServer
                   shouldHandleSetPathRequest:requestHeaders
                                    withFlags:flags];
     if (mNextResponseCode == -1) {
-        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit : 
+        mNextResponseCode = (accept ? kOBEXResponseCodeSuccessWithFinalBit :
                              kOBEXResponseCodeForbiddenWithFinalBit);
     }
 }
 
 - (OBEXError)sendNextResponsePacket
-{    
+{
     if (_debug) NSLog(@"[BBOBEXSetPathRequestHandler] sendNextResponsePacket");
-    
+
     CFMutableDataRef bytes = NULL;
     if (mNextResponseHeaders) {
         bytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
         if (!bytes && [mNextResponseHeaders count] > 0)
             return kOBEXInternalError;
     }
-    
-    OBEXError status = 
-        [mSession OBEXSetPathResponse:mNextResponseCode 
-                      optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL) 
+
+    OBEXError status =
+        [mSession OBEXSetPathResponse:mNextResponseCode
+                      optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
                 optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
-                        eventSelector:mServerEventSelector 
-                       selectorTarget:mServer 
+                        eventSelector:mServerEventSelector
+                       selectorTarget:mServer
                                refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;

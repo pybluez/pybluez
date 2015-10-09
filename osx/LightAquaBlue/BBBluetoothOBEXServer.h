@@ -25,14 +25,14 @@
 //
 //  Generally you will use BBBluetoothOBEXServer like this:
 //    1. Call registerForChannelOpenNotifications:selector:withChannelID:direction:
-//       in the IOBluetoothRFCOMMChannel class in order be notified whenever 
+//       in the IOBluetoothRFCOMMChannel class in order be notified whenever
 //       you receive a client connection on a particular RFCOMM channel ID.
 //    2. When you are notified that a client has connected, use the provided
 //       IOBluetoothRFCOMMChannel to create a a BBBluetoothOBEXServer
 //       object, and then call run: on the object to start the server.
 //
 //  There is an example in examples/LightAquaBlue/SimpleOBEXServer that shows
-//  how to use this class to run a basic OBEX server session.  
+//  how to use this class to run a basic OBEX server session.
 //
 
 #import <Cocoa/Cocoa.h>
@@ -49,11 +49,11 @@
 
 @interface BBBluetoothOBEXServer : NSObject {
     IOBluetoothRFCOMMChannel *mChannel;
-    
+
     OBEXSession *mSession;
     id mDelegate;
     BBOBEXRequestHandler *mCurrentRequestHandler;
-    
+
     IOBluetoothUserNotification *mChannelNotif;
 }
 
@@ -81,13 +81,13 @@
 - (void)close;
 
 /*
- * Sets <responseCode> to be the next response code to be sent for the current 
- * request. 
+ * Sets <responseCode> to be the next response code to be sent for the current
+ * request.
  *
  * Available response codes are listed in the OBEXOpCodeResponseValues enum in
  * <IOBluetooth/OBEX.h>. (Use the codes that end with "WithFinalBit".) For
- * example, you could set the response code to 
- * kOBEXResponseCodeNotFoundWithFinalBit if a client requests a non-existent 
+ * example, you could set the response code to
+ * kOBEXResponseCodeNotFoundWithFinalBit if a client requests a non-existent
  * file.
  */
 - (void)setResponseCodeForCurrentRequest:(int)responseCode;
@@ -96,7 +96,7 @@
  * Adds <responseHeaders> to the next response headers to be sent for the
  * current request.
  *
- * For example, OBEX servers commonly include a "Length" header when 
+ * For example, OBEX servers commonly include a "Length" header when
  * responding to a Get request to indicate the size of the file to be
  * transferred.
  */
@@ -121,13 +121,13 @@
 
 
 /*
- * This informal protocol describes the methods that can be implemented for a 
+ * This informal protocol describes the methods that can be implemented for a
  * BBBluetoothOBEXServer delegate.
  *
  * For each type of client request, there is a "...shouldHandle..." method
- * (e.g. server:shouldHandleConnectRequest:) that is called when the request 
- * is received. If the delegate does not implement this method for a 
- * particular type of request, the server will automatically refuse all 
+ * (e.g. server:shouldHandleConnectRequest:) that is called when the request
+ * is received. If the delegate does not implement this method for a
+ * particular type of request, the server will automatically refuse all
  * requests of this type with a "Not Implemented" response.
  */
 @protocol BBBluetoothOBEXServerDelegate
@@ -175,9 +175,9 @@ shouldHandleDisconnectRequest:(BBOBEXHeaderSet *)requestHeaders;
 /*
  * Called when a Put request is received with the specified <requestHeaders>.
  *
- * This should return an opened NSOutputStream if the request should be allowed 
- * to continue, or nil if the request should be refused. (By default, a request 
- * will be refused with a 'Forbidden' response; call 
+ * This should return an opened NSOutputStream if the request should be allowed
+ * to continue, or nil if the request should be refused. (By default, a request
+ * will be refused with a 'Forbidden' response; call
  * setResponseCodeForCurrentRequest: to set a more specific response.)
  *
  * Note the returned stream *must* be open, or the request will fail.
@@ -196,8 +196,8 @@ didReceiveDataOfLength:(unsigned)length
   isLastPacket:(BOOL)isLastPacket;
 
 /*
- * Called when the server finishes processing of a Put request. The 
- * <outputStream> is the stream originally provided from 
+ * Called when the server finishes processing of a Put request. The
+ * <outputStream> is the stream originally provided from
  * server:shouldHandlePutRequest: and <aborted> is set to YES if the client
  * sent an Abort request to cancel the Put request before it was completed.
  */
@@ -224,9 +224,9 @@ shouldHandlePutDeleteRequest:(BBOBEXHeaderSet *)requestHeaders;
 /*
  * Called when a Get request is received with the specified <requestHeaders>.
  *
- * This should return an opened NSInputStream if the request should be allowed 
- * to continue, or nil if the request should be refused. (By default, a request 
- * will be refused with a 'Forbidden' response; call 
+ * This should return an opened NSInputStream if the request should be allowed
+ * to continue, or nil if the request should be refused. (By default, a request
+ * will be refused with a 'Forbidden' response; call
  * setResponseCodeForCurrentRequest: to set a more specific response.)
  *
  * Note the returned stream *must* be open, or the request will fail.
@@ -242,8 +242,8 @@ shouldHandlePutDeleteRequest:(BBOBEXHeaderSet *)requestHeaders;
 didSendDataOfLength:(unsigned)length;
 
 /*
- * Called when the server finishes processing of a Get request. The 
- * <outputStream> is the stream originally provided from 
+ * Called when the server finishes processing of a Get request. The
+ * <outputStream> is the stream originally provided from
  * server:shouldHandleGetRequest: and <aborted> is set to YES if the client
  * sent an Abort request to cancel the Get request before it was completed.
  */
@@ -255,7 +255,7 @@ didHandleGetRequestForStream:(NSInputStream *)inputStream
  * Called when a SetPath request is received with the specified <requestHeaders>
  * and SetPath <flags>. The first two bits of the flags are significant
  * for the SetPath operation:
- *      - Bit 0 is set if the server should back up one level (i.e. "..") 
+ *      - Bit 0 is set if the server should back up one level (i.e. "..")
  *        before applying the requested path name
  *      - Bit 1 is set if the server should respond with an error instead of
  *        creating a directory if the specified directory does not exist

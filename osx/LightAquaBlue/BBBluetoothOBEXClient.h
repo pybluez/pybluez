@@ -22,7 +22,7 @@
 //  LightAquaBlue
 //
 //  Implements the client side of an OBEX session over a Bluetooth transport.
-//  
+//
 //  There is an example in examples/LightAquaBlue/SimpleOBEXClient that shows
 //  how to use this class to connect to and send files to an OBEX server.
 //
@@ -42,19 +42,19 @@
 @interface BBBluetoothOBEXClient : NSObject {
     OBEXSession* mSession;
     id mDelegate;
-    
+
     OBEXMaxPacketLength	mMaxPacketLength;
     int mLastServerResponse;
     uint32_t mConnectionID;
     BOOL mHasConnectionID;
-    
+
     BOOL mAborting;
-    
+
     BBOBEXRequest *mCurrentRequest;
 }
 
 /*
- * Creates a BBBluetoothOBEXClient with the given <delegate>. The client will 
+ * Creates a BBBluetoothOBEXClient with the given <delegate>. The client will
  * connect to the OBEX server on the given <deviceAddress> and <channelID>.
  */
 - (id)initWithRemoteDeviceAddress:(const BluetoothDeviceAddress *)deviceAddress
@@ -62,21 +62,21 @@
                          delegate:(id)delegate;
 
 /*
- * Sends a Connect request with the given <headers>. 
- * 
- * Returns kOBEXSuccess if the request was sent, or some other OBEXError value 
- * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed 
- * through client:didFinishConnectRequestWithError:responseCode:responseHeaders: 
+ * Sends a Connect request with the given <headers>.
+ *
+ * Returns kOBEXSuccess if the request was sent, or some other OBEXError value
+ * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed
+ * through client:didFinishConnectRequestWithError:responseCode:responseHeaders:
  * when the request is finished.
  */
 - (OBEXError)sendConnectRequestWithHeaders:(BBOBEXHeaderSet *)headers;
 
 /*
- * Sends a Disconnect request with the given <headers>. 
- * 
- * Returns kOBEXSuccess if the request was sent, or some other OBEXError value 
- * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed 
- * through client:didFinishDisconnectRequestWithError:responseCode:responseHeaders: 
+ * Sends a Disconnect request with the given <headers>.
+ *
+ * Returns kOBEXSuccess if the request was sent, or some other OBEXError value
+ * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed
+ * through client:didFinishDisconnectRequestWithError:responseCode:responseHeaders:
  * when the request is finished.
  *
  * You must have already sent a Connect request; otherwise, this fails and
@@ -91,10 +91,10 @@
  * Sends a Put request with the given <headers> that will send the data from
  * the given <inputStream>. (The stream must be already open, or the request
  * will fail!) To send a Put-Delete request, set <inputStream> to nil.
- * 
- * Returns kOBEXSuccess if the request was sent, or some other OBEXError value 
- * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed 
- * through client:didFinishPutRequestForStream:error:responseCode:responseHeaders: 
+ *
+ * Returns kOBEXSuccess if the request was sent, or some other OBEXError value
+ * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed
+ * through client:didFinishPutRequestForStream:error:responseCode:responseHeaders:
  * when the request is finished.
  *
  * You must have already sent a Connect request; otherwise, this fails and
@@ -110,10 +110,10 @@
  * Sends a Get request with the given <headers> that will write received data
  * to the given <outputStream>. (The stream must be already open, or the request
  * will fail!)
- * 
- * Returns kOBEXSuccess if the request was sent, or some other OBEXError value 
- * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed 
- * through client:didFinishGetRequestForStream:error:responseCode:responseHeaders: 
+ *
+ * Returns kOBEXSuccess if the request was sent, or some other OBEXError value
+ * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed
+ * through client:didFinishGetRequestForStream:error:responseCode:responseHeaders:
  * when the request is finished.
  *
  * You must have already sent a Connect request; otherwise, this fails and
@@ -129,12 +129,12 @@
  * Sends a SetPath request with the given <headers>. Set
  * <changeToParentDirectoryFirst> to YES if you want to move up one directory
  * (i.e. "..") before changing to the directory specified in the headers. Set
- * <createDirectoriesIfNeeded> to YES if you want to create a directory 
+ * <createDirectoriesIfNeeded> to YES if you want to create a directory
  * (instead of receiving an error response) if it does not currently exist.
- * 
- * Returns kOBEXSuccess if the request was sent, or some other OBEXError value 
- * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed 
- * through client:didFinishSetPathRequestWithError:responseCode:responseHeaders: 
+ *
+ * Returns kOBEXSuccess if the request was sent, or some other OBEXError value
+ * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed
+ * through client:didFinishSetPathRequestWithError:responseCode:responseHeaders:
  * when the request is finished.
  *
  * You must have already sent a Connect request; otherwise, this fails and
@@ -150,11 +150,11 @@
 /*
  * Aborts the current request if a Put or Get request is currently in progress.
  *
- * This schedules an Abort request to be sent when possible (i.e. when the 
+ * This schedules an Abort request to be sent when possible (i.e. when the
  * client next receives a server response).
  *
- * Returns kOBEXSuccess if the request was sent, or some other OBEXError value 
- * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed 
+ * Returns kOBEXSuccess if the request was sent, or some other OBEXError value
+ * from <IOBluetooth/OBEX.h> if there was an error. The delegate is informed
  * through client:didFinishAbortRequestWithError:responseCode:forStream:
  * when the Abort request is finished.
  */
@@ -210,13 +210,13 @@
 
 
 /*
- * This informal protocol describes the methods that can be implemented for a 
+ * This informal protocol describes the methods that can be implemented for a
  * BBBluetoothOBEXClient delegate.
  */
 @protocol BBBluetoothOBEXClientDelegate
 
 /*
- * Called when a Connect request is completed. <error> is set to kOBEXSuccess 
+ * Called when a Connect request is completed. <error> is set to kOBEXSuccess
  * if the request finished without an error, or some other OBEXError value
  * from <IOBluetooth/OBEX.h> if an error occured. <response> contains the
  * response code and headers.
@@ -226,11 +226,11 @@
  * accepted by the OBEX server.
  */
 - (void)client:(BBBluetoothOBEXClient *)client
-didFinishConnectRequestWithError:(OBEXError)error 
+didFinishConnectRequestWithError:(OBEXError)error
       response:(BBOBEXResponse *)response;
 
 /*
- * Called when a Disconnect request is completed. <error> is set to kOBEXSuccess 
+ * Called when a Disconnect request is completed. <error> is set to kOBEXSuccess
  * if the request finished without an error, or some other OBEXError value
  * from <IOBluetooth/OBEX.h> if an error occured. <response> contains the
  * response code and headers.
@@ -240,11 +240,11 @@ didFinishConnectRequestWithError:(OBEXError)error
  * accepted by the OBEX server.
  */
 - (void)client:(BBBluetoothOBEXClient *)client
-didFinishDisconnectRequestWithError:(OBEXError)error 
+didFinishDisconnectRequestWithError:(OBEXError)error
       response:(BBOBEXResponse *)response;
 
 /*
- * Called when a Put request is completed. <error> is set to kOBEXSuccess 
+ * Called when a Put request is completed. <error> is set to kOBEXSuccess
  * if the request finished without an error, or some other OBEXError value
  * from <IOBluetooth/OBEX.h> if an error occured. The <inputStream> is the
  * stream originally passed to sendPutRequestWithHeaders:readFromStream:, and
@@ -277,11 +277,11 @@ didReceiveDataOfLength:(unsigned)length
     ofTotalLength:(unsigned)totalLength;
 
 /*
- * Called when a Get request is completed. <error> is set to kOBEXSuccess 
+ * Called when a Get request is completed. <error> is set to kOBEXSuccess
  * if the request finished without an error, or some other OBEXError value
  * from <IOBluetooth/OBEX.h> if an error occured. The <outputStream> is the
  * stream originally passed to sendGetRequestWithHeaders:writeToStream:, and
- * <response> contains the response code and headers. 
+ * <response> contains the response code and headers.
  *
  * The <error> only indicates whether the request was processed successfully;
  * use the response code in <response> to see whether the request was actually
@@ -293,7 +293,7 @@ didFinishGetRequestForStream:(NSOutputStream *)outputStream
       response:(BBOBEXResponse *)response;
 
 /*
- * Called when a SetPath request is completed. <error> is set to kOBEXSuccess 
+ * Called when a SetPath request is completed. <error> is set to kOBEXSuccess
  * if the request finished without an error, or some other OBEXError value
  * from <IOBluetooth/OBEX.h> if an error occured. <response> contains the
  * response code and headers.
@@ -303,12 +303,12 @@ didFinishGetRequestForStream:(NSOutputStream *)outputStream
  * accepted by the OBEX server.
  */
 - (void)client:(BBBluetoothOBEXClient *)client
-    didFinishSetPathRequestWithError:(OBEXError)error 
+    didFinishSetPathRequestWithError:(OBEXError)error
       response:(BBOBEXResponse *)response;
 
 /*
- * Called when an Abort request is completed following a call to 
- * abortCurrentRequest:. <error> is set to kOBEXSuccess 
+ * Called when an Abort request is completed following a call to
+ * abortCurrentRequest:. <error> is set to kOBEXSuccess
  * if the request finished without an error, or some other OBEXError value
  * from <IOBluetooth/OBEX.h> if an error occured. The <stream> is the
  * stream originally passed to sendPutRequestWithHeaders:readFromStream: or

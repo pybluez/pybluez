@@ -16,23 +16,23 @@
 # along with LightBlue.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Provides a python interface to the Mac OSX IOBluetooth Framework classes, 
+Provides a python interface to the Mac OSX IOBluetooth Framework classes,
 through PyObjC.
 
 For example:
     >>> from lightblue import _IOBluetooth
     >>> for d in _IOBluetooth.IOBluetoothDevice.recentDevices_(0):
     ...     print d.getName()
-    ... 
+    ...
     Munkey
     Adam
     My Nokia 6600
-    >>> 
-    
-See http://developer.apple.com/documentation/DeviceDrivers/Reference/IOBluetooth/index.html 
-for Apple's IOBluetooth documentation.    
-    
-See http://pyobjc.sourceforge.net for details on how to access Objective-C 
+    >>>
+
+See http://developer.apple.com/documentation/DeviceDrivers/Reference/IOBluetooth/index.html
+for Apple's IOBluetooth documentation.
+
+See http://pyobjc.sourceforge.net for details on how to access Objective-C
 classes through PyObjC.
 """
 
@@ -48,8 +48,8 @@ try:
 
 except (AttributeError, ValueError):
     # earlier versions use loadBundle() and setSignatureForSelector()
-    
-    objc.loadBundle("IOBluetooth", globals(), 
+
+    objc.loadBundle("IOBluetooth", globals(),
        bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetooth.framework'))
 
     # Sets selector signatures in order to receive arguments correctly from
@@ -58,29 +58,29 @@ except (AttributeError, ValueError):
 
     # set to return int, and take an unsigned char output arg
     # i.e. in python: return (int, unsigned char) and accept no args
-    objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",     
-            "getRFCOMMChannelID:", "i12@0:o^C") 
-            
+    objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",
+            "getRFCOMMChannelID:", "i12@0:o^C")
+
     # set to return int, and take an unsigned int output arg
-    # i.e. in python: return (int, unsigned int) and accept no args    
-    objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",     
+    # i.e. in python: return (int, unsigned int) and accept no args
+    objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",
             "getL2CAPPSM:", "i12@0:o^S")
-    
+
     # set to return int, and take (output object, unsigned char, object) args
     # i.e. in python: return (int, object) and accept (unsigned char, object)
-    objc.setSignatureForSelector("IOBluetoothDevice", 
-            "openRFCOMMChannelSync:withChannelID:delegate:", "i16@0:o^@C@") 
+    objc.setSignatureForSelector("IOBluetoothDevice",
+            "openRFCOMMChannelSync:withChannelID:delegate:", "i16@0:o^@C@")
 
-    # set to return int, and take (output object, unsigned int, object) args            
-    # i.e. in python: return (int, object) and accept (unsigned int, object)    
-    objc.setSignatureForSelector("IOBluetoothDevice", 
+    # set to return int, and take (output object, unsigned int, object) args
+    # i.e. in python: return (int, object) and accept (unsigned int, object)
+    objc.setSignatureForSelector("IOBluetoothDevice",
             "openL2CAPChannelSync:withPSM:delegate:", "i20@0:o^@I@")
 
     # set to return int, take a const 6-char array arg
     # i.e. in python: return object and accept 6-char list
     # this seems to work even though the selector doesn't take a char aray,
     # it takes a struct 'BluetoothDeviceAddress' which contains a char array.
-    objc.setSignatureForSelector("IOBluetoothDevice", 
-            "withAddress:", '@12@0:r^[6C]') 
-   
+    objc.setSignatureForSelector("IOBluetoothDevice",
+            "withAddress:", '@12@0:r^[6C]')
+
 del objc

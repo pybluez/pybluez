@@ -22,7 +22,7 @@
 //  LightAquaBlue
 //
 //  These are internal classes used by BBBluetoothOBEXServer for handling
-//  incoming client requests. Each BBOBEXRequestHandler subclass encapsulates 
+//  incoming client requests. Each BBOBEXRequestHandler subclass encapsulates
 //  the process for handling a particular type of request.
 //
 
@@ -39,14 +39,14 @@
     BBBluetoothOBEXServer *mServer;
     SEL mServerEventSelector;
     OBEXSession *mSession;
-    
+
     int mNextResponseCode;
     BBMutableOBEXHeaderSet *mNextResponseHeaders;
 }
 
 + (void)setDebug:(BOOL)debug;
 
-- (id)initWithServer:(BBBluetoothOBEXServer *)server 
+- (id)initWithServer:(BBBluetoothOBEXServer *)server
        eventSelector:(SEL)selector
              session:(OBEXSession *)session;
 
@@ -58,16 +58,16 @@
 
 
 /*** for subclasses - calls errorOccurred:description: on delegate ***/
-- (void)errorOccurred:(OBEXError)error 
+- (void)errorOccurred:(OBEXError)error
           description:(NSString *)description;
 
 
-/*** methods below must be overriden by subclasses, and should be regarded 
+/*** methods below must be overriden by subclasses, and should be regarded
     as 'protected' - they don't need to be called by outside classes ***/
 
 - (BOOL)readOBEXRequestHeaders:(BBMutableOBEXHeaderSet **)requestHeaders
                andRequestFlags:(OBEXFlags *)flags
-              fromSessionEvent:(const OBEXSessionEvent *)event; 
+              fromSessionEvent:(const OBEXSessionEvent *)event;
 
 - (void)prepareResponseForRequestWithHeaders:(BBMutableOBEXHeaderSet *)requestHeaders
                                        flags:(OBEXFlags)flags
@@ -94,7 +94,7 @@
 @end
 
 @interface BBOBEXPutRequestHandler : BBOBEXRequestHandler {
-    CFMutableDataRef mHeadersDataRef;    
+    CFMutableDataRef mHeadersDataRef;
     BBMutableOBEXHeaderSet *mPreviousRequestHeaders;
     NSOutputStream *mOutputStream;
     BOOL mDefinitelyIsPut;
@@ -103,14 +103,14 @@
 @end
 
 @interface BBOBEXGetRequestHandler : BBOBEXRequestHandler {
-    CFMutableDataRef mHeadersDataRef;    
+    CFMutableDataRef mHeadersDataRef;
     NSMutableData *mSentBodyData;
     NSInputStream *mInputStream;
-    BOOL mAborted;    
+    BOOL mAborted;
 }
 @end
 
 @interface BBOBEXSetPathRequestHandler : BBOBEXRequestHandler {
-    CFMutableDataRef mHeadersDataRef;    
+    CFMutableDataRef mHeadersDataRef;
 }
 @end

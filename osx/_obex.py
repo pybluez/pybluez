@@ -58,13 +58,13 @@ _obexerrorcodes = { 0: "no error", -21850: "general error", -21851: "no resource
 def errdesc(errorcode):
     return _obexerrorcodes.get(errorcode, str(errorcode))
 
-    
-# OBEXSession provides response codes with the final bit set, but OBEXResponse 
+
+# OBEXSession provides response codes with the final bit set, but OBEXResponse
 # class expects the response code to not have the final bit set.
 def _cutresponsefinalbit(responsecode):
     return (responsecode & ~_OBEX_FINAL_MASK)
-    
-    
+
+
 def _headersdicttoset(headers):
     headerset = BBMutableOBEXHeaderSet.alloc().init()
     for header, value in list(headers.items()):
@@ -90,7 +90,7 @@ def _headersdicttoset(headers):
             headerset.setValue_forByteSequenceHeader_(value, hid)
         elif mask == _HEADER_1BYTE:
             if not isinstance(value, int):
-                raise TypeError("value for '%s' must be int, was %s" % 
+                raise TypeError("value for '%s' must be int, was %s" %
                     (str(header), type(value)))
             headerset.setValue_for1ByteHeader_(value, hid)
         elif mask == _HEADER_4BYTE:
@@ -102,13 +102,13 @@ def _headersdicttoset(headers):
             raise ValueError("cannot set OBEX header value for '%s'" % header)
     return headerset
 
-    
+
 # returns in { header-id: value } form.
 def _headersettodict(headerset):
     headers = {}
     for number in headerset.allHeaders():
         hid = number.unsignedCharValue()
-        mask = hid & _HEADER_MASK            
+        mask = hid & _HEADER_MASK
         if mask == _HEADER_UNICODE:
             value = headerset.valueForUnicodeHeader_(hid)
         elif mask == _HEADER_BYTE_SEQ:
@@ -128,28 +128,28 @@ def _headersettodict(headerset):
 
 class OBEXClient(object):
     __doc__ = _obexcommon._obexclientclassdoc
-    
+
     def __init__(self, address, channel):
-        if not _lightbluecommon._isbtaddr(address):  
+        if not _lightbluecommon._isbtaddr(address):
             raise TypeError("address '%s' is not a valid bluetooth address"
                 % address)
         if not type(channel) == int:
             raise TypeError("channel must be int, was %s" % type(channel))
         if channel < 0:
             raise ValueError("channel cannot be negative")
-    
+
         self.__serveraddr = (address, channel)
-        self.__busy = False    
+        self.__busy = False
         self.__client = None
         self.__obexsession = None   # for testing
         #BBBluetoothOBEXClient.setDebug_(True)
-        
-                    
+
+
     def connect(self, headers={}):
         if self.__client is None:
             if not BBLocalDevice.isPoweredOn():
-                raise OBEXError(_kOBEXSessionNoTransportError, 
-                        "Bluetooth device not available")         
+                raise OBEXError(_kOBEXSessionNoTransportError,
+                        "Bluetooth device not available")
             self.__delegate = _BBOBEXClientDelegate.alloc().initWithCallback_(
                     self._finishedrequest)
             self.__client = BBBluetoothOBEXClient.alloc().initWithRemoteDeviceAddress_channelID_delegate_(
@@ -160,39 +160,39 @@ class OBEXClient(object):
                         self.__obexsession)
 
         self.__reset()
-        headerset = _headersdicttoset(headers)        
+        headerset = _headersdicttoset(headers)
         r = self.__client.sendConnectRequestWithHeaders_(headerset)
         if r != _kOBEXSuccess:
             self.__closetransport()
             raise OBEXError(r, "error starting Connect request (%s)" %
                     errdesc(r))
-            
+
         _macutil.waituntil(self._done)
         if self.__error != _kOBEXSuccess:
             self.__closetransport()
-            raise OBEXError(self.__error, "error during Connect request (%s)" % 
+            raise OBEXError(self.__error, "error during Connect request (%s)" %
                     errdesc(self.__error))
-               
-        resp = self.__getresponse()               
+
+        resp = self.__getresponse()
         if resp.code != _obexcommon.OK:
             self.__closetransport()
         return resp
-        
-        
+
+
     def disconnect(self, headers={}):
         self.__checkconnected()
         self.__reset()
         try:
-            headerset = _headersdicttoset(headers)       
+            headerset = _headersdicttoset(headers)
             r = self.__client.sendDisconnectRequestWithHeaders_(headerset)
             if r != _kOBEXSuccess:
                 raise OBEXError(r, "error starting Disconnect request (%s)" %
                         errdesc(r))
-                
+
             _macutil.waituntil(self._done)
             if self.__error != _kOBEXSuccess:
-                raise OBEXError(self.__error, 
-                        "error during Disconnect request (%s)" % 
+                raise OBEXError(self.__error,
+                        "error during Disconnect request (%s)" %
                         errdesc(self.__error))
         finally:
             # close channel regardless of disconnect result
@@ -202,10 +202,10 @@ class OBEXClient(object):
 
     def put(self, headers, fileobj):
         if not hasattr(fileobj, "read"):
-            raise TypeError("file-like object must have read() method")       
-        self.__checkconnected()            
+            raise TypeError("file-like object must have read() method")
+        self.__checkconnected()
         self.__reset()
-        
+
         headerset = _headersdicttoset(headers)
         self.fileobj = fileobj
         self.__fileobjdelegate = _macutil.BBFileLikeObjectReader.alloc().initWithFileLikeObject_(fileobj)
@@ -220,9 +220,9 @@ class OBEXClient(object):
             raise OBEXError(self.__error, "error during Put request (%s)" %
                     errdesc(self.__error))
         return self.__getresponse()
-        
-        
-    def delete(self, headers):      
+
+
+    def delete(self, headers):
         self.__checkconnected()
         self.__reset()
         headerset = _headersdicttoset(headers)
@@ -231,24 +231,24 @@ class OBEXClient(object):
         if r != _kOBEXSuccess:
             raise OBEXError(r, "error starting Delete request (%s)" %
                     errdesc(r))
-            
+
         _macutil.waituntil(self._done)
         if self.__error != _kOBEXSuccess:
             raise OBEXError(self.__error, "error during Delete request (%s)" %
                     errdesc(self.__error))
         return self.__getresponse()
-        
-        
+
+
     def get(self, headers, fileobj):
         if not hasattr(fileobj, "write"):
             raise TypeError("file-like object must have write() method")
-            
+
         self.__checkconnected()
         self.__reset()
         headerset = _headersdicttoset(headers)
         delegate = _macutil.BBFileLikeObjectWriter.alloc().initWithFileLikeObject_(fileobj)
         outstream = BBStreamingOutputStream.alloc().initWithDelegate_(delegate)
-        outstream.open()            
+        outstream.open()
         r = self.__client.sendGetRequestWithHeaders_writeToStream_(
                 headerset, outstream)
         if r != _kOBEXSuccess:
@@ -259,12 +259,12 @@ class OBEXClient(object):
             raise OBEXError(self.__error, "error during Get request (%s)" %
                     errdesc(self.__error))
         return self.__getresponse()
-        
-        
+
+
     def setpath(self, headers, cdtoparent=False, createdirs=False):
         self.__checkconnected()
         self.__reset()
-        headerset = _headersdicttoset(headers)       
+        headerset = _headersdicttoset(headers)
         r = self.__client.sendSetPathRequestWithHeaders_changeToParentDirectoryFirst_createDirectoriesIfNeeded_(headerset, cdtoparent, createdirs)
         if r != _kOBEXSuccess:
             raise OBEXError(r, "error starting SetPath request (%s)" %
@@ -274,12 +274,12 @@ class OBEXClient(object):
         if self.__error != _kOBEXSuccess:
             raise OBEXError(self.__error, "error during SetPath request (%s)" %
                     errdesc(self.__error))
-        return self.__getresponse()        
-                
+        return self.__getresponse()
+
 
     def _done(self):
         return not self.__busy
-        
+
     def _finishedrequest(self, error, response):
         if error in (_kOBEXSessionNoTransportError,
                      _kOBEXSessionTransportDiedError):
@@ -288,18 +288,18 @@ class OBEXClient(object):
         self.__response = response
         self.__busy = False
         _macutil.interruptwait()
-        
+
     def _setobexsession(self, session):
         self.__obexsession = session
-        
+
     # Note that OBEXSession returns kOBEXSessionNotConnectedError if you don't
     # send CONNECT before sending any other requests; this means the OBEXClient
     # must send connect() before other requests, so this restriction is enforced
     # in the Linux version as well, for consistency.
     def __checkconnected(self):
         if self.__client is None:
-            raise OBEXError(_kOBEXSessionNotConnectedError, 
-                    "must connect() before sending other requests")        
+            raise OBEXError(_kOBEXSessionNotConnectedError,
+                    "must connect() before sending other requests")
 
     def __closetransport(self):
         if self.__client is not None:
@@ -308,8 +308,8 @@ class OBEXClient(object):
                 self.__client.RFCOMMChannel().getDevice().closeConnection()
             except:
                 pass
-        self.__client = None                
-        
+        self.__client = None
+
     def __reset(self):
         self.__busy = True
         self.__error = None
@@ -331,10 +331,10 @@ class OBEXClient(object):
         try:
             definedmethods[name].__doc__ = doc
         except KeyError:
-            pass                                             
-        
+            pass
 
-        
+
+
 class _BBOBEXClientDelegate(NSObject):
 
     def initWithCallback_(self, cb_requestdone):
@@ -347,28 +347,28 @@ class _BBOBEXClientDelegate(NSObject):
         super(_BBOBEXClientDelegate, self).dealloc()
 
     #
-    # Delegate methods follow. objc signatures for all methods must be set 
+    # Delegate methods follow. objc signatures for all methods must be set
     # using objc.selector or else may get bus error.
-    #        
-        
-    # - (void)client:(BBBluetoothOBEXClient *)client 
-    #    didFinishConnectRequestWithError:(OBEXError)error 
+    #
+
+    # - (void)client:(BBBluetoothOBEXClient *)client
+    #    didFinishConnectRequestWithError:(OBEXError)error
     #       response:(BBOBEXResponse *)response;
     def client_didFinishConnectRequestWithError_response_(self, client, error,
             response):
         self._cb_requestdone(error, response)
     client_didFinishConnectRequestWithError_response_ = objc.selector(
         client_didFinishConnectRequestWithError_response_, signature=b"v@:@i@")
-            
-    # - (void)client:(BBBluetoothOBEXClient *)client 
-    #    didFinishDisconnectRequestWithError:(OBEXError)error 
+
+    # - (void)client:(BBBluetoothOBEXClient *)client
+    #    didFinishDisconnectRequestWithError:(OBEXError)error
     #       response:(BBOBEXResponse *)response;
     def client_didFinishDisconnectRequestWithError_response_(self, client,
             error, response):
         self._cb_requestdone(error, response)
     client_didFinishDisconnectRequestWithError_response_ = objc.selector(
         client_didFinishDisconnectRequestWithError_response_,signature=b"v@:@i@")
-            
+
     # - (void)client:(BBBluetoothOBEXClient *)client
     # didFinishPutRequestForStream:(NSInputStream *)inputStream
     #         error:(OBEXError)error
@@ -378,7 +378,7 @@ class _BBOBEXClientDelegate(NSObject):
         self._cb_requestdone(error, response)
     client_didFinishPutRequestForStream_error_response_ = objc.selector(
         client_didFinishPutRequestForStream_error_response_,signature=b"v@:@@i@")
-            
+
     # - (void)client:(BBBluetoothOBEXClient *)client
     # didFinishGetRequestForStream:(NSOutputStream *)outputStream
     #         error:(OBEXError)error
@@ -388,24 +388,24 @@ class _BBOBEXClientDelegate(NSObject):
         self._cb_requestdone(error, response)
     client_didFinishGetRequestForStream_error_response_ = objc.selector(
         client_didFinishGetRequestForStream_error_response_,signature=b"v@:@@i@")
-            
+
     # - (void)client:(BBBluetoothOBEXClient *)client
-    #    didFinishSetPathRequestWithError:(OBEXError)error 
+    #    didFinishSetPathRequestWithError:(OBEXError)error
     #       response:(BBOBEXResponse *)response;
     def client_didFinishSetPathRequestWithError_response_(self, client, error,
             response):
         self._cb_requestdone(error, response)
     client_didFinishSetPathRequestWithError_response_ = objc.selector(
         client_didFinishSetPathRequestWithError_response_, signature=b"v@:@i@")
-            
+
     # client:didAbortRequestWithStream:error:response: not
     # implemented since OBEXClient does not allow abort requests
-            
-            
+
+
 # ------------------------------------------------------------------
-            
+
 def sendfile(address, channel, source):
-    if not _lightbluecommon._isbtaddr(address):  
+    if not _lightbluecommon._isbtaddr(address):
         raise TypeError("address '%s' is not a valid bluetooth address" %
                 address)
     if not isinstance(channel, int):
@@ -413,20 +413,20 @@ def sendfile(address, channel, source):
     if not isinstance(source, str) and \
             not hasattr(source, "read"):
         raise TypeError("source must be string or file-like object with read() method")
-              
+
     if isinstance(source, str):
         headers = {"name": source}
         fileobj = file(source, "rb")
-        closefileobj = True                    
+        closefileobj = True
     else:
         if hasattr(source, "name"):
             headers = {"name": source.name}
         fileobj = source
-        closefileobj = False                
-        
+        closefileobj = False
+
     client = OBEXClient(address, channel)
-    client.connect()        
-    
+    client.connect()
+
     try:
         resp = client.put(headers, fileobj)
     finally:
@@ -435,7 +435,7 @@ def sendfile(address, channel, source):
         try:
             client.disconnect()
         except:
-            pass    # always ignore disconnection errors                
+            pass    # always ignore disconnection errors
 
     if resp.code != _obexcommon.OK:
         raise OBEXError("server denied the Put request")
@@ -453,17 +453,17 @@ class BBOBEXObjectPushServer(NSObject):
                     type(channel))
         if not hasattr(fileobject, "write"):
             raise TypeError("fileobject must be file-like object with write() method")
-    
+
         self = super(BBOBEXObjectPushServer, self).init()
         self.__fileobject = fileobject
         self.__server = BBBluetoothOBEXServer.alloc().initWithIncomingRFCOMMChannel_delegate_(channel, self)
         #BBBluetoothOBEXServer.setDebug_(True)
-        
+
         self.__error = None
         self.__gotfile = False
         self.__gotdisconnect = False
         self.__disconnected = False
-        
+
         # for internal testing
         if isinstance(channel, OBEXSession):
             self.__server.performSelector_withObject_("setOBEXSession:",
@@ -471,75 +471,75 @@ class BBOBEXObjectPushServer(NSObject):
         return self
     initWithChannel_fileLikeObject_ = objc.selector(
         initWithChannel_fileLikeObject_, signature=b"@@:i@")
-        
-        
+
+
     def run(self):
         self.__server.run()
-    
+
         # wait until client sends a file, or an error occurs
         _macutil.waituntil(lambda: self.__gotfile or self.__error is not None)
-        
+
         # wait briefly for a disconnect request (client may have decided to just
         # close the connection without sending a disconnect request)
         if self.__error is None:
             ok = _macutil.waituntil(lambda: self.__gotdisconnect, 3)
             if ok:
                 _macutil.waituntil(lambda: self.__disconnected)
-            
+
         # only raise OBEXError if file was not received
         if not self.__gotfile:
             if self.__error is not None:
                 raise OBEXError(self.__error[0], self.__error[1])
-                
+
             # if client connected but didn't send PUT
             raise OBEXError(_kOBEXGeneralError, "client did not send a file")
 
     def __del__(self):
         super(BBOBEXObjectPushServer, self).dealloc()
-        
+
     #
     # BBBluetoothOBEXClientDelegate methods follow.
     # These enable this class to get callbacks when some event occurs on the
     # server (e.g. got a new client request, or an error occurred, etc.).
     #
-        
+
     # - (BOOL)server:(BBBluetoothOBEXServer *)server
-    # shouldHandleConnectRequest:(BBOBEXHeaderSet *)requestHeaders;        
+    # shouldHandleConnectRequest:(BBOBEXHeaderSet *)requestHeaders;
     def server_shouldHandleConnectRequest_(self, server, requestheaders):
         return True
-    server_shouldHandleConnectRequest_ = objc.selector(   
-        server_shouldHandleConnectRequest_, signature=b"c@:@@")        
-    
+    server_shouldHandleConnectRequest_ = objc.selector(
+        server_shouldHandleConnectRequest_, signature=b"c@:@@")
+
     # - (BOOL)server:(BBBluetoothOBEXServer *)server
-    # shouldHandleDisconnectRequest:(BBOBEXHeaderSet *)requestHeaders;    
+    # shouldHandleDisconnectRequest:(BBOBEXHeaderSet *)requestHeaders;
     def server_shouldHandleDisconnectRequest_(self, server, requestheaders):
-        self.__gotdisconnect = True    
+        self.__gotdisconnect = True
         _macutil.interruptwait()
         return True
-    server_shouldHandleDisconnectRequest_ = objc.selector(   
+    server_shouldHandleDisconnectRequest_ = objc.selector(
         server_shouldHandleDisconnectRequest_, signature=b"c@:@@")
-        
+
     # - (void)serverDidHandleDisconnectRequest:(BBBluetoothOBEXServer *)server;
     def serverDidHandleDisconnectRequest_(self, server):
         self.__disconnected = True
         _macutil.interruptwait()
     serverDidHandleDisconnectRequest_ = objc.selector(
         serverDidHandleDisconnectRequest_, signature=b"v@:@")
-        
+
     # - (NSOutputStream *)server:(BBBluetoothOBEXServer *)server
-    # shouldHandlePutRequest:(BBOBEXHeaderSet *)requestHeaders;        
+    # shouldHandlePutRequest:(BBOBEXHeaderSet *)requestHeaders;
     def server_shouldHandlePutRequest_(self, server, requestheaders):
         #print "Incoming file:", requestHeaders.valueForNameHeader()
         self.delegate = _macutil.BBFileLikeObjectWriter.alloc().initWithFileLikeObject_(self.__fileobject)
         outstream = BBStreamingOutputStream.alloc().initWithDelegate_(self.delegate)
         outstream.open()
         return outstream
-    server_shouldHandlePutRequest_ = objc.selector(   
+    server_shouldHandlePutRequest_ = objc.selector(
         server_shouldHandlePutRequest_, signature=b"@@:@@")
-        
+
     # - (void)server:(BBBluetoothOBEXServer *)server
     # didHandlePutRequestForStream:(NSOutputStream *)outputStream
-    #   requestWasAborted:(BOOL)aborted;        
+    #   requestWasAborted:(BOOL)aborted;
     def server_didHandlePutRequestForStream_requestWasAborted_(self, server,
             stream, aborted):
         if aborted:
@@ -548,41 +548,41 @@ class BBOBEXObjectPushServer(NSObject):
             self.__gotfile = True
         _macutil.interruptwait()
     server_didHandlePutRequestForStream_requestWasAborted_ = objc.selector(
-        server_didHandlePutRequestForStream_requestWasAborted_, 
-        signature=b"v@:@@c")        
-        
+        server_didHandlePutRequestForStream_requestWasAborted_,
+        signature=b"v@:@@c")
+
     # - (void)server:(BBBluetoothOBEXServer *)server
     # errorOccurred:(OBEXError)error
-    #   description:(NSString *)description;        
+    #   description:(NSString *)description;
     def server_errorOccurred_description_(self, server, error, desc):
         self.__error = (error, desc)
         _macutil.interruptwait()
     server_errorOccurred_description_ = objc.selector(
-        server_errorOccurred_description_, signature=b"v@:@i@")        
+        server_errorOccurred_description_, signature=b"v@:@i@")
 
 
 
-# ------------------------------------------------------------------              
-    
+# ------------------------------------------------------------------
+
 def recvfile(sock, dest):
     if sock is None:
         raise TypeError("Given socket is None")
     if not isinstance(dest, (str, types.FileType)):
         raise TypeError("dest must be string or file-like object with write() method")
-        
+
     if isinstance(dest, str):
         fileobj = open(dest, "wb")
         closefileobj = True
     else:
         fileobj = dest
         closefileobj = False
-        
+
     try:
         sock.listen(1)
         conn, addr = sock.accept()
         #print "A client connected:", addr
         server = BBOBEXObjectPushServer.alloc().initWithChannel_fileLikeObject_(
-                conn._getchannel(), fileobj)            
+                conn._getchannel(), fileobj)
         server.run()
         conn.close()
     finally:

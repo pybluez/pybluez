@@ -44,30 +44,30 @@ static BOOL _debug = NO;
                          delegate:(id)delegate;
 {
     self = [super init];
-    
+
     mSession = [[IOBluetoothOBEXSession alloc] initWithDevice:[IOBluetoothDevice withAddress:deviceAddress]
                                                     channelID:channelID];
-    mDelegate = delegate;    
-    
+    mDelegate = delegate;
+
     mMaxPacketLength = 0x2000;
     mLastServerResponse = kOBEXResponseCodeSuccessWithFinalBit;
-    
+
     mConnectionID = 0;
     mHasConnectionID = NO;
-    
+
     mAborting = NO;
-    
+
     mCurrentRequest = nil;
-    
+
     return self;
-    
+
 }
 
 - (BBOBEXHeaderSet *)addConnectionIDToHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (!mHasConnectionID) 
+    if (!mHasConnectionID)
         return headers;
-    
+
     BBMutableOBEXHeaderSet *modifiedHeaders = [BBMutableOBEXHeaderSet headerSet];
     [modifiedHeaders addHeadersFromHeaderSet:headers];
     [modifiedHeaders setValueForConnectionIDHeader:mConnectionID];
@@ -78,9 +78,9 @@ static BOOL _debug = NO;
 {
     if (mCurrentRequest && ![mCurrentRequest isFinished])
         return kOBEXSessionBusyError;
-    
-    BBOBEXConnectRequest *request = 
-        [[BBOBEXConnectRequest alloc] initWithClient:self 
+
+    BBOBEXConnectRequest *request =
+        [[BBOBEXConnectRequest alloc] initWithClient:self
                                        eventSelector:@selector(handleSessionEvent:)
                                              session:mSession];
     OBEXError status = [request beginWithHeaders:headers];
@@ -97,14 +97,14 @@ static BOOL _debug = NO;
 {
     if (mCurrentRequest && ![mCurrentRequest isFinished])
         return kOBEXSessionBusyError;
-    
-    BBOBEXDisconnectRequest *request = 
-        [[BBOBEXDisconnectRequest alloc] initWithClient:self 
+
+    BBOBEXDisconnectRequest *request =
+        [[BBOBEXDisconnectRequest alloc] initWithClient:self
                                           eventSelector:@selector(handleSessionEvent:)
                                                 session:mSession];
     BBOBEXHeaderSet *realHeaders = (mHasConnectionID ?
             [self addConnectionIDToHeaders:headers] : headers);
-    OBEXError status = [request beginWithHeaders:realHeaders];    
+    OBEXError status = [request beginWithHeaders:realHeaders];
     if (status == kOBEXSuccess) {
         [mCurrentRequest release];
         mCurrentRequest = request;
@@ -119,15 +119,15 @@ static BOOL _debug = NO;
 {
     if (mCurrentRequest && ![mCurrentRequest isFinished])
         return kOBEXSessionBusyError;
-    
-    BBOBEXPutRequest *request = 
-        [[BBOBEXPutRequest alloc] initWithClient:self 
+
+    BBOBEXPutRequest *request =
+        [[BBOBEXPutRequest alloc] initWithClient:self
                                    eventSelector:@selector(handleSessionEvent:)
                                          session:mSession
                                      inputStream:inputStream];
     BBOBEXHeaderSet *realHeaders = (mHasConnectionID ?
-            [self addConnectionIDToHeaders:headers] : headers);    
-    OBEXError status = [request beginWithHeaders:realHeaders];    
+            [self addConnectionIDToHeaders:headers] : headers);
+    OBEXError status = [request beginWithHeaders:realHeaders];
     if (status == kOBEXSuccess) {
         [mCurrentRequest release];
         mCurrentRequest = request;
@@ -142,15 +142,15 @@ static BOOL _debug = NO;
 {
     if (mCurrentRequest && ![mCurrentRequest isFinished])
         return kOBEXSessionBusyError;
-    
+
     BBOBEXGetRequest *request =
-        [[BBOBEXGetRequest alloc] initWithClient:self 
+        [[BBOBEXGetRequest alloc] initWithClient:self
                                    eventSelector:@selector(handleSessionEvent:)
                                          session:mSession
                                     outputStream:outputStream];
     BBOBEXHeaderSet *realHeaders = (mHasConnectionID ?
-            [self addConnectionIDToHeaders:headers] : headers);    
-    OBEXError status = [request beginWithHeaders:realHeaders];    
+            [self addConnectionIDToHeaders:headers] : headers);
+    OBEXError status = [request beginWithHeaders:realHeaders];
     if (status == kOBEXSuccess) {
         [mCurrentRequest release];
         mCurrentRequest = request;
@@ -166,16 +166,16 @@ static BOOL _debug = NO;
 {
     if (mCurrentRequest && ![mCurrentRequest isFinished])
         return kOBEXSessionBusyError;
-    
-    BBOBEXSetPathRequest *request = 
-        [[BBOBEXSetPathRequest alloc] initWithClient:self 
+
+    BBOBEXSetPathRequest *request =
+        [[BBOBEXSetPathRequest alloc] initWithClient:self
                                        eventSelector:@selector(handleSessionEvent:)
                                              session:mSession
                         changeToParentDirectoryFirst:changeToParentDirectoryFirst
                            createDirectoriesIfNeeded:createDirectoriesIfNeeded];
     BBOBEXHeaderSet *realHeaders = (mHasConnectionID ?
-            [self addConnectionIDToHeaders:headers] : headers);    
-    OBEXError status = [request beginWithHeaders:realHeaders];    
+            [self addConnectionIDToHeaders:headers] : headers);
+    OBEXError status = [request beginWithHeaders:realHeaders];
     if (status == kOBEXSuccess) {
         [mCurrentRequest release];
         mCurrentRequest = request;
@@ -193,10 +193,10 @@ static BOOL _debug = NO;
         return;
 
     if (_debug) NSLog(DEBUG_NAME @"Aborting later...");
-    
-	// Just set an abort flag -- can't send OBEXAbort right away because we 
-	// might be in the middle of a transaction, and we must wait our turn to 
-	// send the abort (i.e. wait until after we've received a server response)    
+
+	// Just set an abort flag -- can't send OBEXAbort right away because we
+	// might be in the middle of a transaction, and we must wait our turn to
+	// send the abort (i.e. wait until after we've received a server response)
     mAborting = YES;
 }
 
@@ -206,10 +206,10 @@ static BOOL _debug = NO;
 - (void)finishedCurrentRequestWithError:(OBEXError)error responseCode:(int)responseCode
 {
     if (_debug) NSLog(DEBUG_NAME @"[finishedCurrentRequestWithError] %d 0x%02x", error, responseCode);
-    
+
     mAborting = NO;
     [mCurrentRequest finishedWithError:error responseCode:responseCode];
-    
+
     [mCurrentRequest release];
     mCurrentRequest = nil;
 }
@@ -217,13 +217,13 @@ static BOOL _debug = NO;
 - (void)performAbort
 {
     if (_debug) NSLog(DEBUG_NAME @"[performAbort]");
-    
+
     [mCurrentRequest release];
-    
+
     mCurrentRequest = [[BBOBEXAbortRequest alloc] initWithClient:self
                                                    eventSelector:@selector(handleSessionEvent:)
                                                          session:mSession];
-    
+
     OBEXError status = [mCurrentRequest beginWithHeaders:nil];
     if (status != kOBEXSuccess)
         [self finishedCurrentRequestWithError:status responseCode:0];
@@ -233,15 +233,15 @@ static BOOL _debug = NO;
                       responseCode:(int)responseCode
 {
     if (_debug) NSLog(DEBUG_NAME @"processResponseWithHeaders 0x%x", responseCode);
-    
+
     if (responseCode == kOBEXResponseCodeContinueWithFinalBit) {
         if (mAborting) {
             [self performAbort];
             return;
         }
-        
+
         [mCurrentRequest receivedResponseWithHeaders:responseHeaders];
-        
+
         OBEXError status = [mCurrentRequest sendNextRequestPacket];
         if (status != kOBEXSuccess) {
             [self finishedCurrentRequestWithError:status responseCode:responseCode];
@@ -256,25 +256,25 @@ static BOOL _debug = NO;
 
 - (void)handleSessionEvent:(const OBEXSessionEvent *)event
 {
-    if (_debug) NSLog(DEBUG_NAME @"[handleSessionEvent] event %d (current request=%@)", 
-                     event->type, mCurrentRequest);   
-        
+    if (_debug) NSLog(DEBUG_NAME @"[handleSessionEvent] event %d (current request=%@)",
+                     event->type, mCurrentRequest);
+
     if (mCurrentRequest) {
-        if (event->type == kOBEXSessionEventTypeError) { 
+        if (event->type == kOBEXSessionEventTypeError) {
             if (_debug) NSLog(DEBUG_NAME @"[handleSessionEvent] error occurred %d", event->u.errorData.error);
             [self finishedCurrentRequestWithError:event->u.errorData.error
                                      responseCode:0];
             return;
         }
-        
+
         int responseCode;
         BBMutableOBEXHeaderSet *responseHeaders = nil;
         if ([mCurrentRequest readOBEXResponseHeaders:&responseHeaders
-                                     andResponseCode:&responseCode 
+                                     andResponseCode:&responseCode
                                     fromSessionEvent:event]) {
             if (!responseHeaders)
                 responseHeaders = [BBMutableOBEXHeaderSet headerSet];
-            
+
             if (event->type == kOBEXSessionEventTypeConnectCommandResponseReceived) {
                 // note any received connection id so it can be sent with later
                 // requests
@@ -287,19 +287,19 @@ static BOOL _debug = NO;
                 mConnectionID = 0;
                 mHasConnectionID = NO;
             }
-            
-            [self processResponseWithHeaders:responseHeaders 
+
+            [self processResponseWithHeaders:responseHeaders
                                 responseCode:responseCode];
         } else {
             // unable to read response / response didn't match current request
-            if (_debug) NSLog(DEBUG_NAME @"[handleSessionEvent] can't parse event!");            
+            if (_debug) NSLog(DEBUG_NAME @"[handleSessionEvent] can't parse event!");
             [self finishedCurrentRequestWithError:kOBEXSessionBadResponseError
                                      responseCode:0];
         }
     } else {
-        if (_debug) NSLog(DEBUG_NAME @"ignoring event received while idle: %d", 
+        if (_debug) NSLog(DEBUG_NAME @"ignoring event received while idle: %d",
               event->type);
-    }    
+    }
 }
 
 - (int)serverResponseForLastRequest

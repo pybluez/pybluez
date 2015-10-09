@@ -122,13 +122,13 @@ try:
     # as from python docs example
     class UTC(datetime.tzinfo):
         """UTC"""
-    
+
         def utcoffset(self, dt):
             return datetime.timedelta(0)
-    
+
         def tzname(self, dt):
             return "UTC"
-    
+
         def dst(self, dt):
             return datetime.timedelta(0)
 except:
@@ -243,11 +243,11 @@ _obexclientclassdoc = \
 
     The connect(), disconnect(), put(), delete(), get() and setpath() methods
     all accept the request headers as a dictionary of header-value mappings. The
-    request headers are used to provide the server with additional information 
+    request headers are used to provide the server with additional information
     for the request. For example, this sends a Put request that includes Name,
     Type and Length headers in the request headers, to provide details about
     the transferred file:
-    
+
         >>> f = file("file.txt")
         >>> client.put({"name": "file.txt", "type": "text/plain",
         ...         "length": 5192}, f)
@@ -256,7 +256,7 @@ _obexclientclassdoc = \
 
     Here is a list of all the different string header keys that you can use in
     the request headers, and the expected type of the value for each header:
-    
+
         - "name" -> a string
         - "type" -> a string
         - "length" -> an int
@@ -274,22 +274,22 @@ _obexclientclassdoc = \
         - "object-class" -> a string or buffer
         - "session-parameters" -> a string or buffer
         - "session-sequence-number" -> an int less than 256
-        
+
     (The string header keys are not case-sensitive.)
 
     Alternatively, you can use raw header ID values instead of the above
     convenience strings. So, the previous example can be rewritten as:
-    
+
         >>> client.put({0x01: "file.txt", 0x42: "text/plain", 0xC3: 5192},
         ...     fileobject)
         >>>
 
     This is also useful for inserting custom headers. For example, a PutImage
-    request for a Basic Imaging client requires the Img-Descriptor (0x71) 
+    request for a Basic Imaging client requires the Img-Descriptor (0x71)
     header:
-        >>> client.put({"type": "x-bt/img-img", 
-        ...     "name": "photo.jpg", 
-        ...     0x71: '<image-descriptor version="1.0"><image encoding="JPEG" pixel="160*120" size="37600"/></image-descriptor>'}, 
+        >>> client.put({"type": "x-bt/img-img",
+        ...     "name": "photo.jpg",
+        ...     0x71: '<image-descriptor version="1.0"><image encoding="JPEG" pixel="160*120" size="37600"/></image-descriptor>'},
         ...     file('photo.jpg', 'rb'))
         >>>
 
@@ -314,12 +314,12 @@ _obexclientdocs = {
 "connect":
     """
     Establishes the Bluetooth connection to the remote OBEX server and sends
-    a Connect request to open the OBEX session. Returns an OBEXResponse 
+    a Connect request to open the OBEX session. Returns an OBEXResponse
     instance containing the server response.
-    
+
     Raises lightblue.obex.OBEXError if the session is already connected, or if
     an error occurs during the request.
-    
+
     If the server refuses the Connect request (i.e. if it sends a response code
     other than OK/Success), the Bluetooth connection will be closed.
 
@@ -329,9 +329,9 @@ _obexclientdocs = {
 "disconnect":
     """
     Sends a Disconnect request to end the OBEX session and closes the Bluetooth
-    connection to the remote OBEX server. Returns an OBEXResponse 
+    connection to the remote OBEX server. Returns an OBEXResponse
     instance containing the server response.
-    
+
     Raises lightblue.obex.OBEXError if connect() has not been called, or if an
     error occurs during the request.
 
@@ -345,7 +345,7 @@ _obexclientdocs = {
     """
     Sends a Put request. Returns an OBEXResponse instance containing the
     server response.
-    
+
     Raises lightblue.obex.OBEXError if connect() has not been called, or if an
     error occurs during the request.
 
@@ -357,13 +357,13 @@ _obexclientdocs = {
         - fileobj: a file-like object containing the file data to be sent for
           the request
 
-    For example, to send a file named 'photo.jpg', using the request headers 
+    For example, to send a file named 'photo.jpg', using the request headers
     to notify the server of the file's name, MIME type and length:
-        
+
         >>> client = lightblue.obex.OBEXClient("aa:bb:cc:dd:ee:ff", 10)
         >>> client.connect()
         <OBEXResponse reason='OK' code=0x20 (0xa0) headers={}>
-        >>> client.put({"name": "photo.jpg", "type": "image/jpeg", 
+        >>> client.put({"name": "photo.jpg", "type": "image/jpeg",
                 "length": 28566}, file("photo.jpg", "rb"))
         <OBEXResponse reason='OK' code=0x20 (0xa0) headers={}>
         >>>
@@ -372,7 +372,7 @@ _obexclientdocs = {
     """
     Sends a Put-Delete request in order to delete a file or folder on the remote
     server. Returns an OBEXResponse instance containing the server response.
-    
+
     Raises lightblue.obex.OBEXError if connect() has not been called, or if an
     error occurs during the request.
 
@@ -395,9 +395,9 @@ _obexclientdocs = {
     """,
 "get":
     """
-    Sends a Get request. Returns an OBEXResponse instance containing the server 
+    Sends a Get request. Returns an OBEXResponse instance containing the server
     response.
-    
+
     Raises lightblue.obex.OBEXError if connect() has not been called, or if an
     error occurs during the request.
 
@@ -425,9 +425,9 @@ _obexclientdocs = {
 "setpath":
     """
     Sends a SetPath request in order to set the "current path" on the remote
-    server for file transfers. Returns an OBEXResponse instance containing the 
+    server for file transfers. Returns an OBEXResponse instance containing the
     server response.
-    
+
     Raises lightblue.obex.OBEXError if connect() has not been called, or if an
     error occurs during the request.
 

@@ -45,7 +45,7 @@ static const uint8_t NULL_TERMINATORS[2] = { 0x00, 0x00 };
 }
 
 - (id)init
-{    
+{
     self = [super init];
     mDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     mKeys = [[NSMutableArray alloc] initWithCapacity:0];
@@ -77,13 +77,13 @@ static const uint8_t NULL_TERMINATORS[2] = { 0x00, 0x00 };
         return nil;
     if ([data length] == 0)
         return [NSString string];
-    
+
     const char *s = (const char *)[data bytes];
     if (s[[data length]-1] == '\0') {
         return [NSString stringWithCString:(const char *)[data bytes]
                                   encoding:NSASCIIStringEncoding];
     }
-    
+
     return [[[NSString alloc] initWithBytes:[data bytes]
                                      length:[data length]
                                    encoding:NSASCIIStringEncoding] autorelease];
@@ -108,10 +108,10 @@ static const uint8_t NULL_TERMINATORS[2] = { 0x00, 0x00 };
             [calendarDate setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
         } else {
             calendarDate = [NSCalendarDate dateWithString:s
-                                           calendarFormat:DATE_FORMAT_STRING];            
+                                           calendarFormat:DATE_FORMAT_STRING];
             [calendarDate setTimeZone:[NSTimeZone localTimeZone]];
         }
-        return calendarDate;        
+        return calendarDate;
     } else {
         uint32_t time = [self valueFor4ByteHeader:kOBEXHeaderIDTime4Byte];
         return [NSDate dateWithTimeIntervalSince1970:time];
@@ -184,12 +184,12 @@ static const uint8_t NULL_TERMINATORS[2] = { 0x00, 0x00 };
     NSNumber *number = [mDict objectForKey:[NSNumber numberWithUnsignedChar:headerID]];
     if (number)
         return [number unsignedCharValue];
-    return 0;    
+    return 0;
 }
 
 - (NSString *)valueForUnicodeHeader:(uint8_t)headerID
 {
-    return [mDict objectForKey:[NSNumber numberWithUnsignedChar:headerID]];    
+    return [mDict objectForKey:[NSNumber numberWithUnsignedChar:headerID]];
 }
 
 - (NSArray *)allHeaders
@@ -202,25 +202,25 @@ static const uint8_t NULL_TERMINATORS[2] = { 0x00, 0x00 };
 static void addUInt16Bytes(uint16_t value, NSMutableData *data)
 {
     uint16_t swapped = NSSwapHostShortToBig(value);
-	[data appendBytes:&swapped length:sizeof(swapped)];    
+	[data appendBytes:&swapped length:sizeof(swapped)];
 }
 
 static NSMutableData *stringHeaderBytes(uint8_t hid, NSString *s)
 {
-    NSMutableData *bytes = [NSMutableData dataWithBytes:&hid length:1];   	
-	if ([s length] == 0) {	
+    NSMutableData *bytes = [NSMutableData dataWithBytes:&hid length:1];
+	if ([s length] == 0) {
 		addUInt16Bytes(3, bytes);	// empty string == header length of 3
 		return bytes;
 	}
-	
+
 	CFStringEncoding encoding;
 #if __BIG_ENDIAN__
 	encoding = kCFStringEncodingUnicode;
 #elif __LITTLE_ENDIAN__
 	encoding = kCFStringEncodingUTF16BE;	// not in 10.3
 #endif
-	
-	CFDataRef encodedString = CFStringCreateExternalRepresentation(NULL, 
+
+	CFDataRef encodedString = CFStringCreateExternalRepresentation(NULL,
 			(CFStringRef)s, encoding, '?');
 	if (encodedString) {
 	    // CFStringCreateExternalRepresentation() may insert 2-byte BOM
@@ -239,7 +239,7 @@ static NSMutableData *stringHeaderBytes(uint8_t hid, NSString *s)
         }
         CFRelease(encodedString);
 	}
-	
+
     return bytes;
 }
 
@@ -251,7 +251,7 @@ static NSData *byteSequenceHeaderBytes(uint8_t hid, NSData *data)
 
     if ([data length] == 0)
         return headerBytes;
-    
+
     [headerBytes appendData:data];
     return headerBytes;
 }
@@ -275,9 +275,9 @@ static NSData *oneByteHeaderBytes(uint8_t hid, uint8_t value)
 {
     if ([mDict count] == 0)
         return NULL;
-    
+
     NSMutableData *headerBytes = [[NSMutableData alloc] initWithLength:0];
-    
+
     if ([self containsValueForHeader:kOBEXHeaderIDTarget]) {
         NSData *bytes;
         NSData *target = [self valueForTargetHeader];
@@ -287,25 +287,25 @@ static NSData *oneByteHeaderBytes(uint8_t hid, uint8_t value)
             return NULL;
         [headerBytes appendData:bytes];
     }
-    
+
     if ([self containsValueForHeader:kOBEXHeaderIDConnectionID]) {
-        NSData *bytes = fourByteHeaderBytes(kOBEXHeaderIDConnectionID, 
+        NSData *bytes = fourByteHeaderBytes(kOBEXHeaderIDConnectionID,
                                             [self valueForConnectionIDHeader]);
         if (!bytes)
             return NULL;
         [headerBytes appendData:bytes];
-    }    
-    
+    }
+
     NSArray *headers = [self allHeaders];
     uint8_t rawHeaderID;
     int i;
     for (i=0; i<[headers count]; i++) {
         rawHeaderID = [(NSNumber *)[headers objectAtIndex:i] unsignedCharValue];
         //NSLog(@"--- toBytes() writing header 0x%02x", rawHeaderID);
-        
+
         if (rawHeaderID == kOBEXHeaderIDTarget || rawHeaderID == kOBEXHeaderIDConnectionID)
             continue;   // already handled these
-            
+
         NSData *bytes = nil;
         switch (rawHeaderID & kHeaderEncodingMask) {
             case kHeaderEncodingUnicode:
@@ -341,7 +341,7 @@ static NSData *oneByteHeaderBytes(uint8_t hid, uint8_t value)
             return NULL;
         [headerBytes appendData:bytes];
     }
-	
+
 	return headerBytes;
 }
 
@@ -406,14 +406,14 @@ static NSString *getHeaderDescription(uint8_t headerID)
     int i;
     for (i=0; i<[mKeys count]; i++) {
         n = [mKeys objectAtIndex:i];
-        [string appendFormat:@"%@: %@%@", 
+        [string appendFormat:@"%@: %@%@",
                 getHeaderDescription([n unsignedCharValue]),
                 [mDict objectForKey:n],
                 (i == [mKeys count]-1 ? @"" : @", ")];
     }
-    
+
     [string appendString:@"}"];
-    return string; 
+    return string;
 }
 
 - (void)dealloc

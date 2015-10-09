@@ -21,7 +21,7 @@
 //  BBOBEXRequest.h
 //  LightAquaBlue
 //
-//  These are internal classes used by BBBluetoothOBEXClient for sending OBEX 
+//  These are internal classes used by BBBluetoothOBEXClient for sending OBEX
 //  client requests. Each BBOBEXRequest subclass encapsulates the process
 //  for performing a particular type of request.
 //
@@ -45,7 +45,7 @@
 
 + (void)setDebug:(BOOL)debug;
 
-- (id)initWithClient:(BBBluetoothOBEXClient *)client 
+- (id)initWithClient:(BBBluetoothOBEXClient *)client
        eventSelector:(SEL)selector
              session:(OBEXSession *)session;
 
@@ -72,7 +72,7 @@
 
 @interface BBOBEXDisconnectRequest : BBOBEXRequest
 {
-    CFMutableDataRef mHeadersDataRef;    
+    CFMutableDataRef mHeadersDataRef;
 }
 @end
 

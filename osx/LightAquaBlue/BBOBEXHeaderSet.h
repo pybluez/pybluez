@@ -21,8 +21,8 @@
 //  BBOBEXHeaderSet.h
 //  LightAquaBlue
 //
-//  A collection of unique OBEX headers. 
-// 
+//  A collection of unique OBEX headers.
+//
 //  The mutable counterpart to this class is BBMutableOBEXHeaderSet.
 //
 
@@ -43,7 +43,7 @@
 
 /*
  * Returns whether this header set contains the header with <headerID>.
- * 
+ *
  * Common header IDs are defined in the OBEXHeaderIdentifiers enum in
  * <IOBluetooth/OBEX.h> (for example, kOBEXHeaderIDName).
  */
@@ -61,13 +61,13 @@
 - (unsigned int)valueForCountHeader;
 
 /*
- * Returns the value for the Name header, or nil if the header is not present or 
+ * Returns the value for the Name header, or nil if the header is not present or
  * cannot be read.
  */
 - (NSString *)valueForNameHeader;
 
 /*
- * Returns the value for the Type header, or nil if the header is not present or 
+ * Returns the value for the Type header, or nil if the header is not present or
  * cannot be read.
  */
 - (NSString *)valueForTypeHeader;
@@ -79,7 +79,7 @@
 - (unsigned int)valueForLengthHeader;
 
 /*
- * Returns the value for the 0x44 Time header, or the 0xC4 value if the 0x44 
+ * Returns the value for the 0x44 Time header, or the 0xC4 value if the 0x44
  * header is not present, or nil if neither header is present or cannot be read.
  */
 - (NSDate *)valueForTimeHeader;
@@ -115,31 +115,31 @@
 - (uint32_t)valueForConnectionIDHeader;
 
 /*
- * Returns the value for the Application Parameters header, or nil if the 
+ * Returns the value for the Application Parameters header, or nil if the
  * header is not present or cannot be read.
  */
 - (NSData *)valueForApplicationParametersHeader;
 
 /*
- * Returns the value for the Authorization Challenge header, or nil if the 
+ * Returns the value for the Authorization Challenge header, or nil if the
  * header is not present or cannot be read.
  */
 - (NSData *)valueForAuthorizationChallengeHeader;
 
 /*
- * Returns the value for the Authorization Response header, or nil if the 
+ * Returns the value for the Authorization Response header, or nil if the
  * header is not present or cannot be read.
  */
 - (NSData *)valueForAuthorizationResponseHeader;
 
 /*
- * Returns the value for the Object Class header, or nil if the 
+ * Returns the value for the Object Class header, or nil if the
  * header is not present or cannot be read.
  */
 - (NSData *)valueForObjectClassHeader;
 
 /*
- * Returns the value for the 4-byte header <headerID>, or 0 if the header is 
+ * Returns the value for the 4-byte header <headerID>, or 0 if the header is
  * not present or cannot be read as a 4-byte value.
  */
 - (unsigned int)valueFor4ByteHeader:(uint8_t)headerID;
@@ -151,7 +151,7 @@
  - (NSData *)valueForByteSequenceHeader:(uint8_t)headerID;
 
 /*
- * Returns the value for the 1-byte header <headerID>, or 0 if the header is 
+ * Returns the value for the 1-byte header <headerID>, or 0 if the header is
  * not present or cannot be read as a 1-byte value.
  */
 - (uint8_t)valueFor1ByteHeader:(uint8_t)headerID;

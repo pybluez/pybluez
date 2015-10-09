@@ -17,9 +17,9 @@
 
 """
 Provides a python interface to the LightAquaBlue Framework classes, through
-PyObjC.    
-    
-See http://pyobjc.sourceforge.net for details on how to access Objective-C 
+PyObjC.
+
+See http://pyobjc.sourceforge.net for details on how to access Objective-C
 classes through PyObjC.
 """
 
@@ -41,20 +41,20 @@ try:
 except AttributeError:
     # earlier versions use loadBundle() and setSignatureForSelector()
 
-    objc.loadBundle("LightAquaBlue", globals(), 
+    objc.loadBundle("LightAquaBlue", globals(),
        bundle_path=objc.pathForFramework(_FRAMEWORK_PATH))
 
-    # return int, take (object, object, object, output unsigned char, output int)           
+    # return int, take (object, object, object, output unsigned char, output int)
     # i.e. in python: return (int, char, int), take (object, object, object)
-    objc.setSignatureForSelector("BBServiceAdvertiser", 
+    objc.setSignatureForSelector("BBServiceAdvertiser",
         "addRFCOMMServiceDictionary:withName:UUID:channelID:serviceRecordHandle:",
         "i@0:@@@o^Co^I")
-        
+
     # set to take (6-char array, unsigned char, object)
     # this seems to work even though the selector doesn't take a char aray,
     # it takes a struct 'BluetoothDeviceAddress' which contains a char array.
-    objc.setSignatureForSelector("BBBluetoothOBEXClient", 
-            "initWithRemoteDeviceAddress:channelID:delegate:", 
+    objc.setSignatureForSelector("BBBluetoothOBEXClient",
+            "initWithRemoteDeviceAddress:channelID:delegate:",
             '@@:r^[6C]C@')
 
 del objc

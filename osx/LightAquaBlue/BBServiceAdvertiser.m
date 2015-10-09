@@ -37,7 +37,7 @@ static NSString *kServiceItemKeyProtocolDescriptorList;
 // template service dictionaries for each pre-defined profile
 static NSDictionary *serialPortProfileDict;
 static NSDictionary *objectPushProfileDict;
-static NSDictionary *fileTransferProfileDict;	
+static NSDictionary *fileTransferProfileDict;
 
 
 @implementation BBServiceAdvertiser
@@ -47,21 +47,21 @@ static NSDictionary *fileTransferProfileDict;
 	kServiceItemKeyServiceClassIDList = @"0001 - ServiceClassIDList";
 	kServiceItemKeyServiceName = @"0100 - ServiceName*";
 	kServiceItemKeyProtocolDescriptorList = @"0004 - ProtocolDescriptorList";
-	
+
 	// initialize the template service dictionaries
 	NSBundle *classBundle = [NSBundle bundleForClass:[BBServiceAdvertiser class]];
-	serialPortProfileDict = 
+	serialPortProfileDict =
 		[[NSDictionary alloc] initWithContentsOfFile:[classBundle pathForResource:@"SerialPortDictionary"
                                                                            ofType:@"plist"]];
-	objectPushProfileDict = 
+	objectPushProfileDict =
 		[[NSDictionary alloc] initWithContentsOfFile:[classBundle pathForResource:@"OBEXObjectPushDictionary"
                                                                            ofType:@"plist"]];
-	fileTransferProfileDict = 
+	fileTransferProfileDict =
 		[[NSDictionary alloc] initWithContentsOfFile:[classBundle pathForResource:@"OBEXFileTransferDictionary"
                                                                            ofType:@"plist"]];
-	
+
 	//kRFCOMMChannelNone = 0;
-	//kRFCOMM_UUID = [[IOBluetoothSDPUUID uuid16:kBluetoothSDPUUID16RFCOMM] retain];	
+	//kRFCOMM_UUID = [[IOBluetoothSDPUUID uuid16:kBluetoothSDPUUID16RFCOMM] retain];
 }
 
 + (NSDictionary *)serialPortProfileDictionary
@@ -85,24 +85,24 @@ static NSDictionary *fileTransferProfileDict;
 					   withUUID:(IOBluetoothSDPUUID *)uuid
 {
 	if (sdpEntries == nil) return;
-	
+
 	// set service name
 	if (serviceName != nil) {
 		[sdpEntries setObject:serviceName forKey:kServiceItemKeyServiceName];
 	}
-	
+
 	// set service uuid if given
 	if (uuid != nil) {
-		
-		NSMutableArray *currentServiceList = 
+
+		NSMutableArray *currentServiceList =
 		[sdpEntries objectForKey:kServiceItemKeyServiceClassIDList];
-		
+
 		if (currentServiceList == nil) {
 			currentServiceList = [NSMutableArray array];
-		} 
-		
+		}
+
 		[currentServiceList addObject:[NSData dataWithBytes:[uuid bytes] length:[uuid length]]];
-		
+
 		// update dict
 		[sdpEntries setObject:currentServiceList forKey:kServiceItemKeyServiceClassIDList];
 	}
@@ -114,10 +114,10 @@ static NSDictionary *fileTransferProfileDict;
 								  UUID:(NSString *)uuid
 							 channelID:(BluetoothRFCOMMChannelID *)outChannelID
 				   serviceRecordHandle:(BluetoothSDPServiceRecordHandle *)outServiceRecordHandle
-{	
+{
 	if (dict == nil)
 		return kIOReturnError;
-	
+
 	NSMutableDictionary *sdpEntries = [NSMutableDictionary dictionaryWithDictionary:dict];
 
 
@@ -128,27 +128,27 @@ static NSDictionary *fileTransferProfileDict;
 	[BBServiceAdvertiser updateServiceDictionary:sdpEntries
 										withName:serviceName
 										withUUID:uuidBlutooth];
-	
+
 	// publish the service
 	IOBluetoothSDPServiceRecordRef serviceRecordRef;
 	IOReturn status = IOBluetoothAddServiceDict((CFDictionaryRef) sdpEntries, &serviceRecordRef);
 	[uuid_ autorelease];
 
 	if (status == kIOReturnSuccess) {
-		
+
 		IOBluetoothSDPServiceRecord *serviceRecord =
 			[IOBluetoothSDPServiceRecord withSDPServiceRecordRef:serviceRecordRef];
-		
+
 		// get service channel ID & service record handle
 		status = [serviceRecord getRFCOMMChannelID:outChannelID];
 		if (status == kIOReturnSuccess) {
 			status = [serviceRecord getServiceRecordHandle:outServiceRecordHandle];
 		}
-		
+
 		// cleanup
 		IOBluetoothObjectRelease(serviceRecordRef);
 	}
-	
+
 	return status;
 }
 

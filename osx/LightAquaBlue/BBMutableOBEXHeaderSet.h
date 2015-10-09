@@ -74,79 +74,79 @@
 - (void)setValueForTimeHeader:(NSDate *)date isUTCTime:(BOOL)isUTCTime;
 
 /*
- * Sets the value for the Description header to <description>, overriding 
+ * Sets the value for the Description header to <description>, overriding
  * any existing value for this header.
  */
 - (void)setValueForDescriptionHeader:(NSString *)description;
 
 /*
- * Sets the value for the Target header to <target>, overriding 
+ * Sets the value for the Target header to <target>, overriding
  * any existing value for this header.
  */
 - (void)setValueForTargetHeader:(NSData *)target;
 
 /*
- * Sets the value for the HTTP header to <http>, overriding 
+ * Sets the value for the HTTP header to <http>, overriding
  * any existing value for this header.
  */
 - (void)setValueForHTTPHeader:(NSData *)http;
 
 /*
- * Sets the value for the Who header to <who>, overriding 
+ * Sets the value for the Who header to <who>, overriding
  * any existing value for this header.
  */
 - (void)setValueForWhoHeader:(NSData *)who;
 
 /*
- * Sets the value for the Connection Id header to <connectionID>, overriding 
+ * Sets the value for the Connection Id header to <connectionID>, overriding
  * any existing value for this header.
  */
 - (void)setValueForConnectionIDHeader:(uint32_t)connectionID;
 
 /*
- * Sets the value for the Application Parameters header to <appParameters>, 
+ * Sets the value for the Application Parameters header to <appParameters>,
  * overriding any existing value for this header.
  */
 - (void)setValueForApplicationParametersHeader:(NSData *)appParameters;
 
 /*
- * Sets the value for the Authorization Challenge header to <authChallenge>, 
+ * Sets the value for the Authorization Challenge header to <authChallenge>,
  * overriding any existing value for this header.
  */
 - (void)setValueForAuthorizationChallengeHeader:(NSData *)authChallenge;
 
 /*
- * Sets the value for the Authorization Response header to <authResponse>, 
+ * Sets the value for the Authorization Response header to <authResponse>,
  * overriding any existing value for this header.
  */
 - (void)setValueForAuthorizationResponseHeader:(NSData *)authResponse;
 
 /*
- * Sets the value for the Object Class header to <objectClass>, 
+ * Sets the value for the Object Class header to <objectClass>,
  * overriding any existing value for this header.
  */
 - (void)setValueForObjectClassHeader:(NSData *)objectClass;
 
 /*
- * Sets the value for the unicode-encoded header <headerID> to <value>, 
+ * Sets the value for the unicode-encoded header <headerID> to <value>,
  * overriding any existing value for this header.
  */
 - (void)setValue:(NSString *)value forUnicodeHeader:(uint8_t)headerID;
 
 /*
- * Sets the value for the byte-sequence-encoded header <headerID> to <value>, 
+ * Sets the value for the byte-sequence-encoded header <headerID> to <value>,
  * overriding any existing value for this header.
  */
 - (void)setValue:(NSData *)value forByteSequenceHeader:(uint8_t)headerID;
 
 /*
- * Sets the value for the 4-byte-header <headerID> to <value>, 
+ * Sets the value for the 4-byte-header <headerID> to <value>,
  * overriding any existing value for this header.
  */
 - (void)setValue:(uint32_t)value for4ByteHeader:(uint8_t)headerID;
 
 /*
- * Sets the value for the 1-byte-encoded header <headerID> to <value>, 
+ * Sets the value for the 1-byte-encoded header <headerID> to <value>,
  * overriding any existing value for this header.
  */
 - (void)setValue:(uint8_t)value for1ByteHeader:(uint8_t)headerID;

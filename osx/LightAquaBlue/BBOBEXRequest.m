@@ -41,7 +41,7 @@ static BOOL _debug = NO;
     _debug = debug;
 }
 
-- (id)initWithClient:(BBBluetoothOBEXClient *)client 
+- (id)initWithClient:(BBBluetoothOBEXClient *)client
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
 {
@@ -67,9 +67,9 @@ static BOOL _debug = NO;
 {
     if (!mResponseHeaders)
         mResponseHeaders = [[BBMutableOBEXHeaderSet alloc] init];
-    
+
     // add to current response headers
-    // this way we won't lose previous response headers in multi-packet 
+    // this way we won't lose previous response headers in multi-packet
     // Put & Get requests
     [mResponseHeaders addHeadersFromHeaderSet:responseHeaders];
 }
@@ -108,7 +108,7 @@ static BOOL _debug = NO;
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
-    
+
 	OBEXError status = [mSession OBEXConnect:(OBEXFlags)kOBEXConnectFlagNone
                              maxPacketLength:[mClient maximumPacketLength]
                              optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
@@ -118,15 +118,15 @@ static BOOL _debug = NO;
                                       refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;
-	
+
     return status;
 }
 
 - (void)finishedWithError:(OBEXError)error responseCode:(int)responseCode
 {
     if (_debug) NSLog(@"[BBOBEXConnectRequest] finishedWithError %@: %d", [mClient delegate], error);
-    
-    mFinished = YES;    
+
+    mFinished = YES;
     if ([[mClient delegate] respondsToSelector:@selector(client:didFinishConnectRequestWithError:response:)]) {
         [[mClient delegate] client:mClient
   didFinishConnectRequestWithError:error
@@ -143,7 +143,7 @@ static BOOL _debug = NO;
     const OBEXConnectCommandResponseData *resp = &event->u.connectCommandResponseData;
     *responseCode = resp->serverResponseOpCode;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:resp->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:resp->headerDataPtr
                                     length:resp->headerDataLength]) {
         *responseHeaders = headers;
     }
@@ -165,11 +165,11 @@ static BOOL _debug = NO;
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
     if (_debug) NSLog(@"[BBOBEXDisconnectRequest] beginWithHeaders (%d headers)", [headers count]);
-    
+
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
-    
+
 	OBEXError status = [mSession OBEXDisconnect:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
                           optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
                                   eventSelector:mClientEventSelector
@@ -183,7 +183,7 @@ static BOOL _debug = NO;
 - (void)finishedWithError:(OBEXError)error responseCode:(int)responseCode
 {
     if (_debug) NSLog(@"[BBOBEXDisconnectRequest] finishedWithError: %d", error);
-    
+
     mFinished = YES;
     if ([[mClient delegate] respondsToSelector:@selector(client:didFinishDisconnectRequestWithError:response:)]) {
         [[mClient delegate] client:mClient
@@ -201,7 +201,7 @@ static BOOL _debug = NO;
     const OBEXDisconnectCommandResponseData *resp = &event->u.disconnectCommandResponseData;
     *responseCode = resp->serverResponseOpCode;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:resp->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:resp->headerDataPtr
                                     length:resp->headerDataLength]) {
         *responseHeaders = headers;
     }
@@ -220,7 +220,7 @@ static BOOL _debug = NO;
 
 @implementation BBOBEXPutRequest
 
-- (id)initWithClient:(BBBluetoothOBEXClient *)client 
+- (id)initWithClient:(BBBluetoothOBEXClient *)client
         eventSelector:(SEL)selector
              session:(OBEXSession *)session
           inputStream:(NSInputStream *)inputStream
@@ -232,23 +232,23 @@ static BOOL _debug = NO;
 
 - (NSMutableData *)readNextChunkForHeaderLength:(size_t)headersLength
                                     isLastChunk:(BOOL *)outIsLastChunk
-{ 
+{
     if (mInputStream == nil)
         return nil;
-    
-    OBEXMaxPacketLength	maxPacketSize = 
+
+    OBEXMaxPacketLength	maxPacketSize =
         [mSession getAvailableCommandPayloadLength:kOBEXOpCodePut];
     if (maxPacketSize == 0 || headersLength > maxPacketSize)
         return nil;
-    
+
 	OBEXMaxPacketLength maxBodySize = maxPacketSize - headersLength;
-    
+
     NSMutableData *data = [NSMutableData dataWithLength:maxBodySize];
     int len = [mInputStream read:[data mutableBytes]
                        maxLength:maxBodySize];
-    
+
     if (_debug) NSLog(@"[BBOBEXPutRequest] read %d bytes (maxBodySize = %d)", len, maxBodySize);
-    
+
     // is last packet if there wasn't enough body data to fill up the packet
     if (len >= 0)
         *outIsLastChunk = (len < maxBodySize);
@@ -259,45 +259,45 @@ static BOOL _debug = NO;
 
 + (OBEXError)appendEmptyEndOfBodyHeaderToData:(CFMutableDataRef)headerData
 {
-    if (!headerData) 
+    if (!headerData)
         return kOBEXInternalError;
-    
-    // can't see to add the data using raw bytes, so make a dictionary 
+
+    // can't see to add the data using raw bytes, so make a dictionary
     // and use OBEXHeadersToBytes() to get the end of body header bytes
-    
-    CFMutableDictionaryRef mutableDict = CFDictionaryCreateMutable(NULL, 1, 
-            &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);    
+
+    CFMutableDictionaryRef mutableDict = CFDictionaryCreateMutable(NULL, 1,
+            &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     OBEXError status = OBEXAddBodyHeader(NULL, 0, TRUE, mutableDict);
-    if (status == kOBEXSuccess) {    
+    if (status == kOBEXSuccess) {
         CFMutableDataRef bodyData = OBEXHeadersToBytes(mutableDict);
         if (bodyData == NULL) {
             CFRelease(mutableDict);
             return kOBEXGeneralError;
         }
-        CFDataAppendBytes(headerData, CFDataGetBytePtr(bodyData), 
+        CFDataAppendBytes(headerData, CFDataGetBytePtr(bodyData),
                           CFDataGetLength(bodyData));
         CFRelease(bodyData);
     }
-    
+
     CFRelease(mutableDict);
     return status;
 }
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXPutRequest] beginWithHeaders (%d headers)", [headers count]);    
-    
+    if (_debug) NSLog(@"[BBOBEXPutRequest] beginWithHeaders (%d headers)", [headers count]);
+
     // there's no stream if it's a Put-Delete
     // but if there is a stream, it must be open
     if (mInputStream && [mInputStream streamStatus] != NSStreamStatusOpen) {
         if (_debug) NSLog(@"[BBOBEXPutRequest] given input stream not opened!");
         return kOBEXBadArgumentError;
     }
-    
+
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
-        
+
     BOOL isLastChunk = YES;
     NSMutableData *mutableData = nil;
 
@@ -308,12 +308,12 @@ static BOOL _debug = NO;
             if (_debug) NSLog(@"[BBOBEXPutRequest] error reading from stream!");
             if (bytes)
                 CFRelease(bytes);
-            return kOBEXInternalError; 
+            return kOBEXInternalError;
         }
 
-        // If zero data read, then this must be a Create-Empty (IrOBEX 3.3.3.6) 
+        // If zero data read, then this must be a Create-Empty (IrOBEX 3.3.3.6)
         // so add an empty End-of-Body header, because OBEXPut: won't add body
-        // headers if bodyDataLength is zero, in which case the server will 
+        // headers if bodyDataLength is zero, in which case the server will
         // think it's a Put-Delete instead of a Put.
         if ([mutableData length] == 0) {
             if (!bytes)
@@ -326,7 +326,7 @@ static BOOL _debug = NO;
             }
         }
     }
-    
+
     OBEXError status;
     status = [mSession OBEXPut:isLastChunk
                    headersData:(bytes ? (void*)CFDataGetBytePtr(bytes) : NULL)
@@ -338,33 +338,33 @@ static BOOL _debug = NO;
                         refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;
-    
+
     if (mutableData) {
         [mutableData retain];
         [mSentBodyData release];
         mSentBodyData = mutableData;
-        
+
         if (status == kOBEXSuccess) {
             if ([[mClient delegate] respondsToSelector:@selector(client:didSendDataOfLength:)]) {
                 [[mClient delegate] client:mClient
                        didSendDataOfLength:[mutableData length]];
             }
-        }            
+        }
     }
-    
-    return status;    
+
+    return status;
 }
 
 - (OBEXError)sendNextRequestPacket
 {
     if (_debug) NSLog(@"[BBOBEXPutRequest] sendNextRequestPacket");
-    
+
     BOOL isLastChunk;
     NSMutableData *mutableData = [self readNextChunkForHeaderLength:0
-                                         isLastChunk:&isLastChunk];   
-    
+                                         isLastChunk:&isLastChunk];
+
     if (!mutableData)
-        return kOBEXInternalError; 
+        return kOBEXInternalError;
     OBEXError status = [mSession OBEXPut:isLastChunk
                              headersData:NULL
                        headersDataLength:0
@@ -373,11 +373,11 @@ static BOOL _debug = NO;
                            eventSelector:mClientEventSelector
                           selectorTarget:mClient
                                   refCon:NULL];
-    
+
     [mutableData retain];
     [mSentBodyData release];
     mSentBodyData = mutableData;
-    
+
     if (status == kOBEXSuccess) {
         if ([[mClient delegate] respondsToSelector:@selector(client:didSendDataOfLength:)]) {
             [[mClient delegate] client:mClient
@@ -390,8 +390,8 @@ static BOOL _debug = NO;
 - (void)finishedWithError:(OBEXError)error responseCode:(int)responseCode
 {
     if (_debug) NSLog(@"[BBOBEXPutRequest] finishedWithError: %d", error);
-    
-    mFinished = YES;    
+
+    mFinished = YES;
     if ([[mClient delegate] respondsToSelector:@selector(client:didFinishPutRequestForStream:error:response:)]) {
         [[mClient delegate] client:mClient
       didFinishPutRequestForStream:mInputStream
@@ -409,7 +409,7 @@ static BOOL _debug = NO;
     const OBEXPutCommandResponseData *resp = &event->u.putCommandResponseData;
     *responseCode = resp->serverResponseOpCode;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:resp->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:resp->headerDataPtr
                                     length:resp->headerDataLength]) {
         *responseHeaders = headers;
     }
@@ -430,7 +430,7 @@ static BOOL _debug = NO;
 
 @implementation BBOBEXGetRequest
 
-- (id)initWithClient:(BBBluetoothOBEXClient *)client 
+- (id)initWithClient:(BBBluetoothOBEXClient *)client
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
         outputStream:(NSOutputStream *)outputStream
@@ -442,17 +442,17 @@ static BOOL _debug = NO;
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXGetRequest] beginWithHeaders (%d headers)", [headers count]);    
-    
+    if (_debug) NSLog(@"[BBOBEXGetRequest] beginWithHeaders (%d headers)", [headers count]);
+
     if (mOutputStream == nil || [mOutputStream streamStatus] != NSStreamStatusOpen)
         return kOBEXBadArgumentError;
-    
+
     mTotalGetLength = 0;
-    
+
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
-    
+
     OBEXError status = [mSession OBEXGet:YES
                                  headers:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
                            headersLength:(bytes ? CFDataGetLength(bytes) : 0)
@@ -461,46 +461,46 @@ static BOOL _debug = NO;
                                   refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;
-    return status;        
+    return status;
 }
 
 - (void)receivedResponseWithHeaders:(BBMutableOBEXHeaderSet *)responseHeaders
 {
     if (_debug) NSLog(@"[BBOBEXGetRequest] receivedResponseWithHeaders");
-    
+
     // don't pass body/end-of-body headers onto client delegate
     NSData *bodyData = [responseHeaders valueForByteSequenceHeader:kOBEXHeaderIDBody];
     NSData *endOfBodyData = [responseHeaders valueForByteSequenceHeader:kOBEXHeaderIDEndOfBody];
     [responseHeaders removeValueForHeader:kOBEXHeaderIDBody];
-    [responseHeaders removeValueForHeader:kOBEXHeaderIDEndOfBody];     
-    
+    [responseHeaders removeValueForHeader:kOBEXHeaderIDEndOfBody];
+
     // super impl. stores response headers to pass them onto delegate later
     [super receivedResponseWithHeaders:responseHeaders];
-    
+
     int totalBytesReceived = 0;
-    
+
     if (bodyData) {
         if ([mOutputStream write:[bodyData bytes] maxLength:[bodyData length]] < 0)
             totalBytesReceived = -1;
         else
             totalBytesReceived += [bodyData length];
     }
-    
+
     if (endOfBodyData && totalBytesReceived != -1) {
         if ([mOutputStream write:[endOfBodyData bytes] maxLength:[endOfBodyData length]] < 0)
             totalBytesReceived = -1;
         else
             totalBytesReceived += [endOfBodyData length];
-    }     
-    
+    }
+
     if (totalBytesReceived < 0) {
         if (_debug) NSLog(@"[BBOBEXGetRequest] error writing to output stream");
         return;
     }
-    
+
     // read length (in initial headers) - ok if zero (key not present)
-    mTotalGetLength = [mResponseHeaders valueForLengthHeader];  
-    
+    mTotalGetLength = [mResponseHeaders valueForLengthHeader];
+
     if (totalBytesReceived > 0) {
         if ([[mClient delegate] respondsToSelector:@selector(client:didReceiveDataOfLength:ofTotalLength:)]) {
             [[mClient delegate] client:mClient
@@ -525,7 +525,7 @@ static BOOL _debug = NO;
 - (void)finishedWithError:(OBEXError)error responseCode:(int)responseCode
 {
     if (_debug) NSLog(@"[BBOBEXGetRequest] finishedWithError: %d", error);
-    
+
     mFinished = YES;
     if ([[mClient delegate] respondsToSelector:@selector(client:didFinishGetRequestForStream:error:response:)]) {
         [[mClient delegate] client:mClient
@@ -544,7 +544,7 @@ static BOOL _debug = NO;
     const OBEXGetCommandResponseData *resp = &event->u.getCommandResponseData;
     *responseCode = resp->serverResponseOpCode;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:resp->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:resp->headerDataPtr
                                     length:resp->headerDataLength]) {
         *responseHeaders = headers;
     }
@@ -564,31 +564,31 @@ static BOOL _debug = NO;
 
 @implementation BBOBEXSetPathRequest
 
-- (id)initWithClient:(BBBluetoothOBEXClient *)client 
+- (id)initWithClient:(BBBluetoothOBEXClient *)client
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
 changeToParentDirectoryFirst:(BOOL)changeToParentDirectoryFirst
 createDirectoriesIfNeeded:(BOOL)createDirectoriesIfNeeded
 {
     self = [super initWithClient:client eventSelector:selector session:session];
-    
+
     mRequestFlags = 0;
     if (changeToParentDirectoryFirst)
         mRequestFlags |= 1;
     if (!createDirectoriesIfNeeded)
-        mRequestFlags |= 2;    
-    
+        mRequestFlags |= 2;
+
     return self;
 }
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
-{   
-    if (_debug) NSLog(@"[BBOBEXSetPathRequest] beginWithHeaders (%d headers)", [headers count]);    
-    
+{
+    if (_debug) NSLog(@"[BBOBEXSetPathRequest] beginWithHeaders (%d headers)", [headers count]);
+
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
-    
+
     OBEXError status = [mSession OBEXSetPath:mRequestFlags
                                    constants:0
                              optionalHeaders:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
@@ -598,14 +598,14 @@ createDirectoriesIfNeeded:(BOOL)createDirectoriesIfNeeded
                                       refCon:NULL];
     if (bytes)
         mHeadersDataRef = bytes;
-    return status;        
+    return status;
 }
 
 - (void)finishedWithError:(OBEXError)error responseCode:(int)responseCode
 {
     if (_debug) NSLog(@"[BBOBEXSetPathRequest] finishedWithError: %d", error);
-    
-    mFinished = YES;    
+
+    mFinished = YES;
     if ([[mClient delegate] respondsToSelector:@selector(client:didFinishSetPathRequestWithError:response:)]) {
         [[mClient delegate] client:mClient
   didFinishSetPathRequestWithError:error
@@ -622,7 +622,7 @@ createDirectoriesIfNeeded:(BOOL)createDirectoriesIfNeeded
     const OBEXSetPathCommandResponseData *resp = &event->u.setPathCommandResponseData;
     *responseCode = resp->serverResponseOpCode;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:resp->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:resp->headerDataPtr
                                     length:resp->headerDataLength]) {
         *responseHeaders = headers;
     }
@@ -641,7 +641,7 @@ createDirectoriesIfNeeded:(BOOL)createDirectoriesIfNeeded
 
 @implementation BBOBEXAbortRequest
 
-- (id)initWithClient:(BBBluetoothOBEXClient *)client 
+- (id)initWithClient:(BBBluetoothOBEXClient *)client
        eventSelector:(SEL)selector
              session:(OBEXSession *)session
 currentRequestStream:(NSStream *)stream
@@ -654,11 +654,11 @@ currentRequestStream:(NSStream *)stream
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
     if (_debug) NSLog(@"[BBOBEXAbortRequest] beginWithHeaders (%d headers)", [headers count]);
-    
+
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
-    
+
 	return [mSession OBEXAbort:(bytes ? (void *)CFDataGetBytePtr(bytes) : NULL)
          optionalHeadersLength:(bytes ? CFDataGetLength(bytes) : 0)
                  eventSelector:mClientEventSelector
@@ -687,7 +687,7 @@ currentRequestStream:(NSStream *)stream
     const OBEXAbortCommandResponseData *resp = &event->u.abortCommandResponseData;
     *responseCode = resp->serverResponseOpCode;
     BBMutableOBEXHeaderSet *headers = [BBMutableOBEXHeaderSet headerSet];
-    if ([headers addHeadersFromHeadersData:resp->headerDataPtr 
+    if ([headers addHeadersFromHeadersData:resp->headerDataPtr
                                     length:resp->headerDataLength]) {
         *responseHeaders = headers;
     }

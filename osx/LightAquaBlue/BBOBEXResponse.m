@@ -38,10 +38,10 @@
            headers:(BBOBEXHeaderSet *)headers
 {
     self = [super init];
-    
+
     mCode = responseCode;
     mHeaders = [headers retain];
-    
+
     return self;
 }
 
@@ -56,77 +56,77 @@
         case kOBEXResponseCodeContinueWithFinalBit:
             return @"Continue";
         case kOBEXResponseCodeSuccessWithFinalBit:
-            return @"Success"; 
+            return @"Success";
         case kOBEXResponseCodeCreatedWithFinalBit:
-            return @"Created"; 
+            return @"Created";
         case kOBEXResponseCodeAcceptedWithFinalBit:
             return @"Accepted";
         case kOBEXResponseCodeNonAuthoritativeInfoWithFinalBit:
-            return @"Non-authoritative info";           
+            return @"Non-authoritative info";
         case kOBEXResponseCodeNoContentWithFinalBit:
-            return @"No content";           
+            return @"No content";
         case kOBEXResponseCodeResetContentWithFinalBit:
-            return @"Reset content";        
+            return @"Reset content";
         case kOBEXResponseCodePartialContentWithFinalBit:
-            return @"Partial content";      
+            return @"Partial content";
         case kOBEXResponseCodeMultipleChoicesWithFinalBit:
-            return @"Multiple choices";     
+            return @"Multiple choices";
         case kOBEXResponseCodeMovedPermanentlyWithFinalBit:
-            return @"Moved permanently";    
+            return @"Moved permanently";
         case kOBEXResponseCodeMovedTemporarilyWithFinalBit:
-            return @"Moved temporarily";    
+            return @"Moved temporarily";
         case kOBEXResponseCodeSeeOtherWithFinalBit:
-            return @"See other";            
+            return @"See other";
         case kOBEXResponseCodeNotModifiedWithFinalBit:
-            return @"Code not modified";    
+            return @"Code not modified";
         case kOBEXResponseCodeUseProxyWithFinalBit:
-            return @"Use proxy";            
+            return @"Use proxy";
         case kOBEXResponseCodeBadRequestWithFinalBit:
-            return @"Bad request";          
+            return @"Bad request";
         case kOBEXResponseCodeUnauthorizedWithFinalBit:
-            return @"Unauthorized";         
+            return @"Unauthorized";
         case kOBEXResponseCodePaymentRequiredWithFinalBit:
-            return @"Payment required";     
+            return @"Payment required";
         case kOBEXResponseCodeForbiddenWithFinalBit:
-            return @"Forbidden";            
+            return @"Forbidden";
         case kOBEXResponseCodeNotFoundWithFinalBit:
-            return @"Not found";            
+            return @"Not found";
         case kOBEXResponseCodeMethodNotAllowedWithFinalBit:
-            return @"Method not allowed";   
+            return @"Method not allowed";
         case kOBEXResponseCodeNotAcceptableWithFinalBit:
-            return @"Not acceptable";       
+            return @"Not acceptable";
         case kOBEXResponseCodeProxyAuthenticationRequiredWithFinalBit:
-            return @"Proxy authentication required";            
+            return @"Proxy authentication required";
         case kOBEXResponseCodeRequestTimeOutWithFinalBit:
-            return @"Request time out";         
+            return @"Request time out";
         case kOBEXResponseCodeConflictWithFinalBit:
-            return @"Conflict";         
+            return @"Conflict";
         case kOBEXResponseCodeGoneWithFinalBit:
-            return @"Gone";         
+            return @"Gone";
         case kOBEXResponseCodeLengthRequiredFinalBit:
-            return @"Length required";          
+            return @"Length required";
         case kOBEXResponseCodePreconditionFailedWithFinalBit:
-            return @"Precondition failed";      
+            return @"Precondition failed";
         case kOBEXResponseCodeRequestedEntityTooLargeWithFinalBit:
-            return @"Requested entity too large";           
+            return @"Requested entity too large";
         case kOBEXResponseCodeRequestURLTooLargeWithFinalBit:
-            return @"Requested URL too large";          
+            return @"Requested URL too large";
         case kOBEXResponseCodeUnsupportedMediaTypeWithFinalBit:
-            return @"Unsupported media type";           
+            return @"Unsupported media type";
         case kOBEXResponseCodeInternalServerErrorWithFinalBit:
-            return @"Internal server error";            
+            return @"Internal server error";
         case kOBEXResponseCodeNotImplementedWithFinalBit:
-            return @"Not implemented";          
+            return @"Not implemented";
         case kOBEXResponseCodeBadGatewayWithFinalBit:
-            return @"Bad gateway";          
+            return @"Bad gateway";
         case kOBEXResponseCodeServiceUnavailableWithFinalBit:
-            return @"Service unavailable";  
+            return @"Service unavailable";
         case kOBEXResponseCodeGatewayTimeoutWithFinalBit:
-            return @"Gateway timeout";      
+            return @"Gateway timeout";
         case kOBEXResponseCodeHTTPVersionNotSupportedWithFinalBit:
-            return @"HTTP version not supported";           
+            return @"HTTP version not supported";
         case kOBEXResponseCodeDatabaseFullWithFinalBit:
-            return @"Database full";            
+            return @"Database full";
         case kOBEXResponseCodeDatabaseLockedWithFinalBit:
             return @"Database locked";
         default:

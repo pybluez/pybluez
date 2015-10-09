@@ -39,12 +39,12 @@ static BOOL _debug = NO;
 - (void)errorOccurred:(OBEXError)error description:(NSString *)description
 {
     if (_debug) NSLog(DEBUG_NAME @"errorOccurred: %d description: %@", error, description);
-        
+
     if ([mDelegate respondsToSelector:@selector(server:errorOccurred:description:)]) {
-        [mDelegate server:self 
+        [mDelegate server:self
             errorOccurred:error
               description:description];
-    }    
+    }
 }
 
 
@@ -59,10 +59,10 @@ static BOOL _debug = NO;
                            delegate:(id)delegate
 {
     self = [super init];
-    
+
     mChannel = [channel retain];
     mDelegate = delegate;
-    
+
     return self;
 }
 
@@ -70,7 +70,7 @@ static BOOL _debug = NO;
 {
     BBOBEXRequestHandler *handler = nil;
     SEL selector = @selector(handleSessionEvent:);
-        
+
     switch (type) {
         case kOBEXSessionEventTypeConnectCommandReceived:
             handler = [[BBOBEXConnectRequestHandler alloc] initWithServer:self
@@ -81,22 +81,22 @@ static BOOL _debug = NO;
             handler = [[BBOBEXDisconnectRequestHandler alloc] initWithServer:self
                                                                eventSelector:selector
                                                                      session:mSession];
-            break;            
+            break;
         case kOBEXSessionEventTypePutCommandReceived:
             handler = [[BBOBEXPutRequestHandler alloc] initWithServer:self
                                                         eventSelector:selector
                                                               session:mSession];
-            break;            
+            break;
         case kOBEXSessionEventTypeGetCommandReceived:
             handler = [[BBOBEXGetRequestHandler alloc] initWithServer:self
                                                         eventSelector:selector
                                                               session:mSession];
-            break;                        
+            break;
         case kOBEXSessionEventTypeSetPathCommandReceived:
             handler = [[BBOBEXSetPathRequestHandler alloc] initWithServer:self
                                                             eventSelector:selector
                                                                   session:mSession];
-            break;                        
+            break;
     }
     [handler autorelease];
     return handler;
@@ -109,9 +109,9 @@ static BOOL _debug = NO;
 
     if (mSession) {
         [self errorOccurred:kOBEXSessionTransportDiedError
-                description:@"Bluetooth transport connection died"];    
+                description:@"Bluetooth transport connection died"];
     }
-    
+
     if (channel == mChannel)
         [self close];
 }
@@ -122,25 +122,25 @@ static BOOL _debug = NO;
         IOBluetoothOBEXSession *session =
             [IOBluetoothOBEXSession withIncomingRFCOMMChannel:mChannel
                                                 eventSelector:@selector(handleSessionEvent:)
-                                               selectorTarget:self 
+                                               selectorTarget:self
                                                        refCon:NULL];
         mSession = [session retain];
-        
-        mChannelNotif = [mChannel registerForChannelCloseNotification:self 
-                                                             selector:@selector(channelClosed:channel:)];        
-        
+
+        mChannelNotif = [mChannel registerForChannelCloseNotification:self
+                                                             selector:@selector(channelClosed:channel:)];
+
     } else if (mSession) {
         // for internal testing
-        
+
         //NSLog(@"send dummy event");
-        
+
         // dummy event - event selector doesn't seem to get set otherwise if
         // I just call setEventSelector:target:refCon:
         [mSession OBEXConnectResponse:kOBEXResponseCodeSuccessWithFinalBit
                                 flags:0
                       maxPacketLength:1024
-                      optionalHeaders:NULL 
-                optionalHeadersLength:0 
+                      optionalHeaders:NULL
+                optionalHeadersLength:0
                         eventSelector:@selector(handleSessionEvent:)
                        selectorTarget:self
                                refCon:NULL];
@@ -150,22 +150,22 @@ static BOOL _debug = NO;
 - (void)close
 {
     if (_debug) NSLog(DEBUG_NAME @"close");
-    
+
     [mChannelNotif unregister];
     mChannelNotif = nil;
-    
+
     // must set the event selector and target to NULL, otherwise the
     // OBEXSession might continue to try to send us events (e.g. if there's
-    // a link error)    
-    if (mSession) 
+    // a link error)
+    if (mSession)
         [mSession setEventSelector:NULL target:nil refCon:NULL];
-    
+
     [mCurrentRequestHandler release];
-    mCurrentRequestHandler = nil;    
-    
+    mCurrentRequestHandler = nil;
+
     [mChannel release];
     mChannel = nil;
-    
+
     [mSession release];
     mSession = nil;
 }
@@ -179,13 +179,13 @@ static BOOL _debug = NO;
 - (void)addResponseHeadersForCurrentRequest:(BBOBEXHeaderSet *)responseHeaders
 {
     if (mCurrentRequestHandler)
-        [mCurrentRequestHandler addResponseHeaders:responseHeaders];    
+        [mCurrentRequestHandler addResponseHeaders:responseHeaders];
 }
 
 - (void)handleSessionEvent:(const OBEXSessionEvent *)event
 {
     if (_debug) NSLog(DEBUG_NAME @"handleSessionEvent %d", event->type);
-        
+
     if (event->type == kOBEXSessionEventTypeError) {
         if (mCurrentRequestHandler) {
             [self errorOccurred:event->u.errorData.error
@@ -194,7 +194,7 @@ static BOOL _debug = NO;
             [self errorOccurred:event->u.errorData.error
                     description:@"Error occurred while server was idle"];
         }
-        
+
     } else if (event->type == kOBEXSessionEventTypeAbortCommandReceived) {
         if (mCurrentRequestHandler) {
             if (_debug) NSLog(DEBUG_NAME @"Aborting current request...");
@@ -202,8 +202,8 @@ static BOOL _debug = NO;
         } else {
             if (_debug) NSLog(DEBUG_NAME @"Got Abort request, but no request to abort");
             // not really an error, so errorOccurred: not called
-        }        
-        
+        }
+
     } else {
         if (_debug) NSLog(DEBUG_NAME @"Received client request");
         if (!mCurrentRequestHandler) {
@@ -215,7 +215,7 @@ static BOOL _debug = NO;
             }
             [mCurrentRequestHandler retain];
         }
-        
+
         if (_debug) NSLog(DEBUG_NAME @"Found handler, %@", mCurrentRequestHandler);
         BOOL requestFinished = [mCurrentRequestHandler handleRequestEvent:event];
         if (requestFinished) {

@@ -24,7 +24,7 @@
 //  A NSOutputStream subclass that calls write: on its delegate when data
 //  is available.
 //  This class is only intended for use from the LightBlue library.
-//  Most methods are not implemented, and there are no stream:HandleEvent: 
+//  Most methods are not implemented, and there are no stream:HandleEvent:
 //  calls to the delegate.
 //
 

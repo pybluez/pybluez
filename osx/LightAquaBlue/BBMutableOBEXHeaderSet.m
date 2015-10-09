@@ -67,7 +67,7 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
                                      length:[type length] + 1];
         [data resetBytesInRange:NSMakeRange([type length], 1)];
     }
-    
+
     [self setValue:data forByteSequenceHeader:kOBEXHeaderIDType];
 }
 
@@ -83,11 +83,11 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
 
 - (void)setValueForTimeHeader:(NSDate *)date isUTCTime:(BOOL)isUTCTime
 {
-    NSString *dateString = 
+    NSString *dateString =
         [date descriptionWithCalendarFormat: (isUTCTime ? UTC_FORMAT_STRING : LOCAL_TIME_FORMAT_STRING)
                                    timeZone: (isUTCTime ? [NSTimeZone timeZoneWithName:@"UTC"] : [NSTimeZone localTimeZone])
                                      locale: nil];
-    [self setValue:[dateString dataUsingEncoding:NSASCIIStringEncoding] 
+    [self setValue:[dateString dataUsingEncoding:NSASCIIStringEncoding]
     forByteSequenceHeader:kOBEXHeaderIDTimeISO];
 }
 
@@ -102,12 +102,12 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
 }
 
 - (void)setValueForHTTPHeader:(NSData *)http
-{    
+{
     [self setValue:http forByteSequenceHeader:kOBEXHeaderIDHTTP];
 }
 
 - (void)setValueForWhoHeader:(NSData *)who
-{    
+{
     [self setValue:who forByteSequenceHeader:kOBEXHeaderIDWho];
 }
 
@@ -141,17 +141,17 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
     if (!value || ((headerID & kHeaderEncodingMask) != kHeaderEncodingUnicode))
         return;
     NSNumber *key = [NSNumber numberWithUnsignedChar:headerID];
-    if ([mDict objectForKey:key] == nil) 
+    if ([mDict objectForKey:key] == nil)
         [mKeys addObject:key];
-    [mDict setObject:value forKey:key];    
+    [mDict setObject:value forKey:key];
 }
 
 - (void)setValue:(NSData *)value forByteSequenceHeader:(uint8_t)headerID
 {
     if (!value || ((headerID & kHeaderEncodingMask) != kHeaderEncodingByteSequence))
-        return;    
+        return;
     NSNumber *key = [NSNumber numberWithUnsignedChar:headerID];
-    if ([mDict objectForKey:key] == nil) 
+    if ([mDict objectForKey:key] == nil)
         [mKeys addObject:key];
     [mDict setObject:value forKey:key];
 }
@@ -159,9 +159,9 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
 - (void)setValue:(uint32_t)value for4ByteHeader:(uint8_t)headerID
 {
     if ((headerID & kHeaderEncodingMask) != kHeaderEncoding4Byte)
-        return;        
+        return;
     NSNumber *key = [NSNumber numberWithUnsignedChar:headerID];
-    if ([mDict objectForKey:key] == nil) 
+    if ([mDict objectForKey:key] == nil)
         [mKeys addObject:key];
     [mDict setObject:[NSNumber numberWithUnsignedInt:value] forKey:key];
 }
@@ -169,9 +169,9 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
 - (void)setValue:(uint8_t)value for1ByteHeader:(uint8_t)headerID
 {
     if ((headerID & kHeaderEncodingMask) != kHeaderEncoding1Byte)
-        return;        
+        return;
     NSNumber *key = [NSNumber numberWithUnsignedChar:headerID];
-    if ([mDict objectForKey:key] == nil) 
+    if ([mDict objectForKey:key] == nil)
         [mKeys addObject:key];
     [mDict setObject:[NSNumber numberWithUnsignedChar:value] forKey:key];
 }
@@ -181,11 +181,11 @@ static NSString *UTC_FORMAT_STRING = @"%Y%m%dT%H%M%SZ";
     NSDictionary *dict = [headerSet valueForKey:@"mDict"];
     [mDict addEntriesFromDictionary:dict];
 
-    NSArray *keys = [headerSet allHeaders];    
+    NSArray *keys = [headerSet allHeaders];
     int i;
     for (i=0; i<[keys count]; i++) {
         if (![mKeys containsObject:[keys objectAtIndex:i]]) {
-            [mKeys addObject:[keys objectAtIndex:i]]; 
+            [mKeys addObject:[keys objectAtIndex:i]];
         }
     }
 }
@@ -208,7 +208,7 @@ static NSString *parseString(const uint8_t *bytes, unsigned int length)
 {
     if (length < 0)
         return nil;
-	NSString *s = [[NSString alloc] initWithBytes:bytes 
+	NSString *s = [[NSString alloc] initWithBytes:bytes
 										   length:length
 										 encoding:NSUnicodeStringEncoding];
 	return [s autorelease];
@@ -217,7 +217,7 @@ static NSString *parseString(const uint8_t *bytes, unsigned int length)
 static NSData *parseData(const uint8_t *bytes, unsigned int length)
 {
     if (length < 0)
-        return nil;    
+        return nil;
     return [NSData dataWithBytes:bytes length:length];
 }
 
@@ -225,16 +225,16 @@ static NSData *parseData(const uint8_t *bytes, unsigned int length)
                            length:(size_t)length
 {
     if (length == 0)    // nothing to add
-        return YES; 
-    
+        return YES;
+
     if (length == 1)    // must have at least 2 headersData
         return NO;
-    
+
     NSNumber *hi;
     uint16_t hlen;
-	
+
 	//NSLog(@"reading %d bytes", length);
-    
+
     int i = 0;
     while (i < length) {
         hi = [NSNumber numberWithUnsignedChar:headersData[i]];
@@ -251,18 +251,18 @@ static NSData *parseData(const uint8_t *bytes, unsigned int length)
             }
             case kHeaderEncoding1Byte: // ID V
             {
-                //NSLog(@"\tbyte:");                
+                //NSLog(@"\tbyte:");
                 hlen = 2;
                 if (i + hlen > length)
                     return NO;
-                [self setValue:headersData[i+1] for1ByteHeader:headersData[i]];     
+                [self setValue:headersData[i+1] for1ByteHeader:headersData[i]];
                 break;
             }
             case kHeaderEncodingUnicode:  // ID L L V V .. .. O O
             {
                 //NSLog(@"\tunicode:");
                 if (i + 3 > length)
-                    return NO;                
+                    return NO;
                 hlen = parseUInt16(&headersData[i+1]);
                 if (i + hlen > length)
                     return NO;
@@ -275,14 +275,14 @@ static NSData *parseData(const uint8_t *bytes, unsigned int length)
                 }
                 if (!s)
                     return NO;
-                [self setValue:s forUnicodeHeader:headersData[i]];        
+                [self setValue:s forUnicodeHeader:headersData[i]];
                 break;
             }
             case kHeaderEncodingByteSequence:  // ID L L V ..
             {
-                //NSLog(@"\tbyte stream:");               
+                //NSLog(@"\tbyte stream:");
                 if (i + 3 > length)
-                    return NO;                     
+                    return NO;
                 hlen = parseUInt16(&headersData[i+1]);
 				//NSLog(@"\tbytes length: %d", hlen);
                 if (i + hlen > length)
@@ -304,11 +304,11 @@ static NSData *parseData(const uint8_t *bytes, unsigned int length)
         i += hlen;
         //NSLog(@"\tRead header ok, now to index %d...", i);
     }
-    
+
     //NSLog(@"\tFinished reading headers");
-    
+
     return YES;
-    
+
 }
 
 - (void)removeValueForHeader:(uint8_t)headerID

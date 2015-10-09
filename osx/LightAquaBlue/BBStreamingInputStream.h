@@ -24,7 +24,7 @@
 //  A NSInputStream subclass that calls readDataWithMaxLength: on the delegate
 //  when data is required.
 //  This class is only intended for use from the LightBlue library.
-//  Most methods are not implemented, and there are no stream:HandleEvent: 
+//  Most methods are not implemented, and there are no stream:HandleEvent:
 //  calls to the delegate.
 //
 

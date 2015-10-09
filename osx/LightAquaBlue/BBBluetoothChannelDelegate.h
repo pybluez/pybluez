@@ -39,9 +39,9 @@
 
 + (IOReturn)synchronouslyWriteData:(NSData *)data
                    toRFCOMMChannel:(IOBluetoothRFCOMMChannel *)channel;
-                   
+
 + (IOReturn)synchronouslyWriteData:(NSData *)data
-                    toL2CAPChannel:(IOBluetoothL2CAPChannel *)channel;                   
+                    toL2CAPChannel:(IOBluetoothL2CAPChannel *)channel;
 
 @end
 

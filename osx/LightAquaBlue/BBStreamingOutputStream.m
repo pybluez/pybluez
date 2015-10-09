@@ -37,7 +37,7 @@
 - (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
 {
     //NSLog(@"[BBStreamingOutputStream] writing data...");
-    int buflen = [mDelegate write:[NSData dataWithBytesNoCopy:(void *)buffer 
+    int buflen = [mDelegate write:[NSData dataWithBytesNoCopy:(void *)buffer
                                                        length:len
                                                  freeWhenDone:NO]];
     return buflen;

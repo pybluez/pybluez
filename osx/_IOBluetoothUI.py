@@ -16,7 +16,7 @@
 # along with LightBlue.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Provides a python interface to the Mac OSX IOBluetoothUI Framework classes, 
+Provides a python interface to the Mac OSX IOBluetoothUI Framework classes,
 through PyObjC.
 
 For example:
@@ -26,14 +26,14 @@ For example:
     -1000
     >>> for device in selector.getResults():
     ...     print device.getName()    # show name of selected device
-    ... 
+    ...
     Nokia 6600
-    >>> 
-    
-See http://developer.apple.com/documentation/DeviceDrivers/Reference/IOBluetoothUI/index.html 
+    >>>
+
+See http://developer.apple.com/documentation/DeviceDrivers/Reference/IOBluetoothUI/index.html
 for Apple's IOBluetoothUI documentation.
-    
-See http://pyobjc.sourceforge.net for details on how to access Objective-C 
+
+See http://pyobjc.sourceforge.net for details on how to access Objective-C
 classes through PyObjC.
 """
 
@@ -46,12 +46,12 @@ try:
             frameworkPath=objc.pathForFramework(
                 "/System/Library/Frameworks/IOBluetoothUI.framework"),
             globals=globals())
-            
+
 except (AttributeError, ValueError):
-    # earlier versions use loadBundle() and setSignatureForSelector()            
-    
-    objc.loadBundle("IOBluetoothUI", globals(), 
+    # earlier versions use loadBundle() and setSignatureForSelector()
+
+    objc.loadBundle("IOBluetoothUI", globals(),
        bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetoothUI.framework'))
 
 del objc
-    
+
