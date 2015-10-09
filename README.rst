@@ -98,26 +98,12 @@ for Bluetooth Low Energy support:
 - Widcomm BTW development kit 5.0 or later (Optional)
 - Python 2.3 or more recent version
 
-*Mac OS X (Tested only on OS X 10.10/10.11)*:
+*Mac OS X (Unstable - tested only on OS X 10.10/10.11)*:
 
 - Python 2.3 or later
 - Xcode
-- PyObjc 3.0.4 or later (https://pythonhosted.org/pyobjc/install.html)
+- PyObjc 3.1b or later (https://pythonhosted.org/pyobjc/install.html#manual-installation)
 
-. code-block:: python
-
-    $ brew install hg  # If you don't have hg already.
-    $ hg clone https://bitbucket.org/ronaldoussoren/pyobjc
-    $ cd pyobjc/
-    $ sudo python install.py
-
-- PyBluez: https://github.com/karulis/pybluez
-
-.. code-block:: python
-
-    $ git clone https://github.com/karulis/pybluez.git
-    $ cd pybluez
-    $ python setup.py install  # <-- you may need to use 'sudo'
 
 **LICENSE:**
 
