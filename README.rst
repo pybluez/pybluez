@@ -36,6 +36,7 @@ https://github.com/karulis/pybluez
 - `examples/simple/sdp-browse.py`_ - Browsing SDP services on a Bluetooth device.
 - `examples/simple/rfcomm-server.py`_ - establishing an RFCOMM connection.
 - `examples/simple/rfcomm-client.py`_ - establishing an RFCOMM connection.
+- `examples/advanced/read-local-bdaddr.py`_ - provides the local Bluetooth device address.
 
 *GNU/Linux only examples:*
 
@@ -124,6 +125,7 @@ for Bluetooth Low Energy support:
 .. _examples/simple/sdp-browse.py: https://github.com/karulis/pybluez/blob/master/examples/simple/sdp-browse.py
 .. _examples/simple/rfcomm-server.py: https://github.com/karulis/pybluez/blob/master/examples/simple/rfcomm-server.py
 .. _examples/simple/rfcomm-client.py: https://github.com/karulis/pybluez/blob/master/examples/simple/rfcomm-client.py
+.. _examples/advanced/read-local-bdaddr.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/read-local-bdaddr.py
 
 .. _examples/simple/l2capserver.py: https://github.com/karulis/pybluez/blob/master/examples/simple/l2capserver.py
 .. _examples/simple/l2capclient.py: https://github.com/karulis/pybluez/blob/master/examples/simple/l2capclient.py
