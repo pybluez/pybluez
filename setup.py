@@ -5,9 +5,11 @@ import sys
 import platform
 import os
 
+packs = ['bluetooth']
 pack_dir = dict()
 mods = list()
 install_req = list()
+
 
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
@@ -74,8 +76,9 @@ elif sys.platform.startswith("darwin"):
     # On Mac, install LightAquaBlue framework
     # if you want to install the framework somewhere other than /Library/Frameworks
     # make sure the path is also changed in LightAquaBlue.py (in src/mac)
+    packs.append('lightblue')
+    pack_dir = { 'lightblue': 'osx' }
     if "install" in sys.argv:
-        pack_dir = { 'lightblue': 'osx' }
         # install_req = ['pyobjc>=3.1'] this version is not on pypi yet
         # Change to LightAquaBlue framework dir.
         os.chdir("osx/LightAquaBlue")
@@ -116,7 +119,7 @@ setup(name='PyBluez',
       author_email="ashuang@alum.mit.edu",
       url="http://karulis.github.io/pybluez/",
       ext_modules=mods,
-      packages=["bluetooth"],
+      packages=packs,
 # for the python cheese shop
       classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -131,4 +134,5 @@ setup(name='PyBluez',
       maintainer='Piotr Karulis',
       license='GPL',
       extras_require={'ble': ['gattlib==0.20150805']},
+      package_dir=pack_dir,
       install_requires=install_req)
