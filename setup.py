@@ -24,7 +24,8 @@ def find_MS_SDK():
 
     candidate_paths = (MS_SDK,
                        'Microsoft Platform SDK for Windows XP',
-                       'Microsoft Platform SDK')
+                       'Microsoft Platform SDK',
+                        'Common Files\Microsoft\Visual C++ for Python\9.0\WinSDK')
 
     for candidate_root in candidate_roots:
         for candidate_path in candidate_paths:
