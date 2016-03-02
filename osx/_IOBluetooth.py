@@ -37,7 +37,6 @@ classes through PyObjC.
 """
 
 import objc
-import Foundation
 
 
 if hasattr(objc, 'ObjCLazyModule'):
