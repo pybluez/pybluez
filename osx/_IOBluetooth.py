@@ -99,4 +99,4 @@ else:
         objc.setSignatureForSelector("IOBluetoothDevice",
                 "withAddress:", '@12@0:r^[6C]')
 
-    del objc
+del objc
