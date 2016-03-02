@@ -37,50 +37,66 @@ classes through PyObjC.
 """
 
 import objc
+import Foundation
 
-try:
-    # mac os 10.5 loads frameworks using bridgesupport metadata
-    __bundle__ = objc.initFrameworkWrapper("IOBluetooth",
+
+if hasattr(objc, 'ObjCLazyModule'):
+    # `ObjCLazyModule` function is available for PyObjC version >= 2.4
+    io_bluetooth = objc.ObjCLazyModule("IOBluetooth",
+        frameworkIdentifier="com.apple.IOBluetooth",
+        frameworkPath=objc.pathForFramework(
+            "/System/Library/Frameworks/IOBluetooth.framework"
+        ),
+        metadict=globals())
+
+    locals_ = locals()
+    for variable_name in dir(io_bluetooth):
+        locals_[variable_name] = getattr(io_bluetooth, variable_name)
+
+else:
+    try:
+        # mac os 10.5 loads frameworks using bridgesupport metadata
+        __bundle__ = objc.initFrameworkWrapper("IOBluetooth",
             frameworkIdentifier="com.apple.IOBluetooth",
             frameworkPath=objc.pathForFramework(
                 "/System/Library/Frameworks/IOBluetooth.framework"),
             globals=globals())
 
-except (AttributeError, ValueError):
-    # earlier versions use loadBundle() and setSignatureForSelector()
+    except (AttributeError, ValueError):
+        # earlier versions use loadBundle() and setSignatureForSelector()
 
-    objc.loadBundle("IOBluetooth", globals(),
-       bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetooth.framework'))
+        objc.loadBundle("IOBluetooth", globals(),
+            bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetooth.framework'))
 
-    # Sets selector signatures in order to receive arguments correctly from
-    # PyObjC methods. These MUST be set, otherwise the method calls won't work
-    # at all, mostly because you can't pass by pointers in Python.
+        # Sets selector signatures in order to receive arguments correctly from
+        # PyObjC methods. These MUST be set, otherwise the method calls won't work
+        # at all, mostly because you can't pass by pointers in Python.
 
-    # set to return int, and take an unsigned char output arg
-    # i.e. in python: return (int, unsigned char) and accept no args
-    objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",
-            "getRFCOMMChannelID:", "i12@0:o^C")
+        # set to return int, and take an unsigned char output arg
+        # i.e. in python: return (int, unsigned char) and accept no args
+        objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",
+                "getRFCOMMChannelID:", "i12@0:o^C")
 
-    # set to return int, and take an unsigned int output arg
-    # i.e. in python: return (int, unsigned int) and accept no args
-    objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",
-            "getL2CAPPSM:", "i12@0:o^S")
+        # set to return int, and take an unsigned int output arg
+        # i.e. in python: return (int, unsigned int) and accept no args
+        objc.setSignatureForSelector("IOBluetoothSDPServiceRecord",
+                "getL2CAPPSM:", "i12@0:o^S")
 
-    # set to return int, and take (output object, unsigned char, object) args
-    # i.e. in python: return (int, object) and accept (unsigned char, object)
-    objc.setSignatureForSelector("IOBluetoothDevice",
-            "openRFCOMMChannelSync:withChannelID:delegate:", "i16@0:o^@C@")
+        # set to return int, and take (output object, unsigned char, object) args
+        # i.e. in python: return (int, object) and accept (unsigned char, object)
+        objc.setSignatureForSelector("IOBluetoothDevice",
+                "openRFCOMMChannelSync:withChannelID:delegate:", "i16@0:o^@C@")
 
-    # set to return int, and take (output object, unsigned int, object) args
-    # i.e. in python: return (int, object) and accept (unsigned int, object)
-    objc.setSignatureForSelector("IOBluetoothDevice",
-            "openL2CAPChannelSync:withPSM:delegate:", "i20@0:o^@I@")
+        # set to return int, and take (output object, unsigned int, object) args
+        # i.e. in python: return (int, object) and accept (unsigned int, object)
+        objc.setSignatureForSelector("IOBluetoothDevice",
+                "openL2CAPChannelSync:withPSM:delegate:", "i20@0:o^@I@")
 
-    # set to return int, take a const 6-char array arg
-    # i.e. in python: return object and accept 6-char list
-    # this seems to work even though the selector doesn't take a char aray,
-    # it takes a struct 'BluetoothDeviceAddress' which contains a char array.
-    objc.setSignatureForSelector("IOBluetoothDevice",
-            "withAddress:", '@12@0:r^[6C]')
+        # set to return int, take a const 6-char array arg
+        # i.e. in python: return object and accept 6-char list
+        # this seems to work even though the selector doesn't take a char aray,
+        # it takes a struct 'BluetoothDeviceAddress' which contains a char array.
+        objc.setSignatureForSelector("IOBluetoothDevice",
+                "withAddress:", '@12@0:r^[6C]')
 
-del objc
+    del objc
