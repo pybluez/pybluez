@@ -135,4 +135,5 @@ setup(name='PyBluez',
       license='GPL',
       extras_require={'ble': ['gattlib==0.20150805']},
       package_dir=pack_dir,
+      use_2to3=True,
       install_requires=install_req)
