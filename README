@@ -10,7 +10,7 @@ BUILD REQUIREMENTS:
     - Python 2.3 or more recent version
      - Python distutils (standard in most Python distros, separate package
                          python-dev in Debian)
-     - BlueZ libraries and header files
+     - BlueZ libraries and header files (package libbluetooth-dev in Debian)
 
   Windows:
     - Microsoft Windows XP SP1 or Windows Vista/7/8/8.1
