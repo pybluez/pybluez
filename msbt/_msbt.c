@@ -150,7 +150,7 @@ PyDoc_STRVAR(msbt_socket_doc, "TODO");
 static PyObject *
 msbt_bind(PyObject *self, PyObject *args)
 {
-    char *addrstr = NULL;
+    wchar_t *addrstr = NULL;
     int addrstrlen = -1;
     int sockfd = -1;
     int port = -1;
@@ -167,7 +167,7 @@ msbt_bind(PyObject *self, PyObject *args)
     if( addrstrlen == 0 ) {
         sa.btAddr = 0;
     } else {
-        _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddress( addrstr, \
+        _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddressW( addrstr,
                     AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len ) );
     }
     sa.addressFamily = AF_BTH;
@@ -230,7 +230,7 @@ static PyObject *
 msbt_connect(PyObject *self, PyObject *args)
 {
     int sockfd = -1;
-    char *addrstr = NULL;
+    wchar_t *addrstr = NULL;
     int port = -1;
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
@@ -238,7 +238,7 @@ msbt_connect(PyObject *self, PyObject *args)
 
     if(!PyArg_ParseTuple(args, "isi", &sockfd, &addrstr, &port)) return 0;
 
-    if( SOCKET_ERROR == WSAStringToAddress( addrstr, AF_BTH, NULL, 
+    if( SOCKET_ERROR == WSAStringToAddressW( addrstr, AF_BTH, NULL, 
                 (LPSOCKADDR)&sa, &sa_len ) ) {
         Err_SetFromWSALastError(PyExc_IOError);
         return 0;
@@ -350,17 +350,17 @@ msbt_dup(PyObject *self, PyObject *args)
     int newsockfd = -1;
     int status;
     DWORD pid;
-    WSAPROTOCOL_INFO pi = { 0 };
+    WSAPROTOCOL_INFOW pi = { 0 };
 
     if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
 
     // prepare to duplicate
     pid = GetCurrentProcessId();
-    status = WSADuplicateSocket( sockfd, pid, &pi );
+    status = WSADuplicateSocketW( sockfd, pid, &pi );
     _CHECK_OR_RAISE_WSA( NO_ERROR == status );
 
     // duplicate!
-    newsockfd = WSASocket( FROM_PROTOCOL_INFO, 
+    newsockfd = WSASocketW( FROM_PROTOCOL_INFO, 
             FROM_PROTOCOL_INFO, 
             FROM_PROTOCOL_INFO,
             &pi, 0, 0 );
@@ -469,14 +469,14 @@ msbt_lookup_name(PyObject *self, PyObject *args)
     BLUETOOTH_FIND_RADIO_PARAMS p = { sizeof(p) };
     HBLUETOOTH_RADIO_FIND fhandle = NULL;
     BLUETOOTH_DEVICE_INFO dinfo = { 0 };
-    char *addrstr = NULL;
+    wchar_t *addrstr = NULL;
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
     DWORD status;
 
     if(!PyArg_ParseTuple(args,"s",&addrstr)) return 0;
     
-    _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddress( addrstr, \
+    _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddressW( addrstr,
                 AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len ) );
 
 //    printf("looking for first radio\n");
