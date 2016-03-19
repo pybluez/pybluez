@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <winsock2.h>
 #include <ws2bth.h>
 #include <BluetoothAPIs.h>
@@ -682,7 +683,7 @@ static PyObject *
 msbt_set_service_raw(PyObject *self, PyObject *args)
 {
     int advertise = 0;
-    WSAQUERYSET qs = { 0 };
+    WSAQUERYSETW qs = { 0 };
     WSAESETSERVICEOP op;
 
     char *record = NULL;
@@ -717,7 +718,7 @@ msbt_set_service_raw(PyObject *self, PyObject *args)
     blob.cbSize = silen;
     blob.pBlobData = (BYTE*)si;
 
-    status = WSASetService( &qs, op, 0 );
+    status = WSASetServiceW( &qs, op, 0 );
     free( si );
 
     if( SOCKET_ERROR == status ) {
@@ -733,11 +734,15 @@ static PyObject *
 msbt_set_service(PyObject *self, PyObject *args)
 {
     int advertise = 0;
-    WSAQUERYSET qs = { 0 };
+    WSAQUERYSETW qs = { 0 };
     WSAESETSERVICEOP op;
+    size_t return_value;
 
 	SOCKADDR_BTH sa = { 0 };
 	int sa_len = sizeof(sa);
+    /*  TODO change size of wcservice_name to not hardcoded one*/
+    wchar_t wcservice_name[200];
+    wchar_t wcservice_desc[200];
     char *service_name = NULL;
     char *service_desc = NULL;
     char *service_class_id_str = NULL;
@@ -763,16 +768,21 @@ msbt_set_service(PyObject *self, PyObject *args)
 	sockInfo.RemoteAddr.lpSockaddr = (LPSOCKADDR) &sa;
 	sockInfo.RemoteAddr.iSockaddrLength = sizeof(sa);
 
+    
     qs.dwSize = sizeof(qs);
     qs.dwNameSpace = NS_BTH;
     qs.lpcsaBuffer = &sockInfo;
-    qs.lpszServiceInstanceName = service_name;
-    qs.lpszComment = service_desc;
+    mbstowcs_s(&return_value, wcservice_name, sizeof(wcservice_name),
+            service_name, strlen(service_name)+1);//Plus null
+    qs.lpszServiceInstanceName = wcservice_name;
+    mbstowcs_s(&return_value, wcservice_desc, sizeof(wcservice_desc),
+            service_desc, strlen(service_desc)+1);//Plus null
+    qs.lpszComment = wcservice_desc;
     str2uuid( service_class_id_str, &uuid );
     qs.lpServiceClassId = (LPGUID) &uuid;
     qs.dwNumberOfCsAddrs = 1;
 
-    if( SOCKET_ERROR == WSASetService( &qs, op, 0 ) ) {
+    if( SOCKET_ERROR == WSASetServiceW( &qs, op, 0 ) ) {
         Err_SetFromWSALastError( PyExc_IOError );
         return 0;
     }
