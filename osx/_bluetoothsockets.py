@@ -734,7 +734,7 @@ class _RFCOMMConnection(object):
             raise _socket.error("socket not connected")
         return \
             BBBluetoothChannelDelegate.synchronouslyWriteData_toRFCOMMChannel_(
-                buffer(data), self.channel)
+                memoryview(data.encode()), self.channel)
 
     def getwritemtu(self):
         return self.channel.getMTU()

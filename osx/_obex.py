@@ -84,7 +84,7 @@ def _headersdicttoset(headers):
             headerset.setValue_forUnicodeHeader_(value, hid)
         elif mask == _HEADER_BYTE_SEQ:
             try:
-                value = buffer(value)
+                value = memoryview(value.encode())
             except:
                 raise TypeError("value for '%s' must be string, array or other buffer type, was %s" % (str(header), type(value)))
             headerset.setValue_forByteSequenceHeader_(value, hid)
