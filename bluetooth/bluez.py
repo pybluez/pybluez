@@ -72,13 +72,13 @@ def read_local_bdaddr():
     status,raw_bdaddr = struct.unpack("xxxxxxB6s", pkt)
     assert status == 0
 
-    t = [ "%X" % ord(get_byte(b)) for b in raw_bdaddr ]
+    t = [ "%X" % get_byte(b) for b in raw_bdaddr ]
     t.reverse()
     bdaddr = ":".join(t)
 
     # restore old filter
     hci_sock.setsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, old_filter )
-    return bdaddr
+    return [bdaddr]
 
 def lookup_name (address, timeout=10):
     if not is_valid_address (address): 

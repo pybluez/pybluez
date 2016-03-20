@@ -72,7 +72,7 @@ def find_service(name=None, uuid=None, address=None):
 
 
 def read_local_bdaddr():
-    return lightblue.gethostaddr()
+    return [lightblue.gethostaddr()]
 
 
 def advertise_service(sock, name, service_id="", service_classes=None,
