@@ -17,6 +17,11 @@ def find_MS_SDK():
 
     candidate_paths = []
 
+    if sys.version_info[0:2] == (2, 7):
+        # Microsoft Visual C++ Compiler for Python 2.7
+        # https://www.microsoft.com/en-us/download/details.aspx?id=44266
+        candidate_paths.append(r'Common Files\Microsoft\Visual C++ for Python\9.0\WinSDK')
+
     # Microsoft SDKs
     if sys.version < '3.3':
         candidate_paths.append(r'Microsoft SDKs\Windows\v6.0A')  # Visual Studio 9
