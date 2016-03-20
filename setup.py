@@ -15,16 +15,20 @@ def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
                        os.getenv('ProgramFiles(x86)'))
 
-    if sys.version < '3.3':
-        MS_SDK = r'Microsoft SDKs\Windows\v6.0A'  # Visual Studio 9
-    elif '3.3' <= sys.version < '3.5':
-        MS_SDK = r'Microsoft SDKs\Windows\v7.0A'  # Visual Studio 10
-    elif sys.version >= '3.5':
-        MS_SDK = r'Microsoft SDKs\Windows\v10.0A'  # Visual Studio 14
+    candidate_paths = []
 
-    candidate_paths = (MS_SDK,
-                       'Microsoft Platform SDK for Windows XP',
-                       'Microsoft Platform SDK')
+    # Microsoft SDKs
+    if sys.version < '3.3':
+        candidate_paths.append(r'Microsoft SDKs\Windows\v6.0A')  # Visual Studio 9
+    elif '3.3' <= sys.version < '3.5':
+        candidate_paths.append(r'Microsoft SDKs\Windows\v7.0A')  # Visual Studio 10
+    elif sys.version >= '3.5':
+        candidate_paths.append(r'Microsoft SDKs\Windows\v10.0A')  # Visual Studio 14
+
+    candidate_paths.extend((
+        'Microsoft Platform SDK for Windows XP',
+        'Microsoft Platform SDK'
+    ))
 
     for candidate_root in candidate_roots:
         for candidate_path in candidate_paths:
