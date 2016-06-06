@@ -61,7 +61,7 @@ def read_local_bdaddr():
     opcode = _bt.cmd_opcode_pack(_bt.OGF_INFO_PARAM, 
             _bt.OCF_READ_BD_ADDR)
     _bt.hci_filter_set_ptype(flt, _bt.HCI_EVENT_PKT)
-    _bt.hci_filter_set_event(flt, _bt.EVT_CMD_COMPLETE);
+    _bt.hci_filter_set_event(flt, _bt.EVT_CMD_COMPLETE)
     _bt.hci_filter_set_opcode(flt, opcode)
     hci_sock.setsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, flt )
 
