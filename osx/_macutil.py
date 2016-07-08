@@ -209,7 +209,7 @@ class BBFileLikeObjectReader(NSObject):
             data = self.__fileobj.read(maxlength)
         except Exception:
             return None
-        return memoryview(data.envode())
+        return memoryview(data.encode())
     readDataWithMaxLength_ = objc.selector(readDataWithMaxLength_,
             signature=b"@@:I")    #"@12@0:4I8"    #"@:I"
 
