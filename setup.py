@@ -88,7 +88,7 @@ elif sys.platform.startswith("darwin"):
     packs.append('lightblue')
     pack_dir = { 'lightblue': 'osx' }
     if "install" in sys.argv:
-        # install_req = ['pyobjc>=3.1'] this version is not on pypi yet
+        install_req = ['pyobjc-core>=3.1', 'pyobjc-framework-Cocoa>=3.1']
         # Change to LightAquaBlue framework dir.
         os.chdir("osx/LightAquaBlue")
 
