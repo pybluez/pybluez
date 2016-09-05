@@ -12,7 +12,10 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False,
     namesIndex = 1
     classIndex = 2
 
-    devices = bt.discover_devices(duration=duration, flush_cache=flush_cache)
+    try:
+        devices = bt.discover_devices(duration=duration, flush_cache=flush_cache)
+    except OSError:
+        return []
     ret = list()
     for device in devices:
         item = [device[btAddresIndex],]
@@ -35,7 +38,10 @@ def read_local_bdaddr():
 def lookup_name (address, timeout=10):
     if not is_valid_address (address): 
         raise ValueError ("Invalid Bluetooth address")
-    return bt.lookup_name (address)
+    try:
+        return bt.lookup_name(address)
+    except OSError:
+        return None
 
 
 class BluetoothSocket:
