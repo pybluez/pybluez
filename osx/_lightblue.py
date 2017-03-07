@@ -285,6 +285,7 @@ class _SDPQueryRunner(Foundation.NSObject):
     on an IOBluetoothDevice.
     """
 
+    @objc.python_method
     def query(self, device, timeout=10.0):
         # do SDP query
         err = device.performSDPQuery_(self)
@@ -310,6 +311,7 @@ class _SDPQueryRunner(Foundation.NSObject):
     sdpQueryComplete_status_ = objc.selector(
         sdpQueryComplete_status_, signature=b"v@:@i")    # accept object, int
 
+    @objc.python_method
     def _errmsg(self, device):
         return "Error getting services for %s" % device.getNameOrAddress()
 
@@ -403,6 +405,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
         return self
 
     # length property
+    @objc.python_method
     def _setlength(self, length):
         self._inquiry.setInquiryLength_(length)
     length = property(
@@ -410,6 +413,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
             _setlength)
 
     # updatenames property
+    @objc.python_method
     def _setupdatenames(self, update):
         self._inquiry.setUpdateNewDeviceNames_(update)
     updatenames = property(
