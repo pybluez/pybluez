@@ -819,6 +819,7 @@ class _ChannelEventListener(Foundation.NSObject):
     def delegate(self):
         return self.__channelDelegate
 
+    @objc.python_method
     def registerclosenotif(self, channel):
         # oddly enough, sometimes the channelClosed: selector doesn't get called
         # (maybe if there's a lot of data being passed?) but this seems to work

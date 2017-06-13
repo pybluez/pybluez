@@ -172,6 +172,7 @@ class BBCocoaSleeper(NSObject):
         self.timedout = False
         return self
 
+    @objc.python_method
     def sleep(self, timeout):
         NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
                 timeout, self, "timedOut:", None, False)
