@@ -104,7 +104,7 @@ static BOOL _debug = NO;
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXConnectRequest] beginWithHeaders (%d headers)", [headers count]);
+    if (_debug) NSLog(@"[BBOBEXConnectRequest] beginWithHeaders (%lu headers)", (unsigned long)[headers count]);
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
         return kOBEXInternalError;
@@ -164,7 +164,7 @@ static BOOL _debug = NO;
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXDisconnectRequest] beginWithHeaders (%d headers)", [headers count]);
+    if (_debug) NSLog(@"[BBOBEXDisconnectRequest] beginWithHeaders (%lu headers)", (unsigned long)[headers count]);
 
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
@@ -244,10 +244,10 @@ static BOOL _debug = NO;
 	OBEXMaxPacketLength maxBodySize = maxPacketSize - headersLength;
 
     NSMutableData *data = [NSMutableData dataWithLength:maxBodySize];
-    int len = [mInputStream read:[data mutableBytes]
+    NSInteger len = [mInputStream read:[data mutableBytes]
                        maxLength:maxBodySize];
 
-    if (_debug) NSLog(@"[BBOBEXPutRequest] read %d bytes (maxBodySize = %d)", len, maxBodySize);
+    if (_debug) NSLog(@"[BBOBEXPutRequest] read %ld bytes (maxBodySize = %d)", (long)len, maxBodySize);
 
     // is last packet if there wasn't enough body data to fill up the packet
     if (len >= 0)
@@ -285,7 +285,7 @@ static BOOL _debug = NO;
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXPutRequest] beginWithHeaders (%d headers)", [headers count]);
+    if (_debug) NSLog(@"[BBOBEXPutRequest] beginWithHeaders (%lu headers)", (unsigned long)[headers count]);
 
     // there's no stream if it's a Put-Delete
     // but if there is a stream, it must be open
@@ -442,7 +442,7 @@ static BOOL _debug = NO;
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXGetRequest] beginWithHeaders (%d headers)", [headers count]);
+    if (_debug) NSLog(@"[BBOBEXGetRequest] beginWithHeaders (%lu headers)", (unsigned long)[headers count]);
 
     if (mOutputStream == nil || [mOutputStream streamStatus] != NSStreamStatusOpen)
         return kOBEXBadArgumentError;
@@ -583,7 +583,7 @@ createDirectoriesIfNeeded:(BOOL)createDirectoriesIfNeeded
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXSetPathRequest] beginWithHeaders (%d headers)", [headers count]);
+    if (_debug) NSLog(@"[BBOBEXSetPathRequest] beginWithHeaders (%lu headers)", (unsigned long)[headers count]);
 
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)
@@ -653,7 +653,7 @@ currentRequestStream:(NSStream *)stream
 
 - (OBEXError)beginWithHeaders:(BBOBEXHeaderSet *)headers
 {
-    if (_debug) NSLog(@"[BBOBEXAbortRequest] beginWithHeaders (%d headers)", [headers count]);
+    if (_debug) NSLog(@"[BBOBEXAbortRequest] beginWithHeaders (%lu headers)", (unsigned long)[headers count]);
 
     CFMutableDataRef bytes = (CFMutableDataRef)[headers toBytes];
     if (!bytes && [headers count] > 0)

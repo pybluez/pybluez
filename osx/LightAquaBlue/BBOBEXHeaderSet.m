@@ -279,7 +279,7 @@ static NSData *oneByteHeaderBytes(uint8_t hid, uint8_t value)
     NSMutableData *headerBytes = [[NSMutableData alloc] initWithLength:0];
 
     if ([self containsValueForHeader:kOBEXHeaderIDTarget]) {
-        NSData *bytes;
+        NSData *bytes = nil;
         NSData *target = [self valueForTargetHeader];
         if (target)
             bytes = byteSequenceHeaderBytes(kOBEXHeaderIDTarget, target);
@@ -345,7 +345,7 @@ static NSData *oneByteHeaderBytes(uint8_t hid, uint8_t value)
 	return headerBytes;
 }
 
-- (unsigned)count
+- (NSUInteger)count
 {
     return [mDict count];
 }

@@ -52,7 +52,7 @@
 /*
  * Returns the number of headers in this header set.
  */
-- (unsigned)count;
+- (NSUInteger)count;
 
 /*
  * Returns the "Count" header value, or 0 if the header is not present or cannot
