@@ -4,3 +4,7 @@
 build/
 PyBluez.egg-info/
 dist/
+
+# Mac detritus 
+.DS_Store
+xcuserdata/
