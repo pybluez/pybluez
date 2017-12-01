@@ -2097,6 +2097,7 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     int flush = 1;
     int flags = 0;
     int lookup_class = 0;
+    int iac = 0x9e8b33;
     char ba_name[19];
     inquiry_info *info = NULL;
     PySocketSockObject *socko = NULL;
@@ -2104,10 +2105,10 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     char buf[sizeof(*ir) + sizeof(inquiry_info) * 250];
 
     PyObject *rtn_list = (PyObject *)NULL;
-    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", "device_id", 0};
+    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", "device_id", "iac", 0};
 
-    if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iiii", keywords,
-                &socko, &length, &flush, &lookup_class, &dev_id) )
+    if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iiiii", keywords,
+                &socko, &length, &flush, &lookup_class, &dev_id, &iac) )
     {
         return 0;
     }
@@ -2121,9 +2122,9 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     ir->length  = length;
     ir->flags   = flags;
 
-    ir->lap[0] = 0x33;
-    ir->lap[1] = 0x8b;
-    ir->lap[2] = 0x9e;
+    ir->lap[0] = iac & 0xff;
+    ir->lap[1] = (iac >> 8) & 0xff;
+    ir->lap[2] = (iac >> 16) & 0xff;
 
     Py_BEGIN_ALLOW_THREADS
     err = ioctl(socko->sock_fd, HCIINQUIRY, (unsigned long) buf);

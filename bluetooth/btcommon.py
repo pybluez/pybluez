@@ -172,6 +172,10 @@ CMTP_UUID      = "001b"
 UDI_UUID       = "001d"
 L2CAP_UUID     = "0100"
 
+# Inquiry Access Codes
+IAC_GIAC = 0x9e8b33
+IAC_LIAC = 0x9e8b00
+
 class BluetoothError (IOError):
     pass
 
