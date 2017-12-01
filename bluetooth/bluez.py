@@ -21,7 +21,7 @@ del _constants
 # ============== SDP service registration and unregistration ============
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False,
-                      lookup_class=False, device_id=-1, iac=_bt.IAC_GIAC):
+                      lookup_class=False, device_id=-1, iac=IAC_GIAC):
     if device_id == -1:
         device_id = _bt.hci_get_route()
 
