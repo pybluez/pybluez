@@ -206,8 +206,6 @@ static uint32_t parseUInt32(const uint8_t *bytes)
 
 static NSString *parseString(const uint8_t *bytes, unsigned int length)
 {
-    if (length < 0)
-        return nil;
 	NSString *s = [[NSString alloc] initWithBytes:bytes
 										   length:length
 										 encoding:NSUnicodeStringEncoding];
@@ -216,8 +214,6 @@ static NSString *parseString(const uint8_t *bytes, unsigned int length)
 
 static NSData *parseData(const uint8_t *bytes, unsigned int length)
 {
-    if (length < 0)
-        return nil;
     return [NSData dataWithBytes:bytes length:length];
 }
 

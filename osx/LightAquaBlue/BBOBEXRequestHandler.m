@@ -663,10 +663,10 @@ static BOOL _debug = NO;
 	OBEXMaxPacketLength maxBodySize = maxPacketSize - headersLength;
 
     NSMutableData *data = [NSMutableData dataWithLength:maxBodySize];
-    int len = [mInputStream read:[data mutableBytes]
+    NSInteger len = [mInputStream read:[data mutableBytes]
                        maxLength:maxBodySize];
 
-    if (_debug) NSLog(@"[BBOBEXGetRequestHandler] read %d bytes (maxBodySize = %d)", len, maxBodySize);
+    if (_debug) NSLog(@"[BBOBEXGetRequestHandler] read %ld bytes (maxBodySize = %d)", (long)len, maxBodySize);
 
     // is last packet if there wasn't enough body data to fill up the packet
     if (len >= 0)
@@ -723,7 +723,7 @@ static BOOL _debug = NO;
     if (!mNextResponseHeaders)
         mNextResponseHeaders = [[BBMutableOBEXHeaderSet alloc] init];
     CFMutableDataRef tempHeaderBytes = (CFMutableDataRef)[mNextResponseHeaders toBytes];
-    int currentHeaderLength = 0;
+    CFIndex currentHeaderLength = 0;
     if (tempHeaderBytes) {
         currentHeaderLength = CFDataGetLength(tempHeaderBytes);
         CFRelease(tempHeaderBytes);

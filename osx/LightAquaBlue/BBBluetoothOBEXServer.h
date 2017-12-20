@@ -239,7 +239,7 @@ shouldHandlePutDeleteRequest:(BBOBEXHeaderSet *)requestHeaders;
  * The <length> indicates the number of bytes sent.
  */
 - (void)server:(BBBluetoothOBEXServer *)server
-didSendDataOfLength:(unsigned)length;
+didSendDataOfLength:(NSUInteger)length;
 
 /*
  * Called when the server finishes processing of a Get request. The

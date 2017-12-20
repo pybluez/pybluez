@@ -42,7 +42,7 @@
 
 @protocol BBStreamingInputStreamDelegate
 
-- (NSData *)readDataWithMaxLength:(unsigned int)maxLength;
+- (NSData *)readDataWithMaxLength:(NSUInteger)maxLength;
 
 @end
 

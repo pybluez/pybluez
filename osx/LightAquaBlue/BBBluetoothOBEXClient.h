@@ -264,7 +264,7 @@ didFinishPutRequestForStream:(NSInputStream *)inputStream
  * during a Put request. <length> is the number of bytes sent.
  */
 - (void)client:(BBBluetoothOBEXClient *)client
-  didSendDataOfLength:(unsigned)length;
+  didSendDataOfLength:(NSUInteger)length;
 
 /*
  * Called each time the client receives another chunk of data from the OBEX

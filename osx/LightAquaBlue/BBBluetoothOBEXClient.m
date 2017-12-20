@@ -45,7 +45,7 @@ static BOOL _debug = NO;
 {
     self = [super init];
 
-    mSession = [[IOBluetoothOBEXSession alloc] initWithDevice:[IOBluetoothDevice withAddress:deviceAddress]
+    mSession = [[IOBluetoothOBEXSession alloc] initWithDevice:[IOBluetoothDevice deviceWithAddress:deviceAddress]
                                                     channelID:channelID];
     mDelegate = delegate;
 
