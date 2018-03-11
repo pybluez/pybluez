@@ -4,7 +4,7 @@
 
 Python extension module allowing access to system Bluetooth resources.
 
-https://github.com/karulis/pybluez
+https://pybluez.github.io/
 
 **EXAMPLES:**
 
@@ -121,24 +121,24 @@ for Bluetooth Low Energy support:
   PyBluez; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
   Fifth Floor, Boston, MA  02110-1301  USA
   
-.. _examples/simple/inquiry.py: https://github.com/karulis/pybluez/blob/master/examples/simple/inquiry.py
-.. _examples/simple/sdp-browse.py: https://github.com/karulis/pybluez/blob/master/examples/simple/sdp-browse.py
-.. _examples/simple/rfcomm-server.py: https://github.com/karulis/pybluez/blob/master/examples/simple/rfcomm-server.py
-.. _examples/simple/rfcomm-client.py: https://github.com/karulis/pybluez/blob/master/examples/simple/rfcomm-client.py
-.. _examples/advanced/read-local-bdaddr.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/read-local-bdaddr.py
+.. _examples/simple/inquiry.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/inquiry.py
+.. _examples/simple/sdp-browse.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/sdp-browse.py
+.. _examples/simple/rfcomm-server.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/rfcomm-server.py
+.. _examples/simple/rfcomm-client.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/rfcomm-client.py
+.. _examples/advanced/read-local-bdaddr.py: https://github.com/pybluez/pybluez/blob/master/examples/advanced/read-local-bdaddr.py
 
-.. _examples/simple/l2capserver.py: https://github.com/karulis/pybluez/blob/master/examples/simple/l2capserver.py
-.. _examples/simple/l2capclient.py: https://github.com/karulis/pybluez/blob/master/examples/simple/l2capclient.py
-.. _examples/simple/asynchronous-inquiry.py: https://github.com/karulis/pybluez/blob/master/examples/simple/asynchronous-inquiry.py
+.. _examples/simple/l2capserver.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/l2capserver.py
+.. _examples/simple/l2capclient.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/l2capclient.py
+.. _examples/simple/asynchronous-inquiry.py: https://github.com/pybluez/pybluez/blob/master/examples/simple/asynchronous-inquiry.py
 
-.. _examples/bluezchat: https://github.com/karulis/pybluez/blob/master/examples/bluezchat
-.. _examples/advanced/inquiry-with-rssi.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/inquiry-with-rssi.py
-.. _examples/advanced/l2-unreliable-server.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/l2-unreliable-server.py
-.. _examples/advanced/l2-unreliable-client.py: https://github.com/karulis/pybluez/blob/master/examples/advanced/l2-unreliable-client.py
+.. _examples/bluezchat: https://github.com/pybluez/pybluez/blob/master/examples/bluezchat
+.. _examples/advanced/inquiry-with-rssi.py: https://github.com/pybluez/pybluez/blob/master/examples/advanced/inquiry-with-rssi.py
+.. _examples/advanced/l2-unreliable-server.py: https://github.com/pybluez/pybluez/blob/master/examples/advanced/l2-unreliable-server.py
+.. _examples/advanced/l2-unreliable-client.py: https://github.com/pybluez/pybluez/blob/master/examples/advanced/l2-unreliable-client.py
 
-.. _examples/ble/scan.py: https://github.com/karulis/pybluez/blob/master/examples/ble/scan.py
-.. _examples/ble/beacon.py: https://github.com/karulis/pybluez/blob/master/examples/ble/beacon.py
-.. _examples/ble/beacon_scan.py: https://github.com/karulis/pybluez/blob/master/examples/ble/beacon_scan.py
-.. _examples/ble/read_name.py: https://github.com/karulis/pybluez/blob/master/examples/ble/read_name.py
+.. _examples/ble/scan.py: https://github.com/pybluez/pybluez/blob/master/examples/ble/scan.py
+.. _examples/ble/beacon.py: https://github.com/pybluez/pybluez/blob/master/examples/ble/beacon.py
+.. _examples/ble/beacon_scan.py: https://github.com/pybluez/pybluez/blob/master/examples/ble/beacon_scan.py
+.. _examples/ble/read_name.py: https://github.com/pybluez/pybluez/blob/master/examples/ble/read_name.py
 
 .. _ble-dependencies: https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default

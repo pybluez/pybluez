@@ -124,7 +124,7 @@ setup(name='PyBluez',
       description='Bluetooth Python extension module',
       author="Albert Huang",
       author_email="ashuang@alum.mit.edu",
-      url="http://karulis.github.io/pybluez/",
+      url="http://pybluez.github.io/",
       ext_modules=ext_modules,
       packages=packages,
 # for the python cheese shop
@@ -134,7 +134,7 @@ setup(name='PyBluez',
                    'Programming Language :: Python :: 2',
                    'Programming Language :: Python :: 3',
                    'Topic :: Communications'],
-      download_url='https://github.com/karulis/pybluez',
+      download_url='https://github.com/pybluez/pybluez',
       long_description='Bluetooth Python extension module to allow Python "\
                 "developers to use system Bluetooth resources. PyBluez works "\
                 "with GNU/Linux, macOS, and Windows XP.',

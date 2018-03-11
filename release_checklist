@@ -1,7 +1,7 @@
 1. update CHANGELOG
 2. bump version number in setup.py and in __init__.py
 3. check out a clean copy of the repository
-   git clone https://github.com/karulis/pybluez.git
+   git clone https://github.com/pybluez/pybluez.git
 3. run python setup.py sdist
 4. test installer
 5. tag git repo with new release X.XX
