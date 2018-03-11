@@ -261,10 +261,18 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
         case BTPROTO_HCI:
             {
                 struct sockaddr_hci *addr = (struct sockaddr_hci*) addr_ret;
-
-                if ( !PyArg_ParseTuple(args, "H", &addr->hci_dev) ) {
-                    return 0;
+                int device;
+                int channel = HCI_CHANNEL_RAW;
+                if ( !PyArg_ParseTuple(args, "i|H", &device, &channel) ) {
+                        return 0;
                 }
+                if (device == -1) {
+                        addr->hci_dev = HCI_DEV_NONE;
+                } else {
+                        addr->hci_dev = device;
+                }
+
+                addr->hci_channel = channel;
 
                 *len_ret = sizeof(struct sockaddr_hci);
                 return 1;
@@ -876,7 +884,7 @@ PyDoc_STRVAR(bind_doc,
 "bind(address)\n\
 \n\
 Bind the socket to a local address.  address must always be a tuple.\n\
-  HCI sockets:    ( device number, )\n\
+  HCI sockets:    ( device number, channel )\n\
                   device number should be 0, 1, 2, etc.\n\
   L2CAP sockets:  ( host, psm )\n\
                   host should be an address e.g. \"01:23:45:67:89:ab\"\n\
@@ -2038,7 +2046,7 @@ bt_hci_send_cmd(PyObject *self, PyObject *args)
 }
 
 PyDoc_STRVAR(bt_hci_send_cmd_doc, 
-"hci_send_command(sock, ogf, ocf, params)\n\
+"hci_send_cmd(sock, ogf, ocf, params)\n\
 \n\
 Transmits the specified HCI command to the socket.\n\
     sock     - the btoscket object to use\n\
@@ -2235,6 +2243,53 @@ Performs a remote name request to the specified bluetooth device.\n\
 \n\
 Returns the name of the device, or raises an error on failure");
 
+static char *opcode2str(uint16_t opcode);
+
+static PyObject*
+bt_hci_opcode_name(PyObject *self, PyObject *args)
+{
+        int opcode;
+        PyArg_ParseTuple(args,"i", &opcode);
+        // DPRINTF("opcode = %x\n", opcode);
+        const char* cmd_name = opcode2str (opcode);
+
+    return PyString_FromString( cmd_name );
+}
+PyDoc_STRVAR(bt_hci_opcode_name_doc,
+"hci_opcode_name(opcode)\n\
+\n\
+Performs a remote name request to the specified bluetooth device.\n\
+   sock - the HCI socket object to use\n\
+   bdaddr - the bluetooth address of the remote device\n\
+   timeout - maximum amount of time, in milliseconds, to wait\n\
+\n\
+Returns the name of the device, or raises an error on failure");
+
+#define EVENT_NUM 77
+static char *event_str[];
+
+static PyObject*
+bt_hci_event_name(PyObject *self, PyObject *args)
+{
+   int eventNum;
+   PyArg_ParseTuple(args,"i", &eventNum);
+   if ((eventNum > EVENT_NUM) || (eventNum < 0)) {
+           PyErr_SetString(bluetooth_error,
+                           "hci_event_name: invalid event number");
+           return 0;
+   }
+   const char* event_name = event_str[eventNum];
+   return PyString_FromString( event_name );
+}
+PyDoc_STRVAR(bt_hci_event_name_doc,
+"hci_event_name(eventNum)\n\
+\n\
+Returns a string withe description of the HCI event.\n\
+   sock - the HCI socket object to use\n\
+   eventNum - valid number\n\
+\n\
+Returns the name of the device, or raises an error on failure");
+
 // lot of repetitive code... yay macros!!
 #define DECL_HCI_FILTER_OP_1(name, docstring) \
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
@@ -2381,7 +2436,7 @@ bt_hci_devid(PyObject *self, PyObject *args)
 
     return Py_BuildValue("i",devid);
 }
-PyDoc_STRVAR( bt_hci_role_doc,
+PyDoc_STRVAR( bt_hci_devid_doc,
 "hci_devid(address)\n\
 \n\
 get the device id for the local device with specified address.\n\
@@ -2411,7 +2466,7 @@ bt_hci_role(PyObject *self, PyObject *args)
 
     return Py_BuildValue("i", role);
 }
-PyDoc_STRVAR( bt_hci_devid_doc,
+PyDoc_STRVAR( bt_hci_role_doc,
 "hci_role(hci_fd, dev_id)\n\
 \n\
 get the role (master or slave) of the device id.\n\
@@ -2905,6 +2960,8 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( cmd_opcode_ocf, METH_VARARGS ),
     DECL_BT_METHOD( ba2str, METH_VARARGS ),
     DECL_BT_METHOD( str2ba, METH_VARARGS ),
+    DECL_BT_METHOD( hci_opcode_name, METH_VARARGS),
+    DECL_BT_METHOD( hci_event_name, METH_VARARGS),
 #ifndef NO_DUP
     DECL_BT_METHOD( fromfd, METH_VARARGS ),
 #endif
@@ -3074,6 +3131,14 @@ PyInit__bluetooth(void)
 #ifdef OCF_CREATE_CONN
     ADD_INT_CONST(m, OCF_CREATE_CONN);
 #endif
+#ifdef CREATE_CONN_CP_SIZE
+    ADD_INT_CONST(m, CREATE_CONN_CP_SIZE);
+#endif
+
+#ifdef ACL_PTYPE_MASK
+    ADD_INT_CONST(m, ACL_PTYPE_MASK);
+#endif
+
 #ifdef OCF_DISCONNECT
     ADD_INT_CONST(m, OCF_DISCONNECT);
 #endif
@@ -3113,6 +3178,9 @@ PyInit__bluetooth(void)
 #ifdef OCF_READ_REMOTE_FEATURES
     ADD_INT_CONST(m, OCF_READ_REMOTE_FEATURES);
 #endif
+#ifdef OCF_READ_REMOTE_EXT_FEATURES
+    ADD_INT_CONST(m, OCF_READ_REMOTE_EXT_FEATURES);
+#endif
 #ifdef OCF_READ_REMOTE_VERSION
     ADD_INT_CONST(m, OCF_READ_REMOTE_VERSION);
 #endif
@@ -3121,6 +3189,12 @@ PyInit__bluetooth(void)
 #endif
 #ifdef OCF_READ_CLOCK_OFFSET
     ADD_INT_CONST(m, OCF_READ_CLOCK);
+#endif
+#ifdef OCF_IO_CAPABILITY_REPLY
+    ADD_INT_CONST(m, OCF_IO_CAPABILITY_REPLY);
+#endif
+#ifdef OCF_USER_CONFIRM_REPLY
+    ADD_INT_CONST(m, OCF_USER_CONFIRM_REPLY);
 #endif
 #ifdef OCF_HOLD_MODE
     ADD_INT_CONST(m, OCF_HOLD_MODE);
@@ -3155,6 +3229,9 @@ PyInit__bluetooth(void)
 #ifdef OCF_RESET
     ADD_INT_CONST(m, OCF_RESET);
 #endif
+#ifdef OCF_SET_EVENT_MASK
+    ADD_INT_CONST(m, OCF_SET_EVENT_MASK);
+#endif
 #ifdef OCF_SET_EVENT_FLT
     ADD_INT_CONST(m, OCF_SET_EVENT_FLT);
 #endif
@@ -3175,6 +3252,9 @@ PyInit__bluetooth(void)
 #endif
 #ifdef OCF_WRITE_PAGE_TIMEOUT
     ADD_INT_CONST(m, OCF_WRITE_PAGE_TIMEOUT);
+#endif
+#ifdef OCF_READ_SCAN_ENABLE
+    ADD_INT_CONST(m, OCF_READ_SCAN_ENABLE);
 #endif
 #ifdef OCF_WRITE_SCAN_ENABLE
     ADD_INT_CONST(m, OCF_WRITE_SCAN_ENABLE);
@@ -3245,6 +3325,15 @@ PyInit__bluetooth(void)
 #ifdef OCF_WRITE_AFH_MODE
     ADD_INT_CONST(m, OCF_WRITE_AFH_MODE);
 #endif
+
+#ifdef OCF_WRITE_EXT_INQUIRY_RESPONSE
+    ADD_INT_CONST(m, OCF_WRITE_EXT_INQUIRY_RESPONSE);
+#endif
+
+#ifdef OCF_WRITE_SIMPLE_PAIRING_MODE
+    ADD_INT_CONST(m, OCF_WRITE_SIMPLE_PAIRING_MODE);
+#endif
+
 #ifdef OCF_READ_LOCAL_VERSION
     ADD_INT_CONST(m, OCF_READ_LOCAL_VERSION);
 #endif
@@ -3382,6 +3471,9 @@ PyInit__bluetooth(void)
 #ifdef EVT_LINK_KEY_NOTIFY_SIZE
     ADD_INT_CONST(m, EVT_LINK_KEY_NOTIFY_SIZE);
 #endif
+#ifdef EVT_MAX_SLOTS_CHANGE
+    ADD_INT_CONST(m, EVT_MAX_SLOTS_CHANGE);
+#endif
 #ifdef EVT_READ_CLOCK_OFFSET_COMPLETE
     ADD_INT_CONST(m, EVT_READ_CLOCK_OFFSET_COMPLETE);
 #endif
@@ -3400,14 +3492,44 @@ PyInit__bluetooth(void)
 #ifdef EVT_QOS_VIOLATION_SIZE
     ADD_INT_CONST(m, EVT_QOS_VIOLATION_SIZE);
 #endif
+#ifdef EVT_PSCAN_REP_MODE_CHANGE
+    ADD_INT_CONST(m,EVT_PSCAN_REP_MODE_CHANGE);
+#endif
+#ifdef EVT_FLOW_SPEC_COMPLETE
+    ADD_INT_CONST(m,EVT_FLOW_SPEC_COMPLETE);
+#endif
+#ifdef EVT_FLOW_SPEC_MODIFY_COMPLETE
+    ADD_INT_CONST(m,EVT_FLOW_SPEC_MODIFY_COMPLETE);
+#endif
 #ifdef EVT_INQUIRY_RESULT_WITH_RSSI
     ADD_INT_CONST(m, EVT_INQUIRY_RESULT_WITH_RSSI);
+#endif
+#ifdef EVT_READ_REMOTE_EXT_FEATURES_COMPLETE
+    ADD_INT_CONST(m, EVT_READ_REMOTE_EXT_FEATURES_COMPLETE);
 #endif
 #ifdef EVT_EXTENDED_INQUIRY_RESULT
     ADD_INT_CONST(m, EVT_EXTENDED_INQUIRY_RESULT);
     PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 1);
 #else
     PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 0);
+#endif
+#ifdef EVT_DISCONNECT_LOGICAL_LINK_COMPLETE
+    ADD_INT_CONST(m, EVT_DISCONNECT_LOGICAL_LINK_COMPLETE);
+#endif
+#ifdef EVT_IO_CAPABILITY_REQUEST
+    ADD_INT_CONST(m, EVT_IO_CAPABILITY_REQUEST);
+#endif
+
+#ifdef EVT_IO_CAPABILITY_RESPONSE
+    ADD_INT_CONST(m, EVT_IO_CAPABILITY_RESPONSE);
+#endif
+
+#ifdef EVT_USER_CONFIRM_REQUEST
+    ADD_INT_CONST(m, EVT_USER_CONFIRM_REQUEST);
+#endif
+
+#ifdef EVT_SIMPLE_PAIRING_COMPLETE
+    ADD_INT_CONST(m, EVT_SIMPLE_PAIRING_COMPLETE);
 #endif
 #ifdef EVT_TESTING
     ADD_INT_CONST(m, EVT_TESTING);
@@ -3430,7 +3552,9 @@ PyInit__bluetooth(void)
 #ifdef EVT_SI_SECURITY
     ADD_INT_CONST(m, EVT_SI_SECURITY);
 #endif
-
+#ifdef EVT_NUMBER_COMPLETED_BLOCKS
+    ADD_INT_CONST(m, EVT_NUMBER_COMPLETED_BLOCKS);
+#endif
     /* HCI packet types */
 #ifdef HCI_COMMAND_PKT
     ADD_INT_CONST(m, HCI_COMMAND_PKT);
@@ -3559,6 +3683,11 @@ PyInit__bluetooth(void)
 	ADD_INT_CONST(m, SCO_OPTIONS);
 	ADD_INT_CONST(m, L2CAP_OPTIONS);
 
+    /* special channels to bind() */
+    ADD_INT_CONST(m, HCI_CHANNEL_CONTROL);
+    ADD_INT_CONST(m, HCI_CHANNEL_USER);
+    ADD_INT_CONST(m, HCI_DEV_NONE);
+
     /* ioctl */
     ADD_INT_CONST(m, HCIDEVUP);
     ADD_INT_CONST(m, HCIDEVDOWN);
@@ -3652,3 +3781,429 @@ PyInit__bluetooth(void)
  * by Carlos Chinea
  * (C) Nokia Research Center, 2004
 */
+static char *event_str[EVENT_NUM + 1] = {
+	"Unknown",
+	"Inquiry Complete",
+	"Inquiry Result",
+	"Connect Complete",
+	"Connect Request",
+	"Disconn Complete",
+	"Auth Complete",
+	"Remote Name Req Complete",
+	"Encrypt Change",
+	"Change Connection Link Key Complete",
+	"Master Link Key Complete",
+	"Read Remote Supported Features",
+	"Read Remote Ver Info Complete",
+	"QoS Setup Complete",
+	"Command Complete",
+	"Command Status",
+	"Hardware Error",
+	"Flush Occurred",
+	"Role Change",
+	"Number of Completed Packets",
+	"Mode Change",
+	"Return Link Keys",
+	"PIN Code Request",
+	"Link Key Request",
+	"Link Key Notification",
+	"Loopback Command",
+	"Data Buffer Overflow",
+	"Max Slots Change",
+	"Read Clock Offset Complete",
+	"Connection Packet Type Changed",
+	"QoS Violation",
+	"Page Scan Mode Change",
+	"Page Scan Repetition Mode Change",
+	"Flow Specification Complete",
+	"Inquiry Result with RSSI",
+	"Read Remote Extended Features",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Synchronous Connect Complete",
+	"Synchronous Connect Changed",
+	"Sniff Subrate",
+	"Extended Inquiry Result",
+	"Encryption Key Refresh Complete",
+	"IO Capability Request",
+	"IO Capability Response",
+	"User Confirmation Request",
+	"User Passkey Request",
+	"Remote OOB Data Request",
+	"Simple Pairing Complete",
+	"Unknown",
+	"Link Supervision Timeout Change",
+	"Enhanced Flush Complete",
+	"Unknown",
+	"User Passkey Notification",
+	"Keypress Notification",
+	"Remote Host Supported Features Notification",
+	"LE Meta Event",
+	"Unknown",
+	"Physical Link Complete",
+	"Channel Selected",
+	"Disconnection Physical Link Complete",
+	"Physical Link Loss Early Warning",
+	"Physical Link Recovery",
+	"Logical Link Complete",
+	"Disconnection Logical Link Complete",
+	"Flow Spec Modify Complete",
+	"Number Of Completed Data Blocks",
+	"AMP Start Test",
+	"AMP Test End",
+	"AMP Receiver Report",
+	"Short Range Mode Change Complete",
+	"AMP Status Change",
+};
+
+#define CMD_LINKCTL_NUM 60
+static char *cmd_linkctl_str[CMD_LINKCTL_NUM + 1] = {
+	"Unknown",
+	"Inquiry",
+	"Inquiry Cancel",
+	"Periodic Inquiry Mode",
+	"Exit Periodic Inquiry Mode",
+	"Create Connection",
+	"Disconnect",
+	"Add SCO Connection",
+	"Create Connection Cancel",
+	"Accept Connection Request",
+	"Reject Connection Request",
+	"Link Key Request Reply",
+	"Link Key Request Negative Reply",
+	"PIN Code Request Reply",
+	"PIN Code Request Negative Reply",
+	"Change Connection Packet Type",
+        //
+	"Unknown",
+	"Authentication Requested",
+	"Unknown",
+	"Set Connection Encryption",
+	"Unknown",
+	"Change Connection Link Key",
+	"Unknown",
+	"Master Link Key",
+	"Unknown",
+	"Remote Name Request",
+	"Remote Name Request Cancel",
+	"Read Remote Supported Features",
+	"Read Remote Extended Features",
+	"Read Remote Version Information",
+	"Unknown",
+	"Read Clock Offset",
+	"Read LMP Handle",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Setup Synchronous Connection",
+	"Accept Synchronous Connection",
+	"Reject Synchronous Connection",
+	"IO Capability Request Reply",
+	"User Confirmation Request Reply",
+	"User Confirmation Request Negative Reply",
+	"User Passkey Request Reply",
+	"User Passkey Request Negative Reply",
+	"Remote OOB Data Request Reply",
+	"Unknown",
+	"Unknown",
+	"Remote OOB Data Request Negative Reply",
+	"IO Capability Request Negative Reply",
+	"Create Physical Link",
+	"Accept Physical Link",
+	"Disconnect Physical Link",
+	"Create Logical Link",
+	"Accept Logical Link",
+	"Disconnect Logical Link",
+	"Logical Link Cancel",
+	"Flow Spec Modify",
+};
+
+#define CMD_LINKPOL_NUM 17
+static char *cmd_linkpol_str[CMD_LINKPOL_NUM + 1] = {
+	"Unknown",
+	"Hold Mode",
+	"Unknown",
+	"Sniff Mode",
+	"Exit Sniff Mode",
+	"Park State",
+	"Exit Park State",
+	"QoS Setup",
+	"Unknown",
+	"Role Discovery",
+	"Unknown",
+	"Switch Role",
+	"Read Link Policy Settings",
+	"Write Link Policy Settings",
+	"Read Default Link Policy Settings",
+	"Write Default Link Policy Settings",
+	"Flow Specification",
+	"Sniff Subrating",
+};
+
+#define CMD_HOSTCTL_NUM 109
+static char *cmd_hostctl_str[CMD_HOSTCTL_NUM + 1] = {
+	"Unknown",
+	"Set Event Mask",
+	"Unknown",
+	"Reset",
+	"Unknown",
+	"Set Event Filter",
+	"Unknown",
+	"Unknown",
+	"Flush",
+	"Read PIN Type ",
+	"Write PIN Type",
+	"Create New Unit Key",
+	"Unknown",
+	"Read Stored Link Key",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Write Stored Link Key",
+	"Delete Stored Link Key",
+	"Write Local Name",
+	"Read Local Name",
+	"Read Connection Accept Timeout",
+	"Write Connection Accept Timeout",
+	"Read Page Timeout",
+	"Write Page Timeout",
+	"Read Scan Enable",
+	"Write Scan Enable",
+	"Read Page Scan Activity",
+	"Write Page Scan Activity",
+	"Read Inquiry Scan Activity",
+	"Write Inquiry Scan Activity",
+	"Read Authentication Enable",
+	"Write Authentication Enable",
+	"Read Encryption Mode",
+	"Write Encryption Mode",
+	"Read Class of Device",
+	"Write Class of Device",
+	"Read Voice Setting",
+	"Write Voice Setting",
+	"Read Automatic Flush Timeout",
+	"Write Automatic Flush Timeout",
+	"Read Num Broadcast Retransmissions",
+	"Write Num Broadcast Retransmissions",
+	"Read Hold Mode Activity ",
+	"Write Hold Mode Activity",
+	"Read Transmit Power Level",
+	"Read Synchronous Flow Control Enable",
+	"Write Synchronous Flow Control Enable",
+	"Unknown",
+	"Set Host Controller To Host Flow Control",
+	"Unknown",
+	"Host Buffer Size",
+	"Unknown",
+	"Host Number of Completed Packets",
+	"Read Link Supervision Timeout",
+	"Write Link Supervision Timeout",
+	"Read Number of Supported IAC",
+	"Read Current IAC LAP",
+	"Write Current IAC LAP",
+	"Read Page Scan Period Mode",
+	"Write Page Scan Period Mode",
+	"Read Page Scan Mode",
+	"Write Page Scan Mode",
+	"Set AFH Host Channel Classification",
+	"Unknown",
+	"Unknown",
+	"Read Inquiry Scan Type",
+	"Write Inquiry Scan Type",
+	"Read Inquiry Mode",
+	"Write Inquiry Mode",
+	"Read Page Scan Type",
+	"Write Page Scan Type",
+	"Read AFH Channel Assessment Mode",
+	"Write AFH Channel Assessment Mode",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Read Extended Inquiry Response",
+	"Write Extended Inquiry Response",
+	"Refresh Encryption Key",
+	"Unknown",
+	"Read Simple Pairing Mode",
+	"Write Simple Pairing Mode",
+	"Read Local OOB Data",
+	"Read Inquiry Response Transmit Power Level",
+	"Write Inquiry Transmit Power Level",
+	"Read Default Erroneous Data Reporting",
+	"Write Default Erroneous Data Reporting",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Enhanced Flush",
+	"Unknown",
+	"Read Logical Link Accept Timeout",
+	"Write Logical Link Accept Timeout",
+	"Set Event Mask Page 2",
+	"Read Location Data",
+	"Write Location Data",
+	"Read Flow Control Mode",
+	"Write Flow Control Mode",
+	"Read Enhanced Transmit Power Level",
+	"Read Best Effort Flush Timeout",
+	"Write Best Effort Flush Timeout",
+	"Short Range Mode",
+	"Read LE Host Supported",
+	"Write LE Host Supported",
+};
+
+#define CMD_INFO_NUM 10
+static char *cmd_info_str[CMD_INFO_NUM + 1] = {
+	"Unknown",
+	"Read Local Version Information",
+	"Read Local Supported Commands",
+	"Read Local Supported Features",
+	"Read Local Extended Features",
+	"Read Buffer Size",
+	"Unknown",
+	"Read Country Code",
+	"Unknown",
+	"Read BD ADDR",
+	"Read Data Block Size",
+};
+
+#define CMD_STATUS_NUM 11
+static char *cmd_status_str[CMD_STATUS_NUM + 1] = {
+	"Unknown",
+	"Read Failed Contact Counter",
+	"Reset Failed Contact Counter",
+	"Read Link Quality",
+	"Unknown",
+	"Read RSSI",
+	"Read AFH Channel Map",
+	"Read Clock",
+	"Read Encryption Key Size",
+	"Read Local AMP Info",
+	"Read Local AMP ASSOC",
+	"Write Remote AMP ASSOC"
+};
+
+#define CMD_TESTING_NUM 4
+static char *cmd_testing_str[CMD_TESTING_NUM + 1] = {
+	"Unknown",
+	"Read Loopback Mode",
+	"Write Loopback Mode",
+	"Enable Device Under Test mode",
+	"Unknown",
+};
+
+#define CMD_LE_NUM 31
+static char *cmd_le_str[CMD_LE_NUM + 1] = {
+	"Unknown",
+	"LE Set Event Mask",
+	"LE Read Buffer Size",
+	"LE Read Local Supported Features",
+	"Unknown",
+	"LE Set Random Address",
+	"LE Set Advertising Parameters",
+	"LE Read Advertising Channel Tx Power",
+	"LE Set Advertising Data",
+	"LE Set Scan Response Data",
+	"LE Set Advertise Enable",
+	"LE Set Scan Parameters",
+	"LE Set Scan Enable",
+	"LE Create Connection",
+	"LE Create Connection Cancel",
+	"LE Read White List Size",
+	"LE Clear White List",
+	"LE Add Device To White List",
+	"LE Remove Device From White List",
+	"LE Connection Update",
+	"LE Set Host Channel Classification",
+	"LE Read Channel Map",
+	"LE Read Remote Used Features",
+	"LE Encrypt",
+	"LE Rand",
+	"LE Start Encryption",
+	"LE Long Term Key Request Reply",
+	"LE Long Term Key Request Negative Reply",
+	"LE Read Supported States",
+	"LE Receiver Test",
+	"LE Transmitter Test",
+	"LE Test End",
+};
+
+static char *opcode2str(uint16_t opcode)
+{
+	uint16_t ogf = cmd_opcode_ogf(opcode);
+	uint16_t ocf = cmd_opcode_ocf(opcode);
+	char *cmd;
+
+	switch (ogf) {
+	case OGF_INFO_PARAM:
+		if (ocf <= CMD_INFO_NUM)
+			cmd = cmd_info_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_HOST_CTL:
+		if (ocf <= CMD_HOSTCTL_NUM)
+			cmd = cmd_hostctl_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_LINK_CTL:
+		if (ocf <= CMD_LINKCTL_NUM)
+			cmd = cmd_linkctl_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_LINK_POLICY:
+		if (ocf <= CMD_LINKPOL_NUM)
+			cmd = cmd_linkpol_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_STATUS_PARAM:
+		if (ocf <= CMD_STATUS_NUM)
+			cmd = cmd_status_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_TESTING_CMD:
+		if (ocf <= CMD_TESTING_NUM)
+			cmd = cmd_testing_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_LE_CTL:
+		if (ocf <= CMD_LE_NUM)
+			cmd = cmd_le_str[ocf];
+		else
+			cmd = "Unknown";
+		break;
+
+	case OGF_VENDOR_CMD:
+		cmd = "Vendor";
+		break;
+
+	default:
+		cmd = "Unknown";
+		break;
+	}
+
+	return cmd;
+}
