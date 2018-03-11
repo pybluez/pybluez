@@ -1,12 +1,27 @@
 language: python
 
 python:
-  - 2.7
+  - "2.7"
+  - "3.6"
 
 os:
-  - osx
   - linux
 
-install:
+before_install:
   - pip install -r requirements.txt
-  - python setup.py -q install
+
+install:
+  - python setup.py install
+
+script:
+  - python examples/simple/inquiry.py || true
+
+# Use VMs instead of Docker; bluez is not on the approved package whitelist
+# https://github.com/travis-ci/apt-package-whitelist/issues/2463
+sudo: true
+
+addons:
+  apt:
+    packages:
+      - bluez
+      - libbluetooth-dev
