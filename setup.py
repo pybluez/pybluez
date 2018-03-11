@@ -97,7 +97,6 @@ elif sys.platform.startswith("darwin"):
         subprocess.check_call([
             'xcodebuild', 'install',
             '-project', 'osx/LightAquaBlue/LightAquaBlue.xcodeproj',
-            '-scheme', 'LightAquaBlue',
             'DSTROOT=' + os.path.join(os.getcwd(), 'osx'),
             'INSTALL_PATH=/',
             'DEPLOYMENT_LOCATION=YES',
