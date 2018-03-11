@@ -44,7 +44,7 @@ elif sys.platform.startswith("linux"):
     else:
         from bluetooth.bluez import *
 elif sys.platform == "darwin":
-    from .osx import *
+    from .macos import *
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
 

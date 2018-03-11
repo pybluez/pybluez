@@ -86,19 +86,19 @@ elif sys.platform.startswith('linux'):
 
 elif sys.platform.startswith("darwin"):
     packages.append('lightblue')
-    package_dir['lightblue'] = 'osx'
+    package_dir['lightblue'] = 'macos'
     install_requires += ['pyobjc-core>=3.1', 'pyobjc-framework-Cocoa>=3.1']
     zip_safe = False
     
     # FIXME: This is inelegant, how can we cover the cases?
     if 'install' in sys.argv or 'bdist' in sys.argv or 'bdist_egg' in sys.argv:
-        # Build the framework into osx/
+        # Build the framework into macos/
         import subprocess
         subprocess.check_call([
             'xcodebuild', 'install',
-            '-project', 'osx/LightAquaBlue/LightAquaBlue.xcodeproj',
+            '-project', 'macos/LightAquaBlue/LightAquaBlue.xcodeproj',
             '-scheme', 'LightAquaBlue',
-            'DSTROOT=' + os.path.join(os.getcwd(), 'osx'),
+            'DSTROOT=' + os.path.join(os.getcwd(), 'macos'),
             'INSTALL_PATH=/',
             'DEPLOYMENT_LOCATION=YES',
         ])
@@ -106,13 +106,13 @@ elif sys.platform.startswith("darwin"):
         # We can't seem to list a directory as package_data, so we will
         # recursively add all all files we find
         package_data['lightblue'] = []
-        for path, _, files in os.walk('osx/LightAquaBlue.framework'):
+        for path, _, files in os.walk('macos/LightAquaBlue.framework'):
             for f in files:
-                include = os.path.join(path, f)[4:]  # trim off osx/
+                include = os.path.join(path, f)[6:]  # trim off macos/
                 package_data['lightblue'].append(include)
     
         # This should allow us to use the framework from an egg [untested]
-        eager_resources.append('osx/LightAquaBlue.framework')
+        eager_resources.append('macos/LightAquaBlue.framework')
         
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez."
