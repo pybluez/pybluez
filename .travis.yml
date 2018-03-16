@@ -34,3 +34,8 @@ addons:
     packages:
       - bluez
       - libbluetooth-dev
+      - pkg-config
+      - libboost-python-dev
+      - libboost-thread-dev
+      - libglib2.0-dev
+      - python-dev
