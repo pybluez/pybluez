@@ -20,7 +20,7 @@ before_install:
 
 install:
   - CFLAGS="-I$LOCAL_INCLUDE_DIR" python setup.py build
-  - python setup.py install
+  - pip install .[ble]
 
 script:
   - python examples/simple/inquiry.py || true
