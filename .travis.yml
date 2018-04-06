@@ -16,6 +16,7 @@ before_install:
   
   - git clone https://git.kernel.org/pub/scm/bluetooth/bluez.git -n $BLUEZ_SRC_DIR && cd $BLUEZ_SRC_DIR && git checkout $(git describe --tags $(git rev-list --tags='[0-9]*.[0-9]*' -n 1)) && cd -
   - mkdir -p $LOCAL_INCLUDE_DIR/bluetooth && cp $BLUEZ_SRC_DIR/lib/*.h $LOCAL_INCLUDE_DIR/bluetooth
+  - wget http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.gz && tar -xvzf boost_1_58_0.tar.gz && cd boost_1_58_0 && ./bootstrap.sh && sudo ./b2 install
   - pip install -r requirements.txt
 
 install:
@@ -35,7 +36,5 @@ addons:
       - bluez
       - libbluetooth-dev
       - pkg-config
-      - libboost-python-dev
-      - libboost-thread-dev
       - libglib2.0-dev
       - python-dev
