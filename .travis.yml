@@ -38,3 +38,4 @@ addons:
       - pkg-config
       - libglib2.0-dev
       - python-dev
+      - python3-dev
