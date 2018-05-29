@@ -91,7 +91,7 @@ active.
 Installation
 ------------
 
-Use pip (there are also binaries for Windows platform on PyPI):
+Use pip (there are also binaries for Windows platform on PyPI or here - [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pybluez)):
 
     pip install pybluez
 
