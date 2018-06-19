@@ -13,6 +13,9 @@ package_data = dict()
 eager_resources = list()
 zip_safe = True
 
+class SDKException(Exception):
+    pass
+    
 
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
@@ -28,10 +31,15 @@ def find_MS_SDK():
     # Microsoft SDKs
     if sys.version < '3.3':
         candidate_paths.append(r'Microsoft SDKs\Windows\v6.0A')  # Visual Studio 9
+        vs_version = 9
     elif '3.3' <= sys.version < '3.5':
         candidate_paths.append(r'Microsoft SDKs\Windows\v7.0A')  # Visual Studio 10
+        vs_version = 10
     elif sys.version >= '3.5':
         candidate_paths.append(r'Microsoft SDKs\Windows\v10.0A')  # Visual Studio 14
+        vs_version = 14
+    else:
+        vs_version = None
 
     candidate_paths.extend((
         'Microsoft Platform SDK for Windows XP',
@@ -43,12 +51,16 @@ def find_MS_SDK():
             candidate_sdk = os.path.join(candidate_root, candidate_path)
             if os.path.exists(candidate_sdk):
                 return candidate_sdk
-
+    raise SDKException("Could not find the Windows Platform SDK, for python {0}.{1} consider installing Visual Studio {2}".format(sys.version_info.major,
+                                                                                                                                  sys.version_info.minor,
+                                                                                                                                  vs_version))
 if sys.platform == 'win32':
-    PSDK_PATH = find_MS_SDK()
-    if PSDK_PATH is None:
-        raise SystemExit("Could not find the Windows Platform SDK")
-
+    try:
+        PSDK_PATH = find_MS_SDK()
+    except SDKException as e:
+        raise SystemExit(e)
+    
+        
     lib_path = os.path.join(PSDK_PATH, 'Lib')
     if '64' in platform.architecture()[0]:
         lib_path = os.path.join(lib_path, 'x64')
