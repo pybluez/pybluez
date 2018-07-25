@@ -326,7 +326,7 @@ msbt_getpeername(PyObject *self, PyObject *args)
     int sockfd = -1;
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
-    char buf[100] = { 0 };
+    char buf[18] = { 0 };
     int buf_len = sizeof(buf);
     int status;
     if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
@@ -358,7 +358,7 @@ msbt_getsockname(PyObject *self, PyObject *args)
     int sockfd = -1;
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
-    char buf[100] = { 0 };
+    char buf[18] = { 0 };
     int buf_len = sizeof(buf);
     int status;
     if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
