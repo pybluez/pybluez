@@ -341,7 +341,16 @@ msbt_getpeername(PyObject *self, PyObject *args)
     ba2str( sa.btAddr, buf, buf_len );
     return Py_BuildValue( "si", buf, sa.port );
 };
-PyDoc_STRVAR(msbt_getpeername_doc, "TODO");
+PyDoc_STRVAR(msbt_getpeername_doc,
+"getpeername() -> address info\n\
+\n\
+Return the address of the peer to which a socket is connected.\n\
+This function works with any address family and it simply returns the \n\
+address to which the socket is connected. The getpeername function can be \n\
+used only on a connected socket.\n\
+For datagram sockets, only the address of a peer specified in a previous \n\
+connect call will be returned. Any address specified by a previous sendto \n\
+call will not be returned by getpeername.");
 
 static PyObject *
 msbt_getsockname(PyObject *self, PyObject *args)

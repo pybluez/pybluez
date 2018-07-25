@@ -98,6 +98,8 @@ class BluetoothSocket:
     def getpeername (self):
         return bt.getpeername (self._sockfd)
 
+    getpeername.__doc__ = bt.getpeername.__doc__
+
     def setblocking (self, blocking):
         bt.setblocking (self._sockfd, blocking)
         self._blocking = blocking
