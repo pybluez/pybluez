@@ -321,6 +321,29 @@ msbt_close(PyObject *self, PyObject *args)
 PyDoc_STRVAR(msbt_close_doc, "TODO");
 
 static PyObject *
+msbt_getpeername(PyObject *self, PyObject *args)
+{
+    int sockfd = -1;
+    SOCKADDR_BTH sa = { 0 };
+    int sa_len = sizeof(sa);
+    char buf[100] = { 0 };
+    int buf_len = sizeof(buf);
+    int status;
+    if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
+
+    sa.addressFamily = AF_BTH;
+    Py_BEGIN_ALLOW_THREADS;
+    status = getpeername( sockfd, (LPSOCKADDR)&sa, &sa_len );
+    Py_END_ALLOW_THREADS;
+
+    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
+
+    ba2str( sa.btAddr, buf, buf_len );
+    return Py_BuildValue( "si", buf, sa.port );
+};
+PyDoc_STRVAR(msbt_getpeername_doc, "TODO");
+
+static PyObject *
 msbt_getsockname(PyObject *self, PyObject *args)
 {
     int sockfd = -1;
@@ -971,6 +994,8 @@ static PyMethodDef msbt_methods[] = {
     { "close", (PyCFunction)msbt_close, METH_VARARGS, msbt_close_doc },
     { "getsockname", (PyCFunction)msbt_getsockname, METH_VARARGS, 
         msbt_getsockname_doc },
+    { "getpeername", (PyCFunction)msbt_getpeername, METH_VARARGS,
+        msbt_getpeername_doc },
     { "dup", (PyCFunction)msbt_dup, METH_VARARGS, msbt_dup_doc },
     { "discover_devices", (PyCFunction)msbt_discover_devices,
             METH_VARARGS | METH_KEYWORDS, msbt_discover_devices_doc },
