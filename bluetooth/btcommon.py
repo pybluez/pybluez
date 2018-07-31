@@ -191,7 +191,7 @@ def is_valid_address (s):
     try:
         pairs = s.split (":")
         if len (pairs) != 6: return False
-        for b in pairs: int (b, 16)
+        if not all(0 <= int(b, 16) <= 255 for b in pairs): return False
     except:
         return False
     return True
@@ -372,7 +372,7 @@ def sdp_make_data_element (type, value):
     elif type == "SInt128":
         ts = maketsd (2, 4)
         # FIXME
-        raise NotImplementedException ("128-bit signed int NYI!")
+        raise NotImplementedError ("128-bit signed int NYI!")
     elif type == "UUID":
         if len (value) == 4:
             return maketsd (3, 1) + binascii.unhexlify (value)
