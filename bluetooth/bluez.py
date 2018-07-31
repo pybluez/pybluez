@@ -1,6 +1,6 @@
 import sys
 import struct
-from errno import (EBUSY, EINVAL)
+from errno import (EADDRINUSE, EBUSY, EINVAL)
 
 if sys.version < '3':
     from .btcommon import *
@@ -153,30 +153,13 @@ def set_l2cap_mtu (sock, mtu):
     options[0] = options[1] = mtu
     set_l2cap_options (sock, options)
 
-def _get_available_port (protocol, addr=""):
-    """
-    deprecated.  bind to PORT_ANY instead.
-    """
+def _get_available_ports(protocol):
     if protocol == RFCOMM:
-        for channel in range (1,31):
-            s = BluetoothSocket (RFCOMM)
-            try:
-                s.bind ( (addr, channel))
-                s.close ()
-                return channel
-            except:
-                s.close ()
+        return range (1, 31)
     elif protocol == L2CAP:
-        for psm in range (0x1001,0x8000,2):
-            s = BluetoothSocket (L2CAP)
-            try:
-                s.bind ( (addr, psm))
-                s.close ()
-                return psm
-            except:
-                s.close ()
+        return range (0x1001, 0x8000, 2)
     else:
-        raise ValueError ("protocol must either RFCOMM or L2CAP")
+        return [0]
 
 class BluetoothSocket:
     __doc__ = _bt.btsocket.__doc__
@@ -203,13 +186,20 @@ class BluetoothSocket:
     accept.__doc__ = _bt.btsocket.accept.__doc__
 
     def bind (self, addrport):
-        try:
-            if self._proto == RFCOMM or self._proto == L2CAP:
-                addr, port = addrport
-                if port == 0: addrport = (addr, _get_available_port (self._proto, addr))
-            return self._sock.bind (addrport)
-        except _bt.error as e:
-            raise BluetoothError (*e.args)
+        if len (addrport) != 2 or addrport[1] != 0:
+            try:
+                return self._sock.bind (addrport)
+            except _bt.error as e:
+                raise BluetoothError (*e.args)
+        addr, _ = addrport
+        for port in _get_available_ports (self._proto):
+            try:
+                return self._sock.bind ((addr, port))
+            except _bt.error as e:
+                err = BluetoothError (*e.args)
+                if e.errno != EADDRINUSE:
+                    break
+        raise err
 
     def get_l2cap_options(self):
         """get_l2cap_options (sock, mtu)
