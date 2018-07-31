@@ -186,12 +186,12 @@ class BluetoothSocket:
     accept.__doc__ = _bt.btsocket.accept.__doc__
 
     def bind (self, addrport):
-        addr, port = addrport
-        if port != 0:
+        if len (addrport) != 2 or addrport[1] != 0:
             try:
                 return self._sock.bind (addrport)
             except _bt.error as e:
                 raise BluetoothError (*e.args)
+        addr, _ = addrport
         for port in _get_available_ports (self._proto):
             try:
                 return self._sock.bind ((addr, port))
