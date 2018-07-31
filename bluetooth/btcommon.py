@@ -372,7 +372,7 @@ def sdp_make_data_element (type, value):
     elif type == "SInt128":
         ts = maketsd (2, 4)
         # FIXME
-        raise NotImplementedException ("128-bit signed int NYI!")
+        raise NotImplementedError ("128-bit signed int NYI!")
     elif type == "UUID":
         if len (value) == 4:
             return maketsd (3, 1) + binascii.unhexlify (value)
