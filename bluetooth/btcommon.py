@@ -191,7 +191,7 @@ def is_valid_address (s):
     try:
         pairs = s.split (":")
         if len (pairs) != 6: return False
-        for b in pairs: int (b, 16)
+        if not all(0 <= int(b, 16) <= 255 for b in pairs): return False
     except:
         return False
     return True
