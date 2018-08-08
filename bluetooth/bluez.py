@@ -2,7 +2,7 @@ import sys
 import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
-if sys.version < '3':
+if sys.version_info.major < 3:
     from .btcommon import *
     import _bluetooth as _bt
     get_byte = ord
@@ -75,7 +75,7 @@ def read_local_bdaddr():
         status,raw_bdaddr = struct.unpack("xxxxxxB6s", pkt)
         assert status == 0
 
-        t = [ "%X" % get_byte(b) for b in raw_bdaddr ]
+        t = [ "%02X" % get_byte(b) for b in raw_bdaddr ]
         t.reverse()
         bdaddr = ":".join(t)
 
