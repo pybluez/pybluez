@@ -75,7 +75,7 @@ def read_local_bdaddr():
         status,raw_bdaddr = struct.unpack("xxxxxxB6s", pkt)
         assert status == 0
 
-        t = [ "%X" % get_byte(b) for b in raw_bdaddr ]
+        t = [ "%02X" % get_byte(b) for b in raw_bdaddr ]
         t.reverse()
         bdaddr = ":".join(t)
 
