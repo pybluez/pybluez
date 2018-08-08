@@ -2,7 +2,7 @@ import sys
 import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
-if sys.version < '3':
+if sys.version_info.major < 3:
     from .btcommon import *
     import _bluetooth as _bt
     get_byte = ord
