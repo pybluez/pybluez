@@ -197,7 +197,7 @@ class BluetoothSocket:
                 return self._sock.bind ((addr, port))
             except _bt.error as e:
                 err = BluetoothError (*e.args)
-                if e.errno != EADDRINUSE:
+                if err.errno != EADDRINUSE:
                     break
         raise err
 
