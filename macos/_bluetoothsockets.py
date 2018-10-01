@@ -107,56 +107,32 @@ class _closedsocket(object):
     send = recv = sendto = recvfrom = __getattr__ = _dummy
 
 
-# Thanks to Simon Wittber for string queue recipe
-# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/426060
-# (this is a modified version)
-class _StringQueue(object):
+# TODO: replace with BytesIO if minimum supported version is python3?
+# or just get rid of wrapper class altogether & use bytearray directly if
+# multi-threaded usage isn't support (it's not currently).
+class _ByteQueue(object):
     def __init__(self):
-        self.l_buffer = []
-        self.s_buffer = ""
-        self.lock = threading.RLock()
-        self.bufempty = True
+        self.buffered = bytearray()
+        self.lock = threading.Lock()
 
     def empty(self):
-        return self.bufempty
+        return len(self.buffered) == 0
 
     def write(self, data):
-        # no type check, and assumes data is not empty!
-        #append data to list, no need to "".join just yet.
-        self.lock.acquire()
-        try:
-            self.l_buffer.append(data)
-            self.bufempty = False
-        finally:
-            self.lock.release()
-
-    def _build_str(self):
-        #build a new string out of list
-        new_string = "".join([str(x.tobytes()) for x in self.l_buffer])
-        #join string buffer and new string
-        self.s_buffer = "".join((self.s_buffer, new_string))
-        #clear list
-        self.l_buffer = []
+        with self.lock:
+          self.buffered.extend(data)
 
     def __len__(self):
         #calculate length without needing to _build_str
-        return sum([len(i) for i in self.l_buffer]) + len(self.s_buffer)
+        return len(self.buffered)
 
     def read(self, count):
-        self.lock.acquire()
-        try:
-            #if string doesn't have enough chars to satisfy caller
-            if count > len(self.s_buffer):
-                self._build_str()
+        with self.lock:
             #get data requested by caller
-            result = self.s_buffer[:count]
-            #remove requested data from string buffer
-            self.s_buffer = self.s_buffer[len(result):]
-            self.bufempty = (len(self.s_buffer) == 0)
-        finally:
-            self.lock.release()
+            result = self.buffered[:count]
+            #remove requested data from buffer
+            del self.buffered[:count]
         return result
-
 
 
 #class _SocketWrapper(_socket._socketobject):
@@ -185,7 +161,7 @@ class _SocketWrapper(object):
         >>> s.listen(1)
         >>> advertise("My RFCOMM Service", s, RFCOMM)
         >>> conn, addr = s.accept()
-        >>> print "Connected by", addr
+        >>> print("Connected by", addr)
         Connected by ('00:0D:93:19:C8:68', 5)
         >>> conn.recv(1024)
         "hello"
@@ -251,7 +227,7 @@ class _BluetoothSocket(object):
         self.__eventlistener = None
         self.__closed = False
         self.__maxqueuedconns = 0
-        self.__incomingdata = _StringQueue()
+        self.__incomingdata = _ByteQueue()
         self.__queuedchannels = []
         self.__queuedchannels_lock = threading.RLock()
 
