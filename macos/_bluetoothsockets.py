@@ -483,8 +483,10 @@ class _BluetoothSocket(object):
         return None
 
     def send(self, data, flags=0):
-        if not isinstance(data, str):
-            raise TypeError("data must be string, was %s" % type(data))
+        # On python 2 this should be OK for backwards compatability as "bytes"
+        # is an alias for "str".
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("data must be bytes, was %s" % type(data))
         if self.__commstate in (SHUT_WR, SHUT_RDWR):
             raise _socket.error(errno.EPIPE, os.strerror(errno.EPIPE))
         self.__checkconnected()
