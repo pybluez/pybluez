@@ -71,6 +71,12 @@ def findservices(addr=None, name=None, servicetype=None):
     services = []
     for devaddr in addresses:
         iobtdevice = _IOBluetooth.IOBluetoothDevice.withAddressString_(devaddr)
+        if not iobtdevice and addr is not None:
+            msg = "findservices() failed, " +\
+                    "failed to find " + devaddr
+            raise _lightbluecommon.BluetoothError(msg)
+        elif not iobtdevice:
+            continue
 
         try:
             lastseen = iobtdevice.getLastServicesUpdate()
