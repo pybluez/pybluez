@@ -5,6 +5,7 @@ to investigate bugs and submit patches.*
 
  - **Operating System:**
  - **Hardware:** (e.g., Raspberry Pi, external Bluetooth adaptor, etc.)
+ - **Python Version:**
  - **PyBluez Version:**
 
 
