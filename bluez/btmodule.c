@@ -237,7 +237,7 @@ makesockaddr(PySocketSockObject *s, struct sockaddr *addr, int addrlen)
             default:
                 PyErr_SetString(bluetooth_error, 
                         "getsockaddrarg: unknown Bluetooth protocol");
-                    return 0;
+                return 0;
         }
     }
 }
@@ -263,12 +263,12 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
                 int device;
                 int channel = HCI_CHANNEL_RAW;
                 if ( !PyArg_ParseTuple(args, "i|H", &device, &channel) ) {
-                        return 0;
+                    return 0;
                 }
                 if (device == -1) {
-                        addr->hci_dev = HCI_DEV_NONE;
+                    addr->hci_dev = HCI_DEV_NONE;
                 } else {
-                        addr->hci_dev = device;
+                    addr->hci_dev = device;
                 }
 
                 addr->hci_channel = channel;
@@ -579,7 +579,7 @@ void uuid2str( const uuid_t *uuid, char *dest )
 
 /* s.accept() method */
 
-    static PyObject *
+static PyObject *
 sock_accept(PySocketSockObject *s)
 {
     char addrbuf[256];
@@ -814,22 +814,22 @@ string of that length; otherwise it is an integer.");
 static PyObject *
 sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
 {
-	int level;
-        struct bt_security sec;
+    int level;
+    struct bt_security sec;
 
 	if (! PyArg_ParseTuple(args, "i:setsockopt",
 			     &level))
 		return NULL;
 
-        memset(&sec, 0, sizeof(sec));
-        sec.level = level;
+    memset(&sec, 0, sizeof(sec));
+    sec.level = level;
 
     if (setsockopt(s->sock_fd, SOL_BLUETOOTH, BT_SECURITY, &sec,
                                                     sizeof(sec)) == 0)
         Py_RETURN_NONE;
 
     if (errno != ENOPROTOOPT)
-    return s->errorhandler();
+        return s->errorhandler();
 
     int lm_map[] = {
             0,
@@ -839,7 +839,7 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
     }, opt = lm_map[level];
 
     if (setsockopt(s->sock_fd, SOL_L2CAP, L2CAP_LM, &opt, sizeof(opt)) < 0)
-    return s->errorhandler();
+        return s->errorhandler();
 
     Py_RETURN_NONE;
 }
@@ -2044,7 +2044,7 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
     int dd = 0;
 
     static char *keywords[] = { "sock", "ogf", "ocf", "event", "rlen", "params",
-        "timeout", 0 };
+                                "timeout", 0 };
 
     if( !PyArg_ParseTupleAndKeywords(args, kwds, "OHHii|s#i", keywords,
                 &socko, &req.ogf, &req.ocf, &req.event, &req.rlen, 
@@ -2981,7 +2981,7 @@ init_bluetooth(void)
 	PyModule_AddObject(m, "error", bluetooth_error);
 
     socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
-            NULL);
+                                        NULL);
 	if (socket_timeout == NULL)
 		return;
 	Py_INCREF(socket_timeout);
