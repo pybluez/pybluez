@@ -441,7 +441,6 @@ sess_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 #endif
 
 	return 0;
-
 }
 
 

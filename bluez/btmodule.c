@@ -446,7 +446,6 @@ adv_available(PySocketSockObject *socko)
     else
         dev_id = hci_get_route(&ba);
 
-    /**/
     if(dev_id == -1)
     /* if dev_id is not specified, inspect all devices. */
     {
@@ -492,7 +491,8 @@ getsockaddrlen(PySocketSockObject *s, socklen_t *len_ret)
 }
 
 
-int str2uuid( const char *uuid_str, uuid_t *uuid )
+int
+str2uuid( const char *uuid_str, uuid_t *uuid )
 {
     uint32_t uuid_int[4];
     char *endptr;
@@ -545,7 +545,8 @@ int str2uuid( const char *uuid_str, uuid_t *uuid )
     return 1;
 }
 
-int pyunicode2uuid( PyObject *item, uuid_t *uuid )
+int
+pyunicode2uuid( PyObject *item, uuid_t *uuid )
 {
 #if PY_MAJOR_VERSION >= 3
     PyObject* ascii = PyUnicode_AsASCIIString( item );
@@ -557,7 +558,8 @@ int pyunicode2uuid( PyObject *item, uuid_t *uuid )
 #endif
 }
 
-void uuid2str( const uuid_t *uuid, char *dest ) 
+void
+uuid2str( const uuid_t *uuid, char *dest ) 
 {
     if( uuid->type == SDP_UUID16 ) {
         sprintf(dest, "%04X", uuid->value.uuid16 );
@@ -572,7 +574,7 @@ void uuid2str( const uuid_t *uuid, char *dest )
                 ntohl(data[2])>>16, 
                 (ntohl(data[2])<<16)>>16, 
                 ntohl(data[3]));
-    } 
+    }
 }
 
 // =================== socket methods ==================== //
@@ -2099,7 +2101,7 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
         return 0;
     }
 
-    flags |= (flush)?IREQ_CACHE_FLUSH:0;
+    flags |= (flush) ? IREQ_CACHE_FLUSH : 0;
 
 
     ir = (struct hci_inquiry_req*)buf;
@@ -2657,7 +2659,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
              ( ! PyArg_ParseTuple(tuple, "sH", 
                  &profile_uuid_str, &version)) || 
              ( ! str2uuid( profile_uuid_str, NULL ) ) 
-             ) {
+           ) {
             PyErr_SetString(PyExc_ValueError, 
                     "Each profile must be a ('uuid', version) tuple");
             return 0;
@@ -2722,7 +2724,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     if( socko->sdp_record_handle != 0 && socko->sdp_session != NULL ) {
         PyErr_SetString(bluetooth_error,
                 "This socket is already being used to advertise a service!\n"
-                "Use  stop_advertising first!\n");
+                "Use stop_advertising first!\n");
         return 0;
     }
 
@@ -3843,7 +3845,6 @@ static char *cmd_linkctl_str[CMD_LINKCTL_NUM + 1] = {
 	"PIN Code Request Reply",
 	"PIN Code Request Negative Reply",
 	"Change Connection Packet Type",
-        //
 	"Unknown",
 	"Authentication Requested",
 	"Unknown",
