@@ -2951,84 +2951,60 @@ PyDoc_STRVAR(socket_doc,
 \n\
 See the bluetooth module for documentation.");
 
-#if PY_MAJOR_VERSION < 3
+#if PY_MAJOR_VERSION >= 3
+#define INITERROR return NULL
+
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_bluetooth",
+    socket_doc,
+    -1,
+    bt_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PyMODINIT_FUNC
+PyInit__bluetooth(void)
+#else
+#define INITERROR return
+
 PyMODINIT_FUNC
 init_bluetooth(void)
+#endif
 {
-	Py_TYPE(&sock_type) = &PyType_Type;
-	Py_TYPE(&sdp_session_type) = &PyType_Type;
+    Py_TYPE(&sock_type) = &PyType_Type;
+    Py_TYPE(&sdp_session_type) = &PyType_Type;
+#if PY_MAJOR_VERSION >= 3
+    PyObject *m = PyModule_Create(&moduledef);
+#else
+    PyObject *m = Py_InitModule3("_bluetooth", bt_methods, socket_doc);
+#endif
+    if (m == NULL)
+        INITERROR;
 
-// Initialization steps for _bluetooth.
-	PyObject *m = Py_InitModule3("_bluetooth",
-               bt_methods,
-               socket_doc);
     bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
-	if (bluetooth_error == NULL)
-		return;
-	Py_INCREF(bluetooth_error);
-	PyModule_AddObject(m, "error", bluetooth_error);
+    if (bluetooth_error == NULL)
+        INITERROR;
+    Py_INCREF(bluetooth_error);
+    PyModule_AddObject(m, "error", bluetooth_error);
 
     socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
                                         NULL);
-	if (socket_timeout == NULL)
-		return;
-	Py_INCREF(socket_timeout);
-	PyModule_AddObject(m, "timeout", socket_timeout);
+    if (socket_timeout == NULL)
+        INITERROR;
+    Py_INCREF(socket_timeout);
+    PyModule_AddObject(m, "timeout", socket_timeout);
 
-	Py_INCREF((PyObject *)&sock_type);
-	if (PyModule_AddObject(m, "btsocket",
-			       (PyObject *)&sock_type) != 0)
-		return;
+    Py_INCREF((PyObject *)&sock_type);
+    if (PyModule_AddObject(m, "btsocket", (PyObject *)&sock_type) != 0)
+        INITERROR;
 
     Py_INCREF((PyObject *)&sdp_session_type);
-    if (PyModule_AddObject(m, "SDPSession",
-                (PyObject *)&sdp_session_type) != 0)
-        return;
-
-#else
-PyMODINIT_FUNC
-PyInit__bluetooth(void)
-{
-	Py_TYPE(&sock_type) = &PyType_Type;
-	Py_TYPE(&sdp_session_type) = &PyType_Type;
-
-// Initialization steps for _bluetooth.
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "_bluetooth",
-        socket_doc,
-        -1,
-        bt_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
-    PyObject *m = PyModule_Create(&moduledef);
-	bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
-	if (bluetooth_error == NULL)
-		return NULL;
-	Py_INCREF(bluetooth_error);
-	PyModule_AddObject(m, "error", bluetooth_error);
-
-	socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
-			NULL);
-	if (socket_timeout == NULL)
-		return NULL;
-	Py_INCREF(socket_timeout);
-	PyModule_AddObject(m, "timeout", socket_timeout);
-
-	Py_INCREF((PyObject *)&sock_type);
-	if (PyModule_AddObject(m, "btsocket",
-				   (PyObject *)&sock_type) != 0)
-		return NULL;
-
-	Py_INCREF((PyObject *)&sdp_session_type);
-	if (PyModule_AddObject(m, "SDPSession",
-				(PyObject *)&sdp_session_type) != 0)
-		return NULL;
-#endif
-
+    if (PyModule_AddObject(m, "SDPSession", (PyObject *)&sdp_session_type) != 0)
+        INITERROR;
 
     // Global variables that can be accessible from Python.
 //    PyModule_AddIntMacro(m, PF_BLUETOOTH);
