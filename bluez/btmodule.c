@@ -655,7 +655,7 @@ sock_setblocking(PySocketSockObject *s, PyObject *arg)
 	s->sock_timeout = block ? -1.0 : 0.0;
 	internal_setblocking(s, block);
 
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setblocking_doc,
@@ -690,7 +690,7 @@ sock_settimeout(PySocketSockObject *s, PyObject *arg)
 	s->sock_timeout = timeout;
 	internal_setblocking(s, timeout < 0.0);
 
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(settimeout_doc,
@@ -859,7 +859,7 @@ sock_bind(PySocketSockObject *s, PyObject *addro)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bind_doc,
@@ -953,7 +953,7 @@ sock_connect(PySocketSockObject *s, PyObject *addro)
 	}
 	if (res != 0)
 		return s->errorhandler();
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(connect_doc,
@@ -1108,8 +1108,8 @@ sock_listen(PySocketSockObject *s, PyObject *arg)
 	if (res < 0)
 		return s->errorhandler();
 
-    s->is_listening_socket = 1;
-    Py_RETURN_NONE;
+	s->is_listening_socket = 1;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(listen_doc,
@@ -1338,7 +1338,7 @@ sock_sendall(PySocketSockObject *s, PyObject *args)
 	if (n < 0)
 		return s->errorhandler();
 
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(sendall_doc,
@@ -1408,7 +1408,7 @@ sock_shutdown(PySocketSockObject *s, PyObject *arg)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(shutdown_doc,
@@ -1888,7 +1888,7 @@ bt_setdefaulttimeout(PyObject *self, PyObject *arg)
 
 	defaulttimeout = timeout;
 
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bt_setdefaulttimeout_doc,
