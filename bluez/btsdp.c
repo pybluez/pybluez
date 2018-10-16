@@ -30,33 +30,20 @@ extern void uuid2str( const uuid_t *uuid, char *dest );
 // =================== utility functions =====================
 
 static void 
-dict_set_str_pyobj(PyObject *dict, const char *key, PyObject *valobj)
-{
-    PyObject *keyobj;
-    keyobj = PyString_FromString( key );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
-}
-
-static void 
 dict_set_strings(PyObject *dict, const char *key, const char *val)
 {
-    PyObject *keyobj, *valobj;
-    keyobj = PyString_FromString( key );
+    PyObject *valobj;
     valobj = PyString_FromString( val );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
+    PyDict_SetItemString( dict, key, valobj );
     Py_DECREF( valobj );
 }
 
 static void 
 dict_set_str_long(PyObject *dict, const char *key, long val)
 {
-    PyObject *keyobj, *valobj;
-    keyobj = PyString_FromString( key );
+    PyObject *valobj;
     valobj = PyInt_FromLong(val);
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
+    PyDict_SetItemString( dict, key, valobj );
     Py_DECREF( valobj );
 }
 
@@ -113,13 +100,13 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
         // initialize service class list
         py_class_list = PyList_New(0);
         if( ! py_class_list ) return 0;
-        dict_set_str_pyobj( dict, "service-classes", py_class_list );
+        PyDict_SetItemString( dict, "service-classes", py_class_list );
         Py_DECREF( py_class_list );
 
         // initialize profile list
         py_profile_list = PyList_New(0);
         if( ! py_profile_list ) return 0;
-        dict_set_str_pyobj( dict, "profiles", py_profile_list );
+        PyDict_SetItemString( dict, "profiles", py_profile_list );
         Py_DECREF( py_profile_list );
 
         // set service name
@@ -127,7 +114,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "name", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "name", Py_None );
+            PyDict_SetItemString( dict, "name", Py_None );
         }
 
         // set service description
@@ -135,7 +122,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "description", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "description", Py_None );
+            PyDict_SetItemString( dict, "description", Py_None );
         }
 
         // set service provider name
@@ -143,7 +130,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "provider", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "provider", Py_None );
+            PyDict_SetItemString( dict, "provider", Py_None );
         }
 
         // set service id
@@ -152,7 +139,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "service-id", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "service-id", Py_None );
+            PyDict_SetItemString( dict, "service-id", Py_None );
         }
         
         // get a list of the protocol sequences
@@ -168,7 +155,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
                 dict_set_str_long( dict, "port", port );
             } else {
                 dict_set_strings( dict, "protocol", "UNKNOWN" );
-                dict_set_str_pyobj( dict, "port", Py_None );
+                PyDict_SetItemString( dict, "port", Py_None );
             }
 
             // sdp_get_access_protos allocates data on the heap for the
@@ -178,8 +165,8 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             }
             sdp_list_free( proto_list, 0 );
         } else {
-            dict_set_str_pyobj( dict, "protocol", Py_None );
-            dict_set_str_pyobj( dict, "port", Py_None );
+            PyDict_SetItemString( dict, "protocol", Py_None );
+            PyDict_SetItemString( dict, "port", Py_None );
         }
 
         // get a list of the service classes
