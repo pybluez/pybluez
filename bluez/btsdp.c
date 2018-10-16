@@ -272,8 +272,7 @@ session was already connected, it's closed first.\n\
 dest specifies the bluetooth address of the server to connect to.  Special\n\
 case is \"localhost\"\n\
 \n\
-raises _bluetooth.error if something goes wrong\n\
-");
+Raises _bluetooth.error if something goes wrong");
 
 // close
 static PyObject *
@@ -290,8 +289,7 @@ sess_close(PySDPSessionObject *s)
 PyDoc_STRVAR(sess_close_doc,
 "close()\n\
 \n\
-closes the connection with the SDP server.  No effect if a session is not open.\n\
-");
+Closes the connection with the SDP server.  No effect if a session is not open.");
 
 // fileno
 static PyObject *
@@ -303,8 +301,7 @@ PyDoc_STRVAR(sess_fileno_doc,
 "fileno() -> integer\n\
 \n\
 Return the integer file descriptor of the socket.\n\
-You can use this for direct communication with the SDP server.\n\
-");
+You can use this for direct communication with the SDP server.");
 
 // search
 static PyObject *
@@ -340,8 +337,7 @@ Searches for a service record with the specified UUID.  If no match is found,\n\
 returns None.  Otherwise, returns a dictionary\n\
 \n\
 UUID must be in the form \"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\", \n\
-where each X is a hexadecimal digit.\n\
-");
+where each X is a hexadecimal digit.");
 
 // browse
 static PyObject *
@@ -367,8 +363,7 @@ sess_browse(PySDPSessionObject *s)
 PyDoc_STRVAR(sess_browse_doc,
 "browse()\n\
 \n\
-Browses all services advertised by connected SDP session\n\
-");
+Browses all services advertised by connected SDP session");
 
 static PyMethodDef sess_methods[] = {
     { "search", (PyCFunction) sess_search, METH_VARARGS, 

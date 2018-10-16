@@ -848,8 +848,7 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
 PyDoc_STRVAR(setl2capsecurity_doc,
 "setl2capsecurity(BT_SECURITY_*) -> value\n\
 \n\
-Sets socket security. Levels are BT_SECURITY_SDP, LOW, MEDIUM\n\
-and HIGH.");
+Sets socket security. Levels are BT_SECURITY_SDP, LOW, MEDIUM and HIGH.");
 
 /* s.bind(sockaddr) method */
 
@@ -881,8 +880,7 @@ Bind the socket to a local address.  address must always be a tuple.\n\
                   host should be an address e.g. \"01:23:45:67:89:ab\"\n\
                   psm should be an unsigned integer\n\
   RFCOMM sockets: ( host, channel )\n\
-  SCO sockets:    ( host )\n\
-");
+  SCO sockets:    ( host )");
 
 /* s.close() method.
    Set the file descriptor to -1 so operations tried subsequently
@@ -2004,7 +2002,7 @@ bt_hci_close_dev(PyObject *self, PyObject *args)
 PyDoc_STRVAR(bt_hci_close_dev_doc, 
 "hci_close_dev(dev_id)\n\
 \n\
-closes the specified device id.  Note:  device id is NOT a btoscket.\n\
+Closes the specified device id.  Note:  device id is NOT a btoscket.\n\
 You can also use btsocket.close() to close a specific socket.");
 
 /*
@@ -2347,7 +2345,7 @@ bt_cmd_opcode_pack(PyObject *self, PyObject *args )
 PyDoc_STRVAR(bt_cmd_opcode_pack_doc,
 "cmd_opcode_pack(ogf, ocf)\n\
 \n\
-packs an OCF and an OGF value together to form a opcode");
+Packs an OCF and an OGF value together to form a opcode");
 
 static PyObject *
 bt_cmd_opcode_ogf(PyObject *self, PyObject *args )
@@ -2402,8 +2400,8 @@ bt_str2ba(PyObject *self, PyObject *args)
 PyDoc_STRVAR(bt_str2ba_doc,
 "str2ba(string)\n\
 \n\
-Converts a bluetooth address string into a packed bluetooth address.  The\n\
-string should be of the form \"XX:XX:XX:XX:XX:XX\"");
+Converts a bluetooth address string into a packed bluetooth address.\n\
+The string should be of the form \"XX:XX:XX:XX:XX:XX\"");
     
 /*
  * params:  (string) device address
@@ -2432,8 +2430,7 @@ bt_hci_devid(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_devid_doc,
 "hci_devid(address)\n\
 \n\
-get the device id for the local device with specified address.\n\
-");
+Get the device id for the local device with specified address.");
 
 /*
  * params:  (string) device address
@@ -2462,8 +2459,7 @@ bt_hci_role(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_role_doc,
 "hci_role(hci_fd, dev_id)\n\
 \n\
-get the role (master or slave) of the device id.\n\
-");
+Get the role (master or slave) of the device id.");
 
 /*
  * params:  (string) device address
@@ -2493,8 +2489,7 @@ bt_hci_read_clock(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_read_clock_doc,
 "hci_read_clock(hci_fd, acl_handle, which_clock, timeout_ms)\n\
 \n\
-Get the Bluetooth Clock (native or piconet).\n\
-");
+Get the Bluetooth Clock (native or piconet).");
 
 /*
  * params:  (string) device address
@@ -2524,8 +2519,7 @@ bt_hci_get_route(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_get_route_doc,
 "hci_get_route(address)\n\
 \n\
-get the device id through which remote specified addr can be reached.\n\
-");
+Get the device id through which remote specified addr can be reached.");
 
 /*
  * params:  (string) device address
@@ -2562,8 +2556,7 @@ bt_hci_acl_conn_handle(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_acl_conn_handle_doc,
 "hci_acl_conn_handle(hci_fd, address)\n\
 \n\
-get the ACL connection handle for the given remote device addr.\n\
-");
+Get the ACL connection handle for the given remote device addr.");
 
 static PyObject *
 bt_hci_filter_new(PyObject *self, PyObject *args)
@@ -2874,8 +2867,7 @@ called socket.listen().  Only L2CAP and RFCOMM sockets are supported.\n\
 name is the name that you want to appear in the SDP record\n\
 \n\
 Registered services will be automatically unregistered when the socket is\n\
-closed.\
-");
+closed.");
 
 
 PyObject *
@@ -2910,8 +2902,7 @@ bt_sdp_stop_advertising( PyObject *self, PyObject *args )
 PyDoc_STRVAR( bt_sdp_stop_advertising_doc,
 "sdp_stop_advertising( socket )\n\
 \n\
-stop advertising services associated with this socket\n\
-");
+Stop advertising services associated with this socket");
 
 
 /* List of functions exported by this module. */
