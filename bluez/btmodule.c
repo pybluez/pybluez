@@ -204,11 +204,10 @@ new_sockobject(int fd, int family, int type, int proto)
 static PyObject *
 makesockaddr(PySocketSockObject *s, struct sockaddr *addr, int addrlen)
 {
-	if (addrlen == 0) {
-		/* No address -- may be recvfrom() from known socket */
-		Py_INCREF(Py_None);
-		return Py_None;
-	} else {
+    if (addrlen == 0) {
+        /* No address -- may be recvfrom() from known socket */
+        Py_RETURN_NONE;
+    } else {
         char ba_name[18];
 
         switch(s->sock_proto) {
@@ -660,8 +659,7 @@ sock_setblocking(PySocketSockObject *s, PyObject *arg)
 	s->sock_timeout = block ? -1.0 : 0.0;
 	internal_setblocking(s, block);
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setblocking_doc,
@@ -697,8 +695,7 @@ sock_settimeout(PySocketSockObject *s, PyObject *arg)
 	s->sock_timeout = timeout;
 	internal_setblocking(s, timeout < 0.0);
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(settimeout_doc,
@@ -714,12 +711,10 @@ Setting a timeout of zero is the same as setblocking(0).");
 static PyObject *
 sock_gettimeout(PySocketSockObject *s)
 {
-	if (s->sock_timeout < 0.0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
-	else
-		return PyFloat_FromDouble(s->sock_timeout);
+    if (s->sock_timeout < 0.0)
+        Py_RETURN_NONE;
+    else
+        return PyFloat_FromDouble(s->sock_timeout);
 }
 
 PyDoc_STRVAR(gettimeout_doc,
@@ -757,8 +752,7 @@ sock_setsockopt(PySocketSockObject *s, PyObject *args)
     res = setsockopt(s->sock_fd, level, optname, buf, buflen);
     if (res < 0)
         return s->errorhandler();
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setsockopt_doc,
@@ -830,11 +824,9 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
         memset(&sec, 0, sizeof(sec));
         sec.level = level;
 
-        if (setsockopt(s->sock_fd, SOL_BLUETOOTH, BT_SECURITY, &sec,
-                                                        sizeof(sec)) == 0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
+    if (setsockopt(s->sock_fd, SOL_BLUETOOTH, BT_SECURITY, &sec,
+                                                    sizeof(sec)) == 0)
+        Py_RETURN_NONE;
 
     if (errno != ENOPROTOOPT)
     return s->errorhandler();
@@ -849,8 +841,7 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
     if (setsockopt(s->sock_fd, SOL_L2CAP, L2CAP_LM, &opt, sizeof(opt)) < 0)
     return s->errorhandler();
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setl2capsecurity_doc,
@@ -876,8 +867,7 @@ sock_bind(PySocketSockObject *s, PyObject *addro)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bind_doc,
@@ -915,8 +905,7 @@ sock_close(PySocketSockObject *s)
         s->sdp_session = NULL;
     }
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(close_doc,
@@ -973,8 +962,7 @@ sock_connect(PySocketSockObject *s, PyObject *addro)
 	}
 	if (res != 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(connect_doc,
@@ -1128,10 +1116,9 @@ sock_listen(PySocketSockObject *s, PyObject *arg)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
 
     s->is_listening_socket = 1;
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(listen_doc,
@@ -1362,8 +1349,7 @@ sock_sendall(PySocketSockObject *s, PyObject *args)
 	if (n < 0)
 		return s->errorhandler();
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(sendall_doc,
@@ -1434,8 +1420,7 @@ sock_shutdown(PySocketSockObject *s, PyObject *arg)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(shutdown_doc,
@@ -1875,8 +1860,7 @@ bt_htobl(PyObject *self, PyObject *args)
 //            }
 //            break;
 //    }
-//    Py_INCREF( Py_None );
-//    return Py_None;
+//    Py_RETURN_NONE;
 //}
 
 PyDoc_STRVAR(bt_htobl_doc,
@@ -1889,12 +1873,10 @@ Convert a 32-bit integer from host to bluetooth byte order.");
 static PyObject *
 bt_getdefaulttimeout(PyObject *self)
 {
-	if (defaulttimeout < 0.0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
-	else
-		return PyFloat_FromDouble(defaulttimeout);
+    if (defaulttimeout < 0.0)
+        Py_RETURN_NONE;
+    else
+        return PyFloat_FromDouble(defaulttimeout);
 }
 
 PyDoc_STRVAR(bt_getdefaulttimeout_doc,
@@ -1923,8 +1905,7 @@ bt_setdefaulttimeout(PyObject *self, PyObject *arg)
 
 	defaulttimeout = timeout;
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bt_setdefaulttimeout_doc,
@@ -2004,8 +1985,7 @@ bt_hci_close_dev(PyObject *self, PyObject *args)
 
     if( err < 0 ) return set_error();
     
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bt_hci_close_dev_doc, 
@@ -2492,10 +2472,8 @@ bt_hci_read_clock(PyObject *self, PyObject *args)
         return NULL;
 
     res = hci_read_clock(fd, handle, which, &btclock, &accuracy, timeout);
-    if (res) {
-    	Py_INCREF(Py_None);
-    	return Py_None;
-    }
+    if (res)
+        Py_RETURN_NONE;
 
     return Py_BuildValue("(ii)", btclock, accuracy);
 }
@@ -2870,8 +2848,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     }
     socko->sdp_record_handle = record.handle;
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR( bt_sdp_advertise_service_doc, 
 "sdp_advertise_service( socket, name )\n\
@@ -2915,8 +2892,7 @@ bt_sdp_stop_advertising( PyObject *self, PyObject *args )
         PyErr_SetString( bluetooth_error, "not currently advertising!");
     }
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR( bt_sdp_stop_advertising_doc,
 "sdp_stop_advertising( socket )\n\

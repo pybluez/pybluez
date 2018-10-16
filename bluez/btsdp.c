@@ -261,8 +261,7 @@ sess_connect(PySDPSessionObject *s, PyObject *args, PyObject *kwds)
     if( s->session == NULL ) 
         return PyErr_SetFromErrno( bluetooth_error );
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(sess_connect_doc,
 "connect( dest = \"localhost\" )\n\
@@ -286,8 +285,7 @@ sess_close(PySDPSessionObject *s)
         Py_END_ALLOW_THREADS
         s->session = NULL;
     }
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(sess_close_doc,
 "close()\n\
