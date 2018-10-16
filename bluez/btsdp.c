@@ -244,10 +244,8 @@ sess_connect(PySDPSessionObject *s, PyObject *args, PyObject *kwds)
         sdp_close( s->session );
     }
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds,
-					 "|s", keywords,
-					 &dst_buf))
-		return NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|s", keywords, &dst_buf))
+        return NULL;
 
     if( strncmp( dst_buf, "localhost", 18 ) != 0 ) {
         str2ba( dst_buf, &dst );
@@ -398,15 +396,13 @@ sess_dealloc(PySDPSessionObject *s)
 static PyObject *
 sess_repr(PySDPSessionObject *s)
 {
-	char buf[512];
+    char buf[512];
     if (s->session != NULL) {
-        PyOS_snprintf( buf, sizeof(buf), 
-                "<SDP Session object - connected>");
+        PyOS_snprintf( buf, sizeof(buf), "<SDP Session object - connected>");
     } else { 
-        PyOS_snprintf( buf, sizeof(buf), 
-                "<SDP Session object - unconnected>");
+        PyOS_snprintf( buf, sizeof(buf), "<SDP Session object - unconnected>");
     }
-	return PyString_FromString(buf);
+    return PyString_FromString(buf);
 }
 
 

@@ -163,8 +163,7 @@ internal_select(PySocketSockObject *s, int writing)
 static double defaulttimeout = -1.0; /* Default timeout for new sockets */
 
 static void
-init_sockobject(PySocketSockObject *s,
-		int fd, int family, int type, int proto)
+init_sockobject(PySocketSockObject *s, int fd, int family, int type, int proto)
 {
 	s->sock_fd = fd;
 	s->sock_family = family;
@@ -188,8 +187,7 @@ static PySocketSockObject *
 new_sockobject(int fd, int family, int type, int proto)
 {
 	PySocketSockObject *s;
-	s = (PySocketSockObject *)
-		PyType_GenericNew(&sock_type, NULL, NULL);
+	s = (PySocketSockObject *) PyType_GenericNew(&sock_type, NULL, NULL);
 	if (s != NULL)
 		init_sockobject(s, fd, family, type, proto);
 	return s;
@@ -345,8 +343,7 @@ _adv_available(struct hci_dev_info *di)
 {
     uint32_t *flags = &di->flags;
 
-    if (hci_test_bit(HCI_RAW, &flags) &&
-            !bacmp(&di->bdaddr, BDADDR_ANY)) {
+    if (hci_test_bit(HCI_RAW, &flags) && !bacmp(&di->bdaddr, BDADDR_ANY)) {
         int dd = hci_open_dev(di->dev_id);
         if (dd < 0)
             return -1;
@@ -415,10 +412,8 @@ adv_available(PySocketSockObject *socko)
     struct sockaddr    addr     = {0, };
     int                dev_id   = -1;
     socklen_t          alen     = sizeof(addr);
-    struct sockaddr_l2 const *
-                       addr_l2  = (struct sockaddr_l2 const *)&addr;
-    struct sockaddr_rc const *
-                       addr_rc  = (struct sockaddr_rc const *)&addr;
+    struct sockaddr_l2 const * addr_l2  = (struct sockaddr_l2 const *)&addr;
+    struct sockaddr_rc const * addr_rc  = (struct sockaddr_rc const *)&addr;
 
     /* get ba */
     if(getsockname(socko->sock_fd, &addr, &alen) < 0)
@@ -602,8 +597,7 @@ sock_accept(PySocketSockObject *s)
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 0);
 	if (!timeout)
-		newfd = accept(s->sock_fd, (struct sockaddr *) addrbuf,
-			       &addrlen);
+		newfd = accept(s->sock_fd, (struct sockaddr *) addrbuf, &addrlen);
 	Py_END_ALLOW_THREADS
 
 	if (timeout) {
@@ -689,8 +683,7 @@ sock_settimeout(PySocketSockObject *s, PyObject *arg)
 		timeout = PyFloat_AsDouble(arg);
 		if (timeout < 0.0) {
 			if (!PyErr_Occurred())
-				PyErr_SetString(PyExc_ValueError,
-						"Timeout value out of range");
+				PyErr_SetString(PyExc_ValueError, "Timeout value out of range");
 			return NULL;
 		}
 	}
@@ -788,9 +781,8 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 			return s->errorhandler();
 		return PyInt_FromLong(flag);
     } else if (buflen <= 0 || buflen > 1024) {
-		PyErr_SetString(bluetooth_error,
-				"getsockopt buflen out of range");
-		return NULL;
+        PyErr_SetString(bluetooth_error, "getsockopt buflen out of range");
+        return NULL;
     } else {
         PyObject *buf = PyString_FromStringAndSize((char *)NULL, buflen);
         if (buf == NULL)
@@ -820,9 +812,8 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
     int level;
     struct bt_security sec;
 
-	if (! PyArg_ParseTuple(args, "i:setsockopt",
-			     &level))
-		return NULL;
+    if (! PyArg_ParseTuple(args, "i:setsockopt", &level))
+        return NULL;
 
     memset(&sec, 0, sizeof(sec));
     sec.level = level;
@@ -1187,8 +1178,7 @@ sock_recv(PySocketSockObject *s, PyObject *args)
 		return NULL;
 
 	if (len < 0) {
-		PyErr_SetString(PyExc_ValueError,
-				"negative buffersize in recv");
+		PyErr_SetString(PyExc_ValueError, "negative buffersize in recv");
 		return NULL;
 	}
 
@@ -1268,8 +1258,7 @@ sock_recvfrom(PySocketSockObject *s, PyObject *args)
 	if (n != len && _PyString_Resize(&buf, n) < 0)
 		return NULL;
 
-	if (!(addr = makesockaddr(s, (struct sockaddr *)addrbuf,
-				  addrlen)))
+	if (!(addr = makesockaddr(s, (struct sockaddr *)addrbuf, addrlen)))
 		goto finally;
 
 	ret = Py_BuildValue("OO", buf, addr);
@@ -1375,8 +1364,7 @@ sock_sendto(PySocketSockObject *s, PyObject *args)
 	flags = 0;
 	if (!PyArg_ParseTuple(args, "s#O:sendto", &buf, &len, &addro)) {
 		PyErr_Clear();
-		if (!PyArg_ParseTuple(args, "s#iO:sendto",
-				      &buf, &len, &flags, &addro))
+		if (!PyArg_ParseTuple(args, "s#iO:sendto", &buf, &len, &flags, &addro))
 			return NULL;
 	}
 
@@ -1588,10 +1576,8 @@ sock_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 	int family = AF_BLUETOOTH, type = SOCK_STREAM, proto = BTPROTO_RFCOMM;
 	static char *keywords[] = {"proto", 0};
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds,
-					 "|i:socket", keywords,
-					 &proto))
-		return -1;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|i:socket", keywords, &proto))
+        return -1;
 
     switch(proto) {
         case BTPROTO_HCI:
@@ -1690,16 +1676,14 @@ bt_fromfd(PyObject *self, PyObject *args)
 	PySocketSockObject *s;
 	int fd;
 	int family, type, proto = 0;
-	if (!PyArg_ParseTuple(args, "iii|i:fromfd",
-			      &fd, &family, &type, &proto))
+	if (!PyArg_ParseTuple(args, "iii|i:fromfd", &fd, &family, &type, &proto))
 		return NULL;
 	/* Dup the fd so it and the socket can be closed independently */
 	fd = dup(fd);
 	if (fd < 0)
 		return set_error();
 	s = new_sockobject(fd, family, type, proto);
-	/* From now on, ignore SIGPIPE and let the error checking
-	   do the work. */
+	/* From now on, ignore SIGPIPE and let the error checking do the work. */
 #ifdef SIGPIPE
 	(void) signal(SIGPIPE, SIG_IGN);
 #endif
@@ -1910,8 +1894,7 @@ bt_setdefaulttimeout(PyObject *self, PyObject *arg)
 		timeout = PyFloat_AsDouble(arg);
 		if (timeout < 0.0) {
 			if (!PyErr_Occurred())
-				PyErr_SetString(PyExc_ValueError,
-						"Timeout value out of range");
+				PyErr_SetString(PyExc_ValueError, "Timeout value out of range");
 			return NULL;
 		}
 	}
@@ -2106,7 +2089,8 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     char buf[sizeof(*ir) + sizeof(inquiry_info) * 250];
 
     PyObject *rtn_list = (PyObject *)NULL;
-    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", "device_id", "iac", 0};
+    static char *keywords[] = {"sock", "duration", "flush_cache",
+                                "lookup_class", "device_id", "iac", 0};
 
     if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iiiii", keywords,
                 &socko, &length, &flush, &lookup_class, &dev_id, &iac) )
@@ -2150,7 +2134,9 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
         if (lookup_class) {
             PyObject *item_tuple = PyTuple_New(2);
 
-            int dev_class = (info+i)->dev_class[2] << 16 | (info+i)->dev_class[1] << 8 | (info+i)->dev_class[0];
+            int dev_class = (info+i)->dev_class[2] << 16 |
+                            (info+i)->dev_class[1] << 8 |
+                            (info+i)->dev_class[0];
             PyObject *class_entry = PyInt_FromLong( dev_class );
 
             err = PyTuple_SetItem( item_tuple, 0, addr_entry );
@@ -2642,8 +2628,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
 
     // service_classes must be a list / sequence
     if (! PySequence_Check(service_classes)) {
-        PyErr_SetString(PyExc_ValueError, 
-                "service_classes must be a sequence");
+        PyErr_SetString(PyExc_ValueError, "service_classes must be a sequence");
         return 0;
     }
     // make sure each item in the list is a valid UUID
@@ -2681,8 +2666,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     
     // protocols must be a list / sequence
     if (! PySequence_Check(protocols)) {
-        PyErr_SetString(PyExc_ValueError, 
-                "protocols must be a sequence");
+        PyErr_SetString(PyExc_ValueError, "protocols must be a sequence");
         return 0;
     }
     // make sure each item in the list is a valid UUID
@@ -2704,10 +2688,9 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         return 0;
     }
 
-    // verify whether device can be advertiable
+    // verify whether device can be advertisable
     if(adv_available(socko) < 0) {
-        PyErr_SetString(bluetooth_error, 
-                "error no advertisable device.");
+        PyErr_SetString(bluetooth_error, "no advertisable device");
         return 0;
     }
 
@@ -2799,8 +2782,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         uuid_t *svc_class_uuid = (uuid_t*) malloc( sizeof( uuid_t ) );
         PyObject *item = PySequence_GetItem(service_classes, i);
         pyunicode2uuid( item, svc_class_uuid );
-        svc_class_list = sdp_list_append(svc_class_list, 
-                svc_class_uuid);
+        svc_class_list = sdp_list_append(svc_class_list, svc_class_uuid);
     }
     sdp_set_service_classes(&record, svc_class_list);
 
