@@ -82,7 +82,7 @@ if sys.platform == 'win32':
     ext_modules.append(Extension('bluetooth._msbt',
                           include_dirs=["%s\\Include" % PSDK_PATH, ".\\port3"],
                           library_dirs=[lib_path],
-                          libraries=["WS2_32", "Irprops"],
+                          libraries=["WS2_32", "Bthprops"],
                           sources=['msbt\\_msbt.c']))
 
     # widcomm
