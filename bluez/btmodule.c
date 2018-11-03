@@ -18,6 +18,7 @@ Local naming conventions:
 */
 
 #include "btmodule.h"
+#include "structmember.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -1513,6 +1514,18 @@ static PyMethodDef sock_methods[] = {
 	{NULL,			NULL}		/* sentinel */
 };
 
+/* SockObject members */
+static PyMemberDef sock_memberlist[] = {
+    {"family", T_INT, offsetof(PySocketSockObject, sock_family), READONLY, "the socket family"},
+    {"type", T_INT, offsetof(PySocketSockObject, sock_type), READONLY, "the socket type"},
+    {"proto", T_INT, offsetof(PySocketSockObject, sock_proto), READONLY, "the socket protocol"},
+    {NULL} /* sentinel */
+};
+
+static PyGetSetDef sock_getsetlist[] = {
+    {"timeout", (getter)sock_gettimeout, NULL, PyDoc_STR("the socket timeout")},
+    {NULL} /* sentinel */
+};
 
 /* Deallocate a socket object in response to the last Py_DECREF().
    First close the file description. */
@@ -1666,8 +1679,8 @@ PyTypeObject sock_type = {
 	0,					/* tp_iter */
 	0,					/* tp_iternext */
 	sock_methods,				/* tp_methods */
-	0,					/* tp_members */
-	0,					/* tp_getset */
+	sock_memberlist,			/* tp_members */
+	sock_getsetlist,			/* tp_getset */
 	0,					/* tp_base */
 	0,					/* tp_dict */
 	0,					/* tp_descr_get */
