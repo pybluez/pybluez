@@ -244,6 +244,14 @@ class BluetoothSocket:
         exec( _s % (_m, _m, _m, _m))
     del _m, _s
 
+    # import readonly attributes from the wrapped socket object
+    _s = ("@property\ndef %s (self): \
+    return self._sock.%s")
+    for _m in ('family', 'type', 'proto', 'timeout'):
+        exec( _s % (_m, _m))
+    del _m, _s
+
+
 def advertise_service (sock, name, service_id = "", service_classes = [], \
         profiles = [], provider = "", description = "", protocols = []):
     if service_id != "" and not is_valid_uuid (service_id):
