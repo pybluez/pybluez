@@ -37,7 +37,6 @@
 		817D21A40D3D7FA500469B5D /* BBBluetoothChannelDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 817D21A20D3D7FA500469B5D /* BBBluetoothChannelDelegate.m */; };
 		817D239D0D40313600469B5D /* BBOBEXResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 817D239B0D40313600469B5D /* BBOBEXResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		817D239E0D40313600469B5D /* BBOBEXResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 817D239C0D40313600469B5D /* BBOBEXResponse.m */; };
-		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
@@ -269,7 +268,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
 				8100FE180D056D0100FA9985 /* OBEXFileTransferDictionary.plist in Resources */,
 				8100FE190D056D0100FA9985 /* OBEXObjectPushDictionary.plist in Resources */,
 				8100FE1A0D056D0100FA9985 /* SerialPortDictionary.plist in Resources */,
