@@ -61,6 +61,7 @@ discover_devices.__doc__ = \
         display name of each detected device.
 
     if lookup_class is True, the class of the device is added to the tuple
+
     """
 
 lookup_name.__doc__ = \
@@ -68,6 +69,7 @@ lookup_name.__doc__ = \
     Tries to determine the friendly name (human readable) of the device with
     the specified bluetooth address.  Returns the name on success, and None
     on failure.
+
     """
 
 advertise_service.__doc__ = \
@@ -110,6 +112,7 @@ stop_advertising.__doc__ = \
     """
     Instructs the local SDP server to stop advertising the service associated
     with sock.  You should typically call this right before you close sock.
+
     """
 
 find_service.__doc__ = \
@@ -146,4 +149,5 @@ find_service.__doc__ = \
       service-id      - the Service ID of the service.  None if it wasn't set
                         See the Bluetooth spec for the difference between
                         Service ID and Service Class ID List
+
     """
