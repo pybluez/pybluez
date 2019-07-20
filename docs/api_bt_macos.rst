@@ -1,5 +1,5 @@
-Mac OS
-======
+macOS
+=====
 
 .. module:: bluetooth.macos
 
