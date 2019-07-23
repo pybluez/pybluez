@@ -1,23 +1,15 @@
+import array
+import fcntl
 import sys
 import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
-if sys.version_info.major < 3:
-    from .btcommon import *
-    import _bluetooth as _bt
-    get_byte = ord
-else:
-    from bluetooth.btcommon import *
-    import bluetooth._bluetooth as _bt
-    get_byte = int
-import array
-import fcntl
-_constants = [ 'HCI', 'RFCOMM', 'L2CAP', 'SCO', 'SOL_L2CAP', 'SOL_RFCOMM',\
-    'L2CAP_OPTIONS' ]
-for _c in _constants:
-    command_ = "{C} = _bt.{C1}".format(C=_c, C1=_c)
-    exec(command_)
-del _constants
+from bluetooth.btcommon import *
+import bluetooth._bluetooth as _bt
+from bluetooth._bluetooth import HCI, RFCOMM, L2CAP, SCO, SOL_L2CAP, \
+                                    SOL_RFCOMM, L2CAP_OPTIONS
+
+get_byte = ord if sys.version_info.major < 3 else int
 
 # ============== SDP service registration and unregistration ============
 

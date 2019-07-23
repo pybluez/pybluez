@@ -8,3 +8,9 @@ dist/
 # Mac detritus 
 .DS_Store
 xcuserdata/
+
+# Visual Studio
+/.vs
+
+# Sphinx doc build files
+/docs/_build
