@@ -1,5 +1,6 @@
+******************
 Installing PyBluez
-==================
+******************
 
 PyBluez can be installed on GNU/Linux, Windows and macOS systems and is compatible 
 with Python 2 and 3. 
@@ -28,13 +29,15 @@ Extract the zip or tar and cd to the extracted file directory, then:
 	python setup.py install
 
 
-**GNU/Linux Dependencies**
+GNU/Linux Dependencies
+""""""""""""""""""""""
 
 - Python 2.3 or more recent version
 - Python distutils (standard in most Python distros, separate package python-dev in Debian)
 - BlueZ libraries and header files
 
-**Windows Dependencies**
+Windows Dependencies
+""""""""""""""""""""
 
 - Microsoft Windows XP SP1, Windows Vista/7/8/8.1/10
 
@@ -65,8 +68,8 @@ For Python 2.6, 2.7, 3.0, 3.1, 3.2
 - Python 2.3 or more recent version
 
 
-**macOS Dependencies**
-
+macOS Dependencies
+"""""""""""""""""" 
 - Xcode
 - PyObjc 3.1b or later (https://pythonhosted.org/pyobjc/install.html#manual-installation)
 
