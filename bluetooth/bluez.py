@@ -103,7 +103,8 @@ def set_packet_timeout (address, timeout):
     superuser privileges.
 
     You must have an active connection to the specified device before invoking
-    this method
+    this method.
+
     """
     n = round (timeout / 0.625)
     write_flush_timeout (address, n)
@@ -113,6 +114,7 @@ def get_l2cap_options (sock):
 
     Gets L2CAP options for the specified L2CAP socket.
     Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+
     """
     # TODO this should be in the C module, because it depends
     # directly on struct l2cap_options layout.
@@ -126,6 +128,7 @@ def set_l2cap_options (sock, options):
     Sets L2CAP options for the specified L2CAP socket.
     The option list must be in the same format supplied by
     get_l2cap_options().
+
     """
     # TODO this should be in the C module, because it depends
     # directly on struct l2cap_options layout.
@@ -140,6 +143,7 @@ def set_l2cap_mtu (sock, mtu):
     that all L2CAP connections start with is 672 bytes.
 
     mtu must be between 48 and 65535, inclusive.
+
     """
     options = get_l2cap_options (sock)
     options[0] = options[1] = mtu
@@ -165,7 +169,9 @@ class BluetoothSocket:
     def dup (self):
         """dup () -> socket object
 
-        Return a new socket object connected to the same system resource."""
+        Return a new socket object connected to the same system resource.
+        
+        """
         return BluetoothSocket (proto=self._proto, _sock=self._sock)
 
     def accept (self):
@@ -198,6 +204,7 @@ class BluetoothSocket:
 
         Gets L2CAP options for the specified L2CAP socket.
         Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+
         """
         return get_l2cap_options(self)
 
@@ -207,6 +214,7 @@ class BluetoothSocket:
         Sets L2CAP options for the specified L2CAP socket.
         The option list must be in the same format supplied by
         get_l2cap_options().
+
         """
         return set_l2cap_options(self, options)
 
@@ -218,6 +226,7 @@ class BluetoothSocket:
         that all L2CAP connections start with is 672 bytes.
 
         mtu must be between 48 and 65535, inclusive.
+
         """
         return set_l2cap_mtu(self, mtu)
 

@@ -5,6 +5,7 @@ PyBluez
 |versions| |wheel| |build status| |license| 
 
 Python extension module allowing access to system Bluetooth resources.
+
 ##########
 User Guide
 ##########
@@ -36,7 +37,7 @@ API Documentation
    :maxdepth: 2
    :titlesonly:
 
-   api/api
+   api
 
 
 **Indices and tables:**

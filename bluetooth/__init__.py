@@ -57,8 +57,8 @@ discover_devices.__doc__ = \
     if lookup_names is True, returns a list of (address, name) tuples
 
     lookup_names=False
-        if set to True, then discover_devices also attempts to lookup the
-        display name of each detected device.
+    if set to True, then discover_devices also attempts to lookup the
+    display name of each detected device.
 
     if lookup_class is True, the class of the device is added to the tuple
 
@@ -103,8 +103,8 @@ advertise_service.__doc__ = \
     description is a text string describing the service
 
     A note on working with Symbian smartphones:
-        bt_discover in Python for Series 60 will only detect service records
-        with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
+    bt_discover in Python for Series 60 will only detect service records
+    with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
 
     """
 
@@ -131,23 +131,23 @@ find_service.__doc__ = \
     The search results will be a list of dictionaries.  Each dictionary
     represents a search match and will have the following key/value pairs:
 
-      host          - the bluetooth address of the device advertising the
-                      service
-      name          - the name of the service being advertised
-      description   - a description of the service being advertised
-      provider      - the name of the person/organization providing the service
-      protocol      - either 'RFCOMM', 'L2CAP', None if the protocol was not
-                      specified, or 'UNKNOWN' if the protocol was specified but
-                      unrecognized
-      port          - the L2CAP PSM # if the protocol is 'L2CAP', the RFCOMM
+    host          - the bluetooth address of the device advertising the
+                    service
+    name          - the name of the service being advertised
+    description   - a description of the service being advertised
+    provider      - the name of the person/organization providing the service
+    protocol      - either 'RFCOMM', 'L2CAP', None if the protocol was not
+                    specified, or 'UNKNOWN' if the protocol was specified but
+                    unrecognized
+    port          - the L2CAP PSM # if the protocol is 'L2CAP', the RFCOMM
                       channel # if the protocol is 'RFCOMM', or None if it
                       wasn't specified
-      service-classes - a list of service class IDs (UUID strings).  possibly
-                        empty
-      profiles        - a list of profiles - (UUID, version) pairs - the
-                        service claims to support.  possibly empty.
-      service-id      - the Service ID of the service.  None if it wasn't set
-                        See the Bluetooth spec for the difference between
-                        Service ID and Service Class ID List
+    service-classes - a list of service class IDs (UUID strings).  possibly
+                      empty
+    profiles        - a list of profiles - (UUID, version) pairs - the
+                      service claims to support.  possibly empty.
+    service-id      - the Service ID of the service.  None if it wasn't set
+                      See the Bluetooth spec for the difference between
+                      Service ID and Service Class ID List
 
     """

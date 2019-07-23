@@ -180,13 +180,12 @@ class BluetoothError (IOError):
     pass
 
 def is_valid_address (s):
-    """
-    returns True if address is a valid Bluetooth address
+    """returns True if address is a valid Bluetooth address.
 
     valid address are always strings of the form XX:XX:XX:XX:XX:XX
     where X is a hexadecimal character.  For example,
-        01:23:45:67:89:AB is a valid address, but
-        IN:VA:LI:DA:DD:RE is not
+    01:23:45:67:89:AB is a valid address, but IN:VA:LI:DA:DD:RE is not.
+
     """
     try:
         pairs = s.split (":")
@@ -203,10 +202,11 @@ def is_valid_uuid (uuid):
     returns True if uuid is a valid 128-bit UUID.
 
     valid UUIDs are always strings taking one of the following forms:
-        XXXX
-        XXXXXXXX
-        XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+    XXXX
+    XXXXXXXX
+    XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
     where each X is a hexadecimal digit (case insensitive)
+
     """
     try:
         if len (uuid) == 4:
@@ -235,6 +235,7 @@ def to_full_uuid (uuid):
     """
     converts a short 16-bit or 32-bit reserved UUID to a full 128-bit Bluetooth
     UUID.
+
     """
     if not is_valid_uuid (uuid): raise ValueError ("invalid UUID")
     if len (uuid) == 4:
