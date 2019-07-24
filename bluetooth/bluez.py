@@ -1,20 +1,59 @@
-import array
-import fcntl
+"""GNU/Linux implementation of Bluetooth."""
 import sys
 import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
-from bluetooth.btcommon import *
-import bluetooth._bluetooth as _bt
-from bluetooth._bluetooth import HCI, RFCOMM, L2CAP, SCO, SOL_L2CAP, \
-                                    SOL_RFCOMM, L2CAP_OPTIONS
-
-get_byte = ord if sys.version_info.major < 3 else int
+if sys.version_info.major < 3:
+    from .btcommon import *
+    import _bluetooth as _bt
+    get_byte = ord
+else:
+    from bluetooth.btcommon import *
+    import bluetooth._bluetooth as _bt
+    get_byte = int
+import array
+import fcntl
+_constants = [ 'HCI', 'RFCOMM', 'L2CAP', 'SCO', 'SOL_L2CAP', 'SOL_RFCOMM',\
+    'L2CAP_OPTIONS' ]
+for _c in _constants:
+    command_ = "{C} = _bt.{C1}".format(C=_c, C1=_c)
+    exec(command_)
+del _constants
 
 # ============== SDP service registration and unregistration ============
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False,
                       lookup_class=False, device_id=-1, iac=IAC_GIAC):
+    """Perform a bluetooth device discovery.
+   
+    uses the first available bluetooth resource to discover bluetooth devices.
+
+    Parameters
+    ----------
+    lookup_names : bool, optional
+        When set to True discover_devices also attempts to look up the display name of each
+        detected device. (the default is False)
+
+    lookup_class : bool, optional 
+        When set to True discover devices attempts to look up the class of each detected device.
+        (the default is False)
+
+    Returns
+    -------
+    list
+        Returns a list of device addresses as strings or a list of tuples. The content of the
+        tuples depends on the values of lookup_names and lookup_class. 
+
+        ============   ============   =====================================
+        lookup_class   lookup_names   Return
+        ============   ============   =====================================
+        False          False          list of device addresses
+        False          True           list of (address, name) tuples
+        True           False          list of (address, class) tuples
+        True           True           list of (address, name, class) tuples
+        ============   ============   =====================================
+
+    """
     if device_id == -1:
         device_id = _bt.hci_get_route()
 
@@ -49,6 +88,20 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False,
         return results
 
 def read_local_bdaddr():
+    """ Try to get the local bluetooth address.
+    
+    Returns
+    -------
+    list
+        A list of bluetooth address strings.
+
+    Raises
+    ------
+    BluetoothError
+        When a bluetooth hci error occurs.
+
+    AssertionError
+        When the hci socket returns a non zero status."""
     try:
         hci_sock = _bt.hci_open_dev(0)
         old_filter = hci_sock.getsockopt( _bt.SOL_HCI, _bt.HCI_FILTER, 14)
@@ -78,6 +131,27 @@ def read_local_bdaddr():
         raise BluetoothError(*e.args)
 
 def lookup_name (address, timeout=10):
+    """Look up the friendly name of the remote device.
+
+    This function tries to determine the friendly name (human readable) of the device with
+    the specified bluetooth address.
+  
+    Parameters
+    ----------
+    address : str
+        The bluetooth address of the remote device.
+    
+    Returns
+    -------
+    str or None
+        The friendly name of the device on success, and None on failure.
+
+    Raises
+    ------
+    BluetoothError
+        If the provided address is not a valid Bluetooth address.
+
+    """
     if not is_valid_address (address):
         raise BluetoothError (EINVAL, "%s is not a valid Bluetooth address" % address)
 
@@ -92,18 +166,29 @@ def lookup_name (address, timeout=10):
     return name
 
 def set_packet_timeout (address, timeout):
-    """
-    Adjusts the ACL flush timeout for the ACL connection to the specified
-    device.  This means that all L2CAP and RFCOMM data being sent to that
-    device will be dropped if not acknowledged in timeout milliseconds (maximum
-    1280).  A timeout of 0 means to never drop packets.
+    """Set the ACL flush timeout.
+   
+    This function sets the flush timout for ACL connection to the specified device. This means 
+    that all L2CAP and RFCOMM data being sent to that device will be dropped if not
+    acknowledged within the specified timeout.  A timeout of 0 means to never drop packets. 
+    You must have an active connection to the specified device before invoking this method.
 
+    Parameters
+    ----------
+    address : str
+        The bluetooth address of the specified device.
+
+    timeout : int
+        The ACL flush timeout from 0 to 1280 milliseconds.
+
+    Note
+    ----
     Since this affects all Bluetooth connections to that device, and not just
     those initiated by this process or PyBluez, a call to this method requires
     superuser privileges.
 
     You must have an active connection to the specified device before invoking
-    this method.
+    this method
 
     """
     n = round (timeout / 0.625)
@@ -114,6 +199,11 @@ def get_l2cap_options (sock):
 
     Gets L2CAP options for the specified L2CAP socket.
     Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+    
+    Returns
+    -------
+    list
+        A list of L2CAP options available for the socket.
 
     """
     # TODO this should be in the C module, because it depends
@@ -128,7 +218,7 @@ def set_l2cap_options (sock, options):
     Sets L2CAP options for the specified L2CAP socket.
     The option list must be in the same format supplied by
     get_l2cap_options().
-
+    
     """
     # TODO this should be in the C module, because it depends
     # directly on struct l2cap_options layout.
@@ -143,7 +233,7 @@ def set_l2cap_mtu (sock, mtu):
     that all L2CAP connections start with is 672 bytes.
 
     mtu must be between 48 and 65535, inclusive.
-
+    
     """
     options = get_l2cap_options (sock)
     options[0] = options[1] = mtu
@@ -158,32 +248,85 @@ def _get_available_ports(protocol):
         return [0]
 
 class BluetoothSocket:
-    __doc__ = _bt.btsocket.__doc__
-
+    """Defines a BluetoothSocket.
+    
+    Instantiating an object of this class open a socket of the given protocol. 
+    The protocol must be one of : HCI, L2CAP, RFCOMM, or SCO. SCO sockets have not been 
+    tested at all yet.
+    
+    A BluetoothSocket object represents one endpoint of a bluetooth connection.
+    
+    """
     def __init__ (self, proto = RFCOMM, _sock=None):
+        """Initialise a BluetoothSocket instance.
+        
+        Parameters
+        ----------
+        proto : int, optional
+            The protocol the socket will use. The options are HCI, L2CAP, RFCOMM, or SCO. 
+            The default is RFCOMM
+
+        Returns
+        -------
+        bluetooth.bluez.BluetoothSocket
+            An initialised BluetoothSocket object.
+            
+        """
         if _sock is None:
             _sock = _bt.btsocket (proto)
         self._sock = _sock
         self._proto = proto
 
     def dup (self):
-        """dup () -> socket object
+        """Duplicate a socket
 
-        Return a new socket object connected to the same system resource.
+        Returns
+        -------
+        bluetooth.bluez.BluetoothSocket
+            a new socket object connected to the same system resource.
         
         """
         return BluetoothSocket (proto=self._proto, _sock=self._sock)
 
     def accept (self):
+        """Accept a connection.
+        
+        Returns
+        -------
+        tuple
+            A tuple containing a bluetooth.bluez.BluetoothSocket and a bluetooth address.
+
+        Raises
+        ------
+        BluetoothError
+            When an attempt to accept fails.
+        """
         try:
             client, addr = self._sock.accept ()
         except _bt.error as e:
             raise BluetoothError (*e.args)
         newsock = BluetoothSocket (self._proto, client)
         return (newsock, addr)
-    accept.__doc__ = _bt.btsocket.accept.__doc__
+   # accept.__doc__ = _bt.btsocket.accept.__doc__
 
     def bind (self, addrport):
+        """Bind a socket to the local address.
+
+        Parameters
+        ----------
+        addrport : tuple
+            A tuple of the form (address str, port int)
+
+        Returns
+        -------
+            
+
+        Raises
+        ------
+        BluetoothError
+            When an attempt to bind a socket fails.
+
+        """
         if len (addrport) != 2 or addrport[1] != 0:
             try:
                 return self._sock.bind (addrport)
@@ -200,20 +343,30 @@ class BluetoothSocket:
         raise err
 
     def get_l2cap_options(self):
-        """get_l2cap_options (sock, mtu)
+        """Get L2CAP options
 
-        Gets L2CAP options for the specified L2CAP socket.
+        Gets the L2CAP options for the specified L2CAP socket.
         Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+        
+        Returns
+        -------
+        list
+            A list of L2CAP options available for the socket.
 
         """
         return get_l2cap_options(self)
 
     def set_l2cap_options(self, options):
-        """set_l2cap_options (sock, options)
+        """Set the L2CAP options for a specified socket
 
-        Sets L2CAP options for the specified L2CAP socket.
-        The option list must be in the same format supplied by
-        get_l2cap_options().
+        Parameters
+        ----------
+        options : list
+            The option list must be in the same format supplied by get_l2cap_options().
+        
+        See also
+        --------
+        BluetoothSocket.get_l2cap_options()
 
         """
         return set_l2cap_options(self, options)
@@ -226,11 +379,11 @@ class BluetoothSocket:
         that all L2CAP connections start with is 672 bytes.
 
         mtu must be between 48 and 65535, inclusive.
-
+        
         """
         return set_l2cap_mtu(self, mtu)
 
-    # import methods from the wraapped socket object
+    # import methods from the wrapped socket object
     _s = ("""def %s (self, *args, **kwargs):
     try:
         return self._sock.%s (*args, **kwargs)
@@ -245,16 +398,71 @@ class BluetoothSocket:
         exec( _s % (_m, _m, _m, _m))
     del _m, _s
 
-    # import readonly attributes from the wrapped socket object
-    _s = ("@property\ndef %s (self): \
-    return self._sock.%s")
-    for _m in ('family', 'type', 'proto', 'timeout'):
-        exec( _s % (_m, _m))
-    del _m, _s
-
-
 def advertise_service (sock, name, service_id = "", service_classes = [], \
         profiles = [], provider = "", description = "", protocols = []):
+    """
+    Advertise a service with the local SDP server.
+  
+    Parameters
+    ----------
+    sock : str
+        The bluetooth socket to use for advertising a service. The socket must be a bound,
+        listening socket.
+        
+    name : str
+        The name of the service and service_id (if specified). This should be a string
+        of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", where each 'X' is a hexadecimal
+        digit.
+
+    service_classes : list 
+        a list of service classes belonging to the advertised service.
+
+        Each service class is represented by a Universal Unique Identifier (UUID). This function
+        expects a 16-bit or 128- bit UUID.
+        
+        ============  ====================================
+        UUID formats
+        --------------------------------------------------
+        UUID Type     Format
+        ------------  ------------------------------------
+        Short 16-bit  XXXX
+        Full 128-bit  XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+        ============  ====================================
+
+        where each 'X' is a hexadecimal digit.
+
+        There are some constants for standard services, e.g. SERIAL_PORT_CLASS that equals to
+        "1101". Some class constants provided by PyBluez are:
+
+        ========================   ========================
+        SERIAL_PORT_CLASS          LAN_ACCESS_CLASS           
+        DIALUP_NET_CLASS           HEADSET_CLASS
+        CORDLESS_TELEPHONY_CLASS   AUDIO_SOURCE_CLASS
+        AUDIO_SINK_CLASS           PANU_CLASS                 
+        NAP_CLASS                  GN_CLASS
+        ========================   ========================
+
+    profiles : list
+        A list of service profiles that thie service fulfills. Each profile is a tuple with 
+        ( uuid, version). Most standard profiles use standard classes as UUIDs. PyBluez offers 
+        a list of standard profiles, for example SERIAL_PORT_PROFILE. All standard profiles have
+        the same name as the classes, except that _CLASS suffix is replaced by _PROFILE.
+
+    provider : str
+        A text string specifying the provider of the service
+
+    description : str
+        A text string describing the service
+
+    protocols : list
+        A list of protocols
+
+    Notes
+    -----
+    A note on working with Symbian smartphones: bt_discover in Python for Series 60 will only 
+    detect service records with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
+
+    """
     if service_id != "" and not is_valid_uuid (service_id):
         raise ValueError ("invalid UUID specified for service_id")
     for uuid in service_classes:
@@ -275,12 +483,80 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
         raise BluetoothError (*e.args)
 
 def stop_advertising (sock):
+    """Try to stop advertising a bluetooth service.
+    
+    Parameters
+    ----------
+    sock : str
+        The BluetoothSocket to stop advertising service on.
+    
+    Raises
+    ------
+    BluetoothError
+        When sdp fails to stop advertising for some reason.
+
+    """
     try:
         _bt.sdp_stop_advertising (sock._sock)
     except _bt.error as e:
         raise BluetoothError (*e.args)
 
 def find_service (name = None, uuid = None, address = None):
+    """Find a bluetooth service.
+
+    This function searches for SDP services that match the specified criteria and returns
+    the search results.
+    
+    Parameters
+    ----------
+    name: str, optional
+        The friendly name of the bluetooth device
+
+    uuid : str, optional
+        The Bluetooth UUID. If specified, it must be either a 16-bit or a 128-bit UUID.
+
+        ============  ====================================
+        UUID formats
+        --------------------------------------------------
+        UUID Type     Format
+        ------------  ------------------------------------
+        Short 16-bit  XXXX
+        Full 128-bit  XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+        ============  ====================================
+
+        where each 'X' is a hexadecimal digit. 
+
+    address : str, optional
+        The Bluetooth address of a device or "localhost". 
+        If "localhost" is provided the function will search for bluetooth services on the
+        local machine.
+    
+    Returns
+    -------
+    list
+        If no criteria are specified then a list of all nearby services detected is returned. 
+        If more than one criteria is specified, then the search results will match all the 
+        criteria specified.
+ 
+        The search results will be a list of dictionaries.  Each dictionary represents a 
+        search match and will have the following key/value pairs:
+
+        * host           - bluetooth address of the advertising device,
+        * name            - name of the service being advertised.
+        * description     - description of the service being advertised.
+        * provider        - name of the person/organization providing the service.
+        * protocol        - either 'RFCOMM', 'L2CAP', None if no protocol was specified,  
+                              or 'UNKNOWN' if the protocol was specified but unrecognized
+        * port            - the L2CAP PSM # if the protocol is 'L2CAP', the RFCOMM channel  
+                              if the protocol is 'RFCOMM', or None if it wasn't specified   
+        * service-classes - a list of service class IDs (UUID strings).  possibly empty  
+        * profiles        - a list of profiles - (UUID, version) pairs the service claims    
+                              to support. possibly empty.                                  
+        * service-id      - the Service ID of the service.  None if it wasn't set. 
+                              See the Bluetooth spec for the difference between Service ID 
+                              and Service Class ID List.
+
+    """
     if not address:
         devices = discover_devices ()
     else:
@@ -326,6 +602,27 @@ def _gethcisock (device_id = -1):
     return sock
 
 def get_acl_conn_handle (hci_sock, addr):
+    """Get a handle for an ACL connection.
+    
+    Parameters
+    ----------
+    hci_sock : str
+        The HCI Socket
+
+    addr : str
+        The bluetooth address of the remote device
+
+    Returns
+    -------
+    str
+        The ACL connection handle
+
+    Raises
+    ------
+    BluetoothError
+        When there is no ACL connection to the device
+        
+    """
     hci_fd = hci_sock.fileno ()
     reqstr = struct.pack ("6sB17s", _bt.str2ba (addr),
             _bt.ACL_LINK, b"\0" * 17)
@@ -340,6 +637,22 @@ def get_acl_conn_handle (hci_sock, addr):
     return handle
 
 def write_flush_timeout (addr, timeout):
+    """Write a flush timeout to the remote device.
+    
+    Parameters
+    ----------
+    addr : str
+        The Bluetooth address of the remote device.
+    timeout : int
+        The timeout value to send.
+
+    Raises
+    ------
+    AssertionError
+        If the ACL connection handle and the handle returned from the remote device are different
+        or the returned status is not 0.
+    
+    """ 
     hci_sock = _bt.hci_open_dev ()
     # get the ACL connection handle to the remote device
     handle = get_acl_conn_handle (hci_sock, addr)
@@ -353,6 +666,25 @@ def write_flush_timeout (addr, timeout):
     assert status == 0
 
 def read_flush_timeout (addr):
+    """Read the flush timeout from the remote device.
+    
+    Parameters
+    ----------
+    addr : str
+        The Bluetooth address of the remote device.
+
+    Returns
+    -------
+    int
+        The flush timeout value in milliseconds.
+
+    Raises
+    ------
+    AssertionError
+        If the ACL connection handle and the handle returned from the remote device are different
+        or the returned status is not 0.
+
+    """
     hci_sock = _bt.hci_open_dev ()
     # get the ACL connection handle to the remote device
     handle = get_acl_conn_handle (hci_sock, addr)
@@ -369,26 +701,44 @@ def read_flush_timeout (addr):
 
 # =============== DeviceDiscoverer ==================
 def byte_to_signed_int(byte_):
+    """Convert a byte into a signed integer.
+    
+    Parameters
+    ----------
+    byte_ : int
+        A positive integer value between 0 and 255
+    
+    Returns
+    -------
+    int
+        An integer value between -128 and +127.
+        
+    """
     if byte_ > 127:
         return byte_ - 256
     else:
         return byte_
 
 class DeviceDiscoverer:
-    """
-    Skeleton class for finer control of the device discovery process.
+    """*Abstract* class for finer control of the device discovery process.
 
-    To implement asynchronous device discovery (e.g. if you want to do
-    something *as soon as* a device is discovered), subclass
-    DeviceDiscoverer and override device_discovered () and
-    inquiry_complete ()
+    If you want to do something **as soon as** a device is discovered (asynchronous discovery),
+    subclass DeviceDiscoverer and override the device_discovered() and inquiry_complete() methods.
+    
     """
     def __init__ (self, device_id=-1):
-        """
-        __init__ (device_id=-1)
+        """Initialise an instance of DeviceDiscoverer
 
-        device_id - The ID of the Bluetooth adapter that will be used
-                    for discovery.
+        Parameters
+        ----------
+        device_id : int, optional
+            The ID of the Bluetooth adapter that will be used for discovery. (default is -1)
+        
+        Returns
+        -------
+        bluetooth.bluez.DeviceDiscoverer
+            An initialised DeviceDiscoverer object.
+        
         """
         self.sock = None
         self.is_inquiring = False
@@ -398,31 +748,38 @@ class DeviceDiscoverer:
         self.names_to_find = {}
         self.names_found = {}
 
-    def find_devices (self, lookup_names=True,
-            duration=8,
-            flush_cache=True):
-        """
-        find_devices (lookup_names=True, service_name=None,
-                       duration=8, flush_cache=True)
-
+    def find_devices (self, lookup_names=True, 
+            duration=8, flush_cache=True):
+        """Find bluetooth devices.
+        
         Call this method to initiate the device discovery process
 
-        lookup_names - set to True if you want to lookup the user-friendly
-                       names for each device found.
+        Parameters
+        ----------
+        lookup_names : bool, optional
+            Set to True if you want to lookup the user-friendly names for each device found.
+            (default is True)
 
-        service_name - set to the name of a service you're looking for.
-                       only devices with a service of this name will be
-                       returned in device_discovered () NOT YET IMPLEMENTED
+        service_name : str, optional
+            Set to the name of a service you're looking for. Only devices with a service of this
+            name will be returned in device_discovered() - NOT YET IMPLEMENTED
 
 
-        ADVANCED PARAMETERS:  (don't change these unless you know what
-                            you're doing)
+        Other parameters
+        ----------------
 
-        duration - the number of 1.2 second units to spend searching for
-                   bluetooth devices.  If lookup_names is True, then the
-                   inquiry process can take a lot longer.
+        duration : int, optional 
+            the number of 1.2 second units to spend searching for bluetooth devices.
+            If lookup_names is True, then the inquiry process can take a lot longer. (default is 8)
 
-        flush_cache - return devices discovered in previous inquiries
+        flush_cache : bool, optional
+            return devices discovered in previous inquiries. (default is False)
+
+        Warnings
+        --------
+        Do not change the values of duration or flush_cache from their defaults unless you really
+        know what you are doing.
+
         """
         if self.is_inquiring:
             raise BluetoothError (EBUSY, "Already inquiring!")
@@ -458,9 +815,11 @@ class DeviceDiscoverer:
         self.names_found = {}
 
     def cancel_inquiry (self):
-        """
+        """Cancel a Bluetooth enquiry.
+        
         Call this method to cancel an inquiry in process.  inquiry_complete
         will still be called.
+
         """
         self.names_to_find = {}
 
@@ -477,17 +836,21 @@ class DeviceDiscoverer:
             self.is_inquiring = False
 
     def process_inquiry (self):
-        """
-        Repeatedly calls process_event () until the device inquiry has
+        """Process a bluetooth inquiry
+        
+        This method repeatedly calls process_event() until the device inquiry has
         completed.
+
         """
         while self.is_inquiring or len (self.names_to_find) > 0:
             self.process_event ()
 
     def process_event (self):
-        """
-        Waits for one event to happen, and proceses it.  The event will be
+        """Process a bluetooth event.
+        
+        This method waits for one event to happen and processes it.  The event will be
         either a device discovery, or an inquiry completion.
+
         """
         self._process_hci_event ()
 
@@ -641,32 +1004,59 @@ class DeviceDiscoverer:
                     (address, e.args[1]))
 
     def fileno (self):
+        """Get a file number.
+
+        You can use returned file descriptor for direct communication with the SDP server.
+
+        Returns
+        -------
+        int or None
+            If there is a valid socket the sockets integer file descriptor is returned, 
+            otherwise None is returned.
+        
+        """
         if not self.sock: return None
         return self.sock.fileno ()
 
     def pre_inquiry (self):
-        """
-        Called just after find_devices is invoked, but just before the
-        inquiry is started.
+        """Set up for inquiry.
 
-        This method exists to be overriden
+        This method is called just after find_devices is invoked, but just before the
+        inquiry is started. The default behaviour of this method is to pass straight through
+        to the inquiry method.
+
+        Override this method to perform any pre-inquiry actions required for your application.
+
         """
+        pass
 
     def device_discovered (self, address, device_class, rssi, name):
-        """
-        Called when a bluetooth device is discovered.
+        """Device discovered callback.
 
-        address is the bluetooth address of the device
+        This method is called by BlueZ when a bluetooth device is discovered. The default 
+        behaviour of this method is to print the device information returned by BlueZ.
 
-        device_class is the Class of Device, as specified in [1]
-                     passed in as a 3-byte string
+        Override this method and change its behaviour to suit your application.
 
-        name is the user-friendly name of the device if lookup_names was
-        set when the inquiry was started.  otherwise None
+        Parameters
+        ----------
+        address : str
+            The bluetooth address of the detected device
 
-        This method exists to be overriden.
+        device_class : str
+            The class of the discovered device, as specified in [1]_ passed in as a 3-byte string
+        
+        rssi : int 
+            The rssi value indicating received signal strength.
 
-        [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
+        name : str or None
+            The user-friendly name of the device if lookup_names was set when the inquiry was 
+            started. otherwise None
+
+        References
+        ----------
+        .. [1] `Assigned Numbers for Baseband <https://www.bluetooth.org/foundry/assignnumb/document/baseband>`_
+
         """
         if name:
             print(("found: %s - %s (class 0x%X, rssi %s)" % \
@@ -678,14 +1068,20 @@ class DeviceDiscoverer:
 
     def _inquiry_complete (self):
         """
-        Called when an inquiry started by find_devices has completed.
+        Called when an inquiry started by find_devices has completed
+
         """
         self.sock.close ()
         self.sock = None
         self.inquiry_complete()
 
     def inquiry_complete (self):
-        """
-        Called when an inquiry started by find_devices has completed.
+        """Inquiry complete callback.
+
+        This method is called by BlueZ when an inquiry, started by find_devices, has completed.
+        The default behaviour of this method is to simply print an inquiry complete message.
+
+        You can override this method and customise it to suit your applications requirements.
+
         """
         print("inquiry complete")

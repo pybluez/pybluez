@@ -1,4 +1,4 @@
-.. orphan page while we develop it. This stops sphinx raising a toctree warning.
+.. orphan this page while we develop it to prevent sphinx throwing a toctree error
 
 :orphan:
 

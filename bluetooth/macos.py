@@ -1,3 +1,4 @@
+"""macOS implementation of Bluetooth."""
 import lightblue
 from .btcommon import *
 
@@ -77,6 +78,54 @@ def read_local_bdaddr():
 
 def advertise_service(sock, name, service_id="", service_classes=None,
         profiles=None, provider="", description="", protocols=None):
+    """
+    Advertises a service with the local SDP server.
+  
+    Parameters
+    ----------
+    sock 
+        must be a bound, listening socket.  
+    name 
+        should be the name of the service, and service_id (if specified) should be a string
+        of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", where each 'X' is a hexadecimal
+        digit.
+
+    service_classes : list 
+        a list of service classes whose this service belongs to.
+
+        Each class service is a 16-bit UUID in the form "XXXX", where each 'X' is a
+        hexadecimal digit, or a 128-bit UUID in the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".
+        There are some constants for standard services, e.g. SERIAL_PORT_CLASS that equals to
+        "1101". Some class constants:
+
+        =================   ========================   ==================
+        SERIAL_PORT_CLASS   LAN_ACCESS_CLASS           DIALUP_NET_CLASS 
+        HEADSET_CLASS       CORDLESS_TELEPHONY_CLASS   AUDIO_SOURCE_CLASS
+        AUDIO_SINK_CLASS    PANU_CLASS                 NAP_CLASS
+        GN_CLASS
+        =================   ========================   ==================
+
+    profiles : list
+        a list of service profiles that thie service fulfills. Each profile is a tuple with 
+        ( uuid, version). Most standard profiles use standard classes as UUIDs. PyBluez offers 
+        a list of standard profiles, for example SERIAL_PORT_PROFILE. All standard profiles have
+        the same name as the classes, except that _CLASS suffix is replaced by _PROFILE.
+
+    provider : str
+        A text string specifying the provider of the service
+
+    description : str
+        A text string describing the service
+
+    protocols : list
+        A list of protocols
+
+    Notes
+    -----
+    A note on working with Symbian smartphones: bt_discover in Python for Series 60 will only 
+    detect service records with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
+
+    """
 
     if protocols is None or protocols == RFCOMM:
         protocols = [lightblue.RFCOMM]

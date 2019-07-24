@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-
+import easydev
 # -- Project information -----------------------------------------------------
 
 project = 'PyBluez'
@@ -31,7 +31,9 @@ master_doc = 'index'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'easydev.copybutton',
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.coverage', 
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
@@ -45,8 +47,15 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
 
+# we are ignoring legacy for present while work is done on the files.
+exclude_patterns = ['legacy']
+
+# we use optional to indicate a function or method parameter is optional. Sphinx throws
+# a warning in nitpick mode because option is not a python type recognised by intershpinx
+# so we are hacking a workaround to stop the warning.
+
+nitpick_ignore = [('py:class', 'optional')]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -97,6 +106,9 @@ autodoc_mock_imports = [
    '_widcomm'
   ]
 
+# Generate file stubs. Set True if rebuilding API documentation.
+autosummary_generate = False
+
 # Napoleon is a sphinx extension allowing autodoc to parse docstrings which don't follow
 # restructured text formatting rules. It will currently attempt to parse google and numpy
 # styles.
@@ -118,3 +130,15 @@ napoleon_use_rtype = True
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None)
     }
+
+#easydev.copybutton
+extensions.append('easydev.copybutton')
+jscopybutton_path = easydev.copybutton.get_copybutton_path()
+
+if os.path.isdir('_static')==False:
+    os.mkdir('_static')
+
+import shutil
+shutil.copy(jscopybutton_path, '_static')
+
+html_static_path = ['_static']

@@ -1,3 +1,4 @@
+"""Windows implementation of Bluetooth."""
 from bluetooth import *
 import bluetooth._msbt as bt
 
@@ -7,6 +8,37 @@ bt.initwinsock ()
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False,
                       lookup_class=False, device_id=-1):
+    """Perform a bluetooth device discovery.
+   
+    uses the first available bluetooth resource to discover bluetooth devices.
+
+    Parameters
+    ----------
+    lookup_names : bool, optional
+        When set to True discover_devices also attempts to look up the display name of each
+        detected device. (the default is False)
+
+    lookup_class : bool, optional 
+        When set to True discover devices attempts to look up the class of each detected device.
+        (the default is False)
+
+    Returns
+    -------
+    list
+        Returns a list of device addresses as strings or a list of tuples. The content of the
+        tuples depends on the values of lookup_names and lookup_class. 
+
+        ============   ============   =====================================
+        lookup_class   lookup_names   Return
+        ============   ============   =====================================
+        False          False          list of device addresses
+        False          True           list of (address, name) tuples
+        True           False          list of (address, class) tuples
+        True           True           list of (address, name, class) tuples
+        ============   ============   =====================================
+
+    """
+
     #this is order of items in C-code
     btAddresIndex = 0
     namesIndex = 1
@@ -132,6 +164,54 @@ class BluetoothSocket:
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \
         profiles = [], provider = "", description = "", protocols = []):
+    """
+    Advertises a service with the local SDP server.
+  
+    Parameters
+    ----------
+    sock 
+        must be a bound, listening socket.  
+    name 
+        should be the name of the service, and service_id (if specified) should be a string
+        of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", where each 'X' is a hexadecimal
+        digit.
+
+    service_classes : list 
+        a list of service classes whose this service belongs to.
+
+        Each class service is a 16-bit UUID in the form "XXXX", where each 'X' is a
+        hexadecimal digit, or a 128-bit UUID in the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".
+        There are some constants for standard services, e.g. SERIAL_PORT_CLASS that equals to
+        "1101". Some class constants:
+
+        =================   ========================   ==================
+        SERIAL_PORT_CLASS   LAN_ACCESS_CLASS           DIALUP_NET_CLASS 
+        HEADSET_CLASS       CORDLESS_TELEPHONY_CLASS   AUDIO_SOURCE_CLASS
+        AUDIO_SINK_CLASS    PANU_CLASS                 NAP_CLASS
+        GN_CLASS
+        =================   ========================   ==================
+
+    profiles : list
+        A list of service profiles that thie service fulfills. Each profile is a tuple with 
+        ( uuid, version). Most standard profiles use standard classes as UUIDs. PyBluez offers 
+        a list of standard profiles, for example SERIAL_PORT_PROFILE. All standard profiles have
+        the same name as the classes, except that _CLASS suffix is replaced by _PROFILE.
+
+    provider : str
+        A text string specifying the provider of the service
+
+    description : str
+        A text string describing the service
+
+    protocols : list
+        A list of protocols
+
+    Notes
+    -----
+    A note on working with Symbian smartphones: bt_discover in Python for Series 60 will only 
+    detect service records with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
+
+    """
     if service_id != "" and not is_valid_uuid (service_id):
         raise ValueError ("invalid UUID specified for service_id")
     for uuid in service_classes:
@@ -278,5 +358,13 @@ def find_service (name = None, uuid = None, address = None):
 
 # =============== DeviceDiscoverer ==================
 class DeviceDiscoverer:
+    """Not implemented on Windows yet."""
     def __init__ (self):
+        """No implementation yet.
+
+        Raises
+        ------
+        NotImplementedError
+
+        """
         raise NotImplementedError

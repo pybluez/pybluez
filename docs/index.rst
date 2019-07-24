@@ -37,7 +37,7 @@ API Documentation
    :maxdepth: 2
    :titlesonly:
 
-   api
+   api/api
 
 
 **Indices and tables:**

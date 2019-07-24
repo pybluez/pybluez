@@ -1,7 +1,9 @@
+"""Common functions and definition of Bluetooth constants."""
 import sys
 import struct
 import binascii
 
+# Protocol IDs
 L2CAP=0
 RFCOMM=3
 
@@ -177,14 +179,28 @@ IAC_GIAC = 0x9e8b33
 IAC_LIAC = 0x9e8b00
 
 class BluetoothError (IOError):
+    """Raised when a Bluetooth I/O operation fails.
+    This error is raised when a bluetooth function or method fails for an I/O-related reason.
+    
+    This class is derived from IOError
+    
+    """
     pass
 
 def is_valid_address (s):
-    """returns True if address is a valid Bluetooth address.
+    """Check for a valid address.
 
-    valid address are always strings of the form XX:XX:XX:XX:XX:XX
-    where X is a hexadecimal character.  For example,
-    01:23:45:67:89:AB is a valid address, but IN:VA:LI:DA:DD:RE is not.
+    Parameters
+    ----------
+    s: str
+        A Bluetooth address. Valid address are always strings of the form XX:XX:XX:XX:XX:XX
+        where X is a hexadecimal character.  For example, 01:23:45:67:89:AB is a valid address, 
+        but IN:VA:LI:DA:DD:RE is not 
+    
+    Returns
+    -------
+    bool
+        True if the Bluetooth address is valid, false otherwise.
 
     """
     try:
@@ -196,16 +212,19 @@ def is_valid_address (s):
     return True
 
 def is_valid_uuid (uuid):
-    """
-    is_valid_uuid (uuid) -> bool
+    """Check for valid UUID
 
-    returns True if uuid is a valid 128-bit UUID.
+    Parameters
+    ----------
+    uuid : str
+        A valid UUID. Valid UUIDs are always strings taking one of the following forms: XXXX or 
+        XXXXXXXX or XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX where each X is a hexadecimal digit 
+        (case insensitive)
 
-    valid UUIDs are always strings taking one of the following forms:
-    XXXX
-    XXXXXXXX
-    XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-    where each X is a hexadecimal digit (case insensitive)
+    Returns
+    -------
+    bool
+        True if uuid is a valid 128-bit UUID.
 
     """
     try:
@@ -232,9 +251,23 @@ def is_valid_uuid (uuid):
     return True
 
 def to_full_uuid (uuid):
-    """
+    """Convert a short UUID to a full Bluetooth UUID.
+
     converts a short 16-bit or 32-bit reserved UUID to a full 128-bit Bluetooth
     UUID.
+
+    Parameters
+    ----------
+    uuid : str
+        A short 16-bit or 32-bit reserved UUID. Valid short UUIDs are always strings taking one 
+        of the following forms: XXXX or XXXXXXXX where each X is a hexadecimal digit 
+        (case insensitive) 
+    
+    Returns
+    -------
+    str
+        The full Bluetooth UUID in the form XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX where each X 
+        is a hexadecimal digit (case insensitive)
 
     """
     if not is_valid_uuid (uuid): raise ValueError ("invalid UUID")

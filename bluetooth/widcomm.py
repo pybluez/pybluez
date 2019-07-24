@@ -1,3 +1,4 @@
+"""Widcomm implementation of Bluetooth."""
 from .btcommon import *
 import socket
 import struct
@@ -22,7 +23,7 @@ def str_to_BD_ADDR (s):
     return struct.pack ("6B", *digits)
 
 class WCInquirer:
-    DEVST_DOWN     = 0
+    DEVST_DOWN     = 0  #: :type: int  Device stack is down
     DEVST_UP       = 1
     DEVST_ERROR    = 2
     DEVST_UNLOADED = 3
@@ -104,7 +105,7 @@ class WCInquirer:
     def get_local_device_address (self):
         return self._wcinq.get_local_device_address ()
 
-inquirer = WCInquirer ()
+#inquirer = WCInquirer ()
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_class=False):
     inquirer.start_inquiry ()
@@ -150,6 +151,54 @@ def lookup_name (address, timeout=10):
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \
         profiles = [], provider = "", description = "", protocols = []):
+    """
+    Advertises a service with the local SDP server.
+  
+    Parameters
+    ----------
+    sock 
+        must be a bound, listening socket.  
+    name 
+        should be the name of the service, and service_id (if specified) should be a string
+        of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", where each 'X' is a hexadecimal
+        digit.
+
+    service_classes : list 
+        a list of service classes whose this service belongs to.
+
+        Each class service is a 16-bit UUID in the form "XXXX", where each 'X' is a
+        hexadecimal digit, or a 128-bit UUID in the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".
+        There are some constants for standard services, e.g. SERIAL_PORT_CLASS that equals to
+        "1101". Some class constants:
+
+        =================   ========================   ==================
+        SERIAL_PORT_CLASS   LAN_ACCESS_CLASS           DIALUP_NET_CLASS 
+        HEADSET_CLASS       CORDLESS_TELEPHONY_CLASS   AUDIO_SOURCE_CLASS
+        AUDIO_SINK_CLASS    PANU_CLASS                 NAP_CLASS
+        GN_CLASS
+        =================   ========================   ==================
+
+    profiles : list
+        a list of service profiles that thie service fulfills. Each profile is a tuple with 
+        ( uuid, version). Most standard profiles use standard classes as UUIDs. PyBluez offers 
+        a list of standard profiles, for example SERIAL_PORT_PROFILE. All standard profiles have
+        the same name as the classes, except that _CLASS suffix is replaced by _PROFILE.
+
+    provider : str
+        A text string specifying the provider of the service
+
+    description : str
+        A text string describing the service
+
+    protocols : list
+        A list of protocols
+
+    Notes
+    -----
+    A note on working with Symbian smartphones: bt_discover in Python for Series 60 will only 
+    detect service records with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
+
+    """
     sock._advertise_service (name, service_id, service_classes,
             profiles, provider, description, protocols)
 
