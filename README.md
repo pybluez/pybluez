@@ -91,50 +91,7 @@ active.
 Installation
 ------------
 
-Use pip (there are also binaries for Windows platform on PyPI or here - [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pybluez)):
-
-    pip install pybluez
-
-For experimental Bluetooth Low Energy support(only for Linux platform -
-for additional dependencies please take look at:
-[ble-dependencies](https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default)):
-
-    pip install pybluez\[ble\]
-
-For source installation:
-
-    python setup.py install
-
-for Bluetooth Low Energy support:
-
-    pip install -e .\[ble\]
-
-### Build Requirements
-
-#### GNU/Linux
-
--   Python 2.3 or more recent version
--   Python distutils (standard in most Python distros, separate package
-    python-dev in Debian)
--   BlueZ libraries and header files
-
-#### Windows
-
--   Microsoft Windows XP SP1 or Windows Vista/7/8/8.1
--   Visual C++ 2010 Express for build for Python 3.3 or newer
--   Visual C++ 2008 Express for build for Python 3.2 or older
--   In order to build 64-bit debug and release executables, Visual
-    Studio 2008/2010 Standard Edition is required
--   Widcomm BTW development kit 5.0 or later (Optional)
--   Python 2.3 or more recent version
-
-#### macOS
-
--   Python 2.3 or later
--   Xcode
--   PyObjc 3.1b or later
-    (<https://pythonhosted.org/pyobjc/install.html#manual-installation>)
-
+Please refer to the [PyBluez Installation page](https://pybluez.readthedocs.io/en/latest/user/install.html) on our [Read the Docs site.](https://pybluez.readthedocs.io/)
 
 License
 -------
