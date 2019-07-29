@@ -5,8 +5,10 @@
 import sys
 import bluetooth
 
-if sys.version < '3':
+try:
     input = raw_input
+except NameError:
+    pass  # Python 3
 
 sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
 
