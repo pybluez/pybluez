@@ -48,10 +48,6 @@ except AttributeError:
     # python 2.3
     SHUT_RD, SHUT_WR, SHUT_RDWR = (0, 1, 2)
 
-try:
-    buffer  # buffer was removed in Python 3
-except NameError:
-    buffer = bytes  # memoryview is an alternate possibility
 
 def _getavailableport(proto):
     # Just advertise a service and see what channel it was assigned, then
@@ -752,7 +748,7 @@ class _L2CAPConnection(object):
             raise _socket.error("socket not connected")
         return \
             BBBluetoothChannelDelegate.synchronouslyWriteData_toL2CAPChannel_(
-                buffer(data), self.channel)
+                bytes(data), self.channel)
 
     def getwritemtu(self):
         return self.channel.getOutgoingMTU()
