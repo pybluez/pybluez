@@ -91,7 +91,7 @@ active.
 Installation
 ------------
 
-Please refer to the [PyBluez Installation page](https://pybluez.readthedocs.io/en/latest/user/install.html) on our [Read the Docs site.](https://pybluez.readthedocs.io/)
+Please refer to the [installation instructions](/docs/user/install.rst).
 
 License
 -------
