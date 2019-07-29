@@ -7,7 +7,7 @@ Bluetooth
 .. automodule:: bluetooth
 
 .. autosummary::
-   :toctree: modules
+   :toctree: ../../_build/api/packages/modules
    :template: pbzmodule.rst
    
    ble

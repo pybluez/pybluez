@@ -107,7 +107,7 @@ autodoc_mock_imports = [
   ]
 
 # Generate file stubs. Set True if rebuilding API documentation.
-autosummary_generate = False
+autosummary_generate = True
 
 # Napoleon is a sphinx extension allowing autodoc to parse docstrings which don't follow
 # restructured text formatting rules. It will currently attempt to parse google and numpy
