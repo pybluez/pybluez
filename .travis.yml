@@ -15,7 +15,7 @@ os:
 before_install:
   - git clone https://git.kernel.org/pub/scm/bluetooth/bluez.git -n $BLUEZ_SRC_DIR && cd $BLUEZ_SRC_DIR && git checkout $(git describe --tags $(git rev-list --tags='[0-9]*.[0-9]*' -n 1)) && cd -
   - mkdir -p $LOCAL_INCLUDE_DIR/bluetooth && cp $BLUEZ_SRC_DIR/lib/*.h $LOCAL_INCLUDE_DIR/bluetooth
-  - pip install -r flake8 requirements.txt
+  - pip install flake8 -r requirements.txt
 
 install:
   - CFLAGS="-I$LOCAL_INCLUDE_DIR" python setup.py build
