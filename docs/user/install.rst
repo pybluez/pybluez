@@ -52,7 +52,7 @@ GNU/Linux Dependencies
 Windows Dependencies
 """"""""""""""""""""
 
-- Microsoft Windows XP SP1, Windows Vista/7/8/8.1/10
+- Windows 7/8/8.1/10
 
 PyBluez requires a C++ compiler installed on your system to build CPython modules.
 
@@ -63,22 +63,10 @@ For Python 3.5 or higher
 - Microsoft Visual C++ 14.0 standalone: Visual C++ Build Tools 2015 (x86, x64, ARM)
 - Microsoft Visual C++ 14.0 with Visual Studio 2015 (x86, x64, ARM)
 
-For Python 3.3 or 3.4
-
-- Microsoft Visual C++ 10.0 standalone: Windows SDK 7.1 (x86, x64, ia64)
-- Microsoft Visual C++ 10.0 with Visual Studio 2010 (x86, x64, ia64)
-
-For Python 2.7, 3.0, 3.1, 3.2
-
-- Microsoft Visual C++ 9.0 standalone: Visual C++ Compiler for Python 2.7 (x86, x64)
-- Microsoft Visual C++ 9.0 standalone: Windows SDK 7.0 (x86, x64, ia64)
-- Microsoft Visual C++ 9.0 standalone: Windows SDK 6.1 (x86, x64, ia64)
-- Microsoft Visual C++ 9.0 with Visual Studio 2008 (x86, x64, ia64)
-
 `More details here <https://wiki.python.org/moin/WindowsCompilers>`_
 
 - Widcomm BTW development kit 5.0 or later (Optional)
-- Python 2.7 or more recent version
+- Python 3.5 or more recent version
 
 
 macOS Dependencies
