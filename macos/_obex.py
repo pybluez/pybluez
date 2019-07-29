@@ -416,7 +416,7 @@ def sendfile(address, channel, source):
 
     if isinstance(source, str):
         headers = {"name": source}
-        fileobj = file(source, "rb")
+        fileobj = open(source, "rb")
         closefileobj = True
     else:
         if hasattr(source, "name"):
