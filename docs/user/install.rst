@@ -22,7 +22,7 @@ for additional dependencies please take look at:
 
     pip install pybluez\[ble\]
 
-*Installing PyBluez from source**
+**Installing PyBluez from source**
 
 Download a stable release from `<https://github.com/pybluez/pybluez/releases>`_
 
