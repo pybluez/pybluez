@@ -18,6 +18,7 @@ import gobject
 import gtk.glade
 
 import bluetooth
+import bluetooth._bluetooth as bluez
 
 GLADEFILE="bluezchat.glade"
 
