@@ -13,16 +13,16 @@ os:
   - linux
 
 before_install:
-  
   - git clone https://git.kernel.org/pub/scm/bluetooth/bluez.git -n $BLUEZ_SRC_DIR && cd $BLUEZ_SRC_DIR && git checkout $(git describe --tags $(git rev-list --tags='[0-9]*.[0-9]*' -n 1)) && cd -
   - mkdir -p $LOCAL_INCLUDE_DIR/bluetooth && cp $BLUEZ_SRC_DIR/lib/*.h $LOCAL_INCLUDE_DIR/bluetooth
-  - pip install -r requirements.txt
+  - pip install -r flake8 requirements.txt
 
 install:
   - CFLAGS="-I$LOCAL_INCLUDE_DIR" python setup.py build
   - python setup.py install
 
 script:
+  - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
   - python examples/simple/inquiry.py || true
 
 # Use VMs instead of Docker; bluez is not on the approved package whitelist
