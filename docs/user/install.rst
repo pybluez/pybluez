@@ -15,9 +15,9 @@ with Python 2.7 and 3.
 
 (there are also binaries for Windows platform on PyPI or here - `Unofficial Windows Binaries for Python Extension Packages <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pybluez>`)
 
-For experimental Bluetooth Low Energy support(only for Linux platform -
+For experimental Bluetooth Low Energy support (only for Linux platform -
 for additional dependencies please take look at:
-`ble-dependencies <https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default>`
+`ble-dependencies <https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default>`)
 ::
 
     pip install pybluez\[ble\]
