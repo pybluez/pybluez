@@ -15,6 +15,5 @@ Bluetooth
    btcommon
    macos
    msbt
-   widcomm
 
    

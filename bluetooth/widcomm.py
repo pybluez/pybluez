@@ -105,7 +105,7 @@ class WCInquirer:
     def get_local_device_address (self):
         return self._wcinq.get_local_device_address ()
 
-#inquirer = WCInquirer ()
+inquirer = WCInquirer ()
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_class=False):
     inquirer.start_inquiry ()
