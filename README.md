@@ -105,6 +105,8 @@ For source installation:
 
     python setup.py install
 
+[To build and source install on Windows 10](https://stackoverflow.com/a/49508566/4140357)
+
 for Bluetooth Low Energy support:
 
     pip install -e .\[ble\]
