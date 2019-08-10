@@ -748,7 +748,7 @@ class _L2CAPConnection(object):
             raise _socket.error("socket not connected")
         return \
             BBBluetoothChannelDelegate.synchronouslyWriteData_toL2CAPChannel_(
-                buffer(data), self.channel)
+                bytes(data), self.channel)
 
     def getwritemtu(self):
         return self.channel.getOutgoingMTU()

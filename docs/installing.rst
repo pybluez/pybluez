@@ -1,15 +1,10 @@
+.. _installing:
 
-******************
 Installing PyBluez
-******************
+==================
 
-PyBluez can be installed on GNU/Linux, Windows and macOS systems and is currently compatible 
-with Python 2 and 3. 
-
-.. important:: Python 2 reaches End of Life on January 1st 2020. As a consequence we are not
-               actively maintaining PyBluez for this version of python. PyBluez v0.22 will still work 
-               on python 2 however this may not be the case for future releases. We therefore encourage
-               our users to consider transitioning to a python 3 version.  
+PyBluez can be installed on GNU/Linux, Windows and macOS systems and is compatible 
+with Python 2.7 and 3. 
 
 .. note:: Before you install **PyBluez** please install the dependencies required for
 		  your system as described in the sections below.
@@ -18,6 +13,15 @@ with Python 2 and 3.
 ::
 
 	pip install pybluez
+
+(there are also binaries for Windows platform on PyPI or here - `Unofficial Windows Binaries for Python Extension Packages <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pybluez>`_)
+
+For experimental Bluetooth Low Energy support (only for Linux platform -
+for additional dependencies please take look at:
+`ble-dependencies <https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default>`_)
+::
+
+    pip install pybluez\[ble\]
 
 **Installing PyBluez from source**
 
@@ -34,20 +38,23 @@ Extract the zip or tar and cd to the extracted file directory, then:
 
 	python setup.py install
 
+for Bluetooth Low Energy support (GNU/Linux only):
+::
+
+    pip install -e .\[ble\]
 
 GNU/Linux Dependencies
 """"""""""""""""""""""
 
-- Python 3.6 or more recent version
+- Python 2.7 or more recent version
 - Python distutils (standard in most Python distros, separate package python-dev in Debian)
 - BlueZ libraries and header files
 
 Windows Dependencies
 """"""""""""""""""""
 
-- Microsoft Windows XP SP1, Windows Vista/7/8/8.1/10
-
-.. important:: PyBluez no longer provides maintenance or support for Windows XP. 
+- Windows 7/8/8.1/10
+- Python 3.5 or more recent version
 
 PyBluez requires a C++ compiler installed on your system to build CPython modules.
 
@@ -58,12 +65,12 @@ For Python 3.5 or higher
 - Microsoft Visual C++ 14.0 standalone: Visual C++ Build Tools 2015 (x86, x64, ARM)
 - Microsoft Visual C++ 14.0 with Visual Studio 2015 (x86, x64, ARM)
 
+.. note:: Windows 10 users need to install the `Windows 10 SDK <https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk>`_
+
 
 `More details here <https://wiki.python.org/moin/WindowsCompilers>`_
 
 - Widcomm BTW development kit 5.0 or later (Optional)
-- Python 3.5 or more recent version
-
 
 macOS Dependencies
 """""""""""""""""" 

@@ -1,9 +1,3 @@
-"""Package of modules providing the PyBluez - Python Bluetooth API.
-
-The modules contained in this package provide access to bluetooth resources on GNU/Linux, 
-Windows and macOS platforms.
-
-"""
 import sys
 import os
 if sys.version < '3':
@@ -53,63 +47,6 @@ elif sys.platform == "darwin":
     from .macos import *
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
-
-# The __doc__ descriptions here override those in individual modules when 
-# from bluetooth import * is used.
-discover_devices.__doc__ = \
-    """Perform a bluetooth device discovery.
-   
-    uses the first available bluetooth resource to discover bluetooth devices.
-
-    Parameters
-    ----------
-    lookup_names : bool, optional
-        When set to True discover_devices also attempts to look up the display name of each
-        detected device. (the default is False)
-
-    lookup_class : bool, optional 
-        When set to True discover devices attempts to look up the class of each detected device.
-        (the default is False)
-
-    Returns
-    -------
-    list
-        Returns a list of device addresses as strings or a list of tuples. The content of the
-        tuples depends on the values of lookup_names and lookup_class. 
-
-        ============   ============   =====================================
-        lookup_class   lookup_names   Return
-        ============   ============   =====================================
-        False          False          list of device addresses
-        False          True           list of (address, name) tuples
-        True           False          list of (address, class) tuples
-        True           True           list of (address, name, class) tuples
-        ============   ============   =====================================
-
-    """
-
-lookup_name.__doc__ = \
-    """Look up the friendly name of the remote device.
-
-    This function tries to determine the friendly name (human readable) of the device with
-    the specified bluetooth address.
-  
-    Parameters
-    ----------
-    address : str
-        The bluetooth address of the remote device.
-    
-    Returns
-    -------
-    str or None
-        The friendly name of the device on success, and None on failure.
-
-    Raises
-    ------
-    BluetoothError
-        If the provided address is not a valid Bluetooth address.
-
-    """
 
 advertise_service.__doc__ = \
     """
@@ -169,28 +106,57 @@ advertise_service.__doc__ = \
     protocols : list
         A list of protocols
 
-    Notes
-    -----
+    Note
+    ----
     A note on working with Symbian smartphones: bt_discover in Python for Series 60 will only 
     detect service records with service class SERIAL_PORT_CLASS and profile SERIAL_PORT_PROFILE
 
     """
 
-stop_advertising.__doc__ = \
-    """Try to stop advertising a bluetooth service.
-
-    Instructs the local SDP server to stop advertising the service associated
-    with sock.  You should typically call this right before you close sock.
+byte_to_signed_int.__doc__ = \
+    """Convert a byte into a signed integer.
     
     Parameters
     ----------
-    sock : str
-        The BluetoothSocket to stop advertising service on.
+    byte_ : int
+        A positive integer value between 0 and 255
     
-    Raises
-    ------
-    BluetoothError
-        When sdp fails to stop advertising for some reason.
+    Returns
+    -------
+    int
+        An integer value between -128 and +127.
+        
+    """
+
+discover_devices.__doc__ = \
+    """Perform a bluetooth device discovery.
+   
+    uses the first available bluetooth resource to discover bluetooth devices.
+
+    Parameters
+    ----------
+    lookup_names : bool, optional
+        When set to True discover_devices also attempts to look up the display name of each
+        detected device. (the default is False)
+
+    lookup_class : bool, optional 
+        When set to True discover devices attempts to look up the class of each detected device.
+        (the default is False)
+
+    Returns
+    -------
+    list
+        Returns a list of device addresses as strings or a list of tuples. The content of the
+        tuples depends on the values of lookup_names and lookup_class. 
+
+        ============   ============   =====================================
+        lookup_class   lookup_names   Return
+        ============   ============   =====================================
+        False          False          list of device addresses
+        False          True           list of (address, name) tuples
+        True           False          list of (address, class) tuples
+        True           True           list of (address, name, class) tuples
+        ============   ============   =====================================
 
     """
 
@@ -206,7 +172,7 @@ find_service.__doc__ = \
         The friendly name of the bluetooth device
 
     uuid : str, optional
-        The Bluetooth UUID. If specified, it must be either a 16-bit or a 128-bit UUID.
+        A 16-bit or 128-bit Bluetooth UUID.
 
         ============  ====================================
         UUID formats
@@ -250,4 +216,103 @@ find_service.__doc__ = \
                               and Service Class ID List.
 
     """
+
+get_acl_conn_handle.__doc__ = \
+    """Get a handle for an ACL connection.
+    
+    Parameters
+    ----------
+    hci_sock : str
+        The HCI Socket
+
+    addr : str
+        The bluetooth address of the remote device
+
+    Returns
+    -------
+    str
+        The ACL connection handle
+
+    Raises
+    ------
+    BluetoothError
+        When there is no ACL connection to the device
+        
+    """
+
+get_l2cap_options.__doc__ = \
+    """Gets L2CAP options for the specified L2CAP socket.
+
+    Parameter
+    ---------
+    sock : BluetoothSocket
+
+    Return
+    ------
+    list
+        A list of L2CAP options available for the socket.
+        Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+
+    """
+
+lookup_name.__doc__ = \
+    """Look up the friendly name of the remote device.
+
+    This function tries to determine the friendly name (human readable) of the device with
+    the specified bluetooth address.
+  
+    Parameters
+    ----------
+    address : str
+        The bluetooth address of the remote device.
+    
+    Returns
+    -------
+    str or None
+        The friendly name of the device on success, and None on failure.
+
+    Raises
+    ------
+    BluetoothError
+        If the provided address is not a valid Bluetooth address.
+
+    """
+
+read_flush_timeout.__doc__ = \
+    """Read the flush timeout from the remote device.
+    
+    Parameters
+    ----------
+    addr : str
+        The Bluetooth address of the remote device.
+
+    Returns
+    -------
+    int
+        The flush timeout value in milliseconds.
+
+    Raises
+    ------
+    AssertionError
+        If the ACL connection handle and the handle returned from the remote device are different
+        or the returned status is not 0.
+
+    """
+
+stop_advertising.__doc__ = \
+    """Try to stop advertising a bluetooth service.
+    
+    Parameters
+    ----------
+    sock : str
+        The BluetoothSocket to stop advertising service on.
+    
+    Raises
+    ------
+    BluetoothError
+        When SDP fails to stop advertising for some reason.
+
+    """
+
+
 

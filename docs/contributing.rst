@@ -1,6 +1,5 @@
-***********************
 Contributing to PyBluez
-***********************
+=======================
 
 
 **This project is not under active development**. Contributions are strongly desired to resolve 
