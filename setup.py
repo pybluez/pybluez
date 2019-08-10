@@ -1,17 +1,36 @@
 #!/usr/bin/env python
+"""Bluetooth Python extension module."""
 
 from setuptools import setup, Extension
 import sys
 import platform
 import os
 
-packages = ['bluetooth']
-package_dir = dict()
-ext_modules = list()
-install_requires = list()
-package_data = dict()
-eager_resources = list()
-zip_safe = True
+# Project information for the cheese factory and read the docs
+__project__         = 'PyBluez'
+__version__         = '0.22'
+__url__             = 'http://pybluez.github.io/'
+__author__          = 'Albert Huang'
+__author_email__    = 'ashuang@alum.mit.edu'
+__license__         = 'GPL'
+__download_url__    = 'https://github.com/pybluez/pybluez',
+__long_description__ ='Bluetooth Python extension module to allow Python '\
+        'developers to use system Bluetooth resources. PyBluez works '\
+        'with GNU/Linux, macOS, and Windows XP.'
+__maintainer__      ='Piotr Karulis'
+
+__extras_require__  = {
+    'ble': ['gattlib==0.20150805'],
+}
+__classifiers__ = [
+    'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: GNU General Public License (GPL)',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 3',
+    'Topic :: Communications',
+]
+
 
 class SDKException(Exception):
 	def __init__(self,message=None):
@@ -68,109 +87,113 @@ def find_MS_SDK():
             if os.path.exists(candidate_sdk):
                 return candidate_sdk
     raise SDKException("Could not find the Windows Platform SDK.")
-	
-if sys.platform == 'win32':
-    try:
-        PSDK_PATH = find_MS_SDK()
-    except SDKException as e:
-        raise SystemExit(e)
-    
-        
-    lib_path = os.path.join(PSDK_PATH, 'Lib')
-    if '64' in platform.architecture()[0]:
-        lib_path = os.path.join(lib_path, 'x64')
-    ext_modules.append(Extension('bluetooth._msbt',
-                          include_dirs=["%s\\Include" % PSDK_PATH, ".\\port3"],
-                          library_dirs=[lib_path],
-                          libraries=["WS2_32", "Irprops"],
-                          sources=['msbt\\_msbt.c']))
-
-    # widcomm
-    WC_BASE = os.path.join(os.getenv('ProgramFiles'), r"Widcomm\BTW DK\SDK")
-    if os.path.exists(WC_BASE):
-        ext_modules.append(Extension('bluetooth._widcomm',
-                include_dirs=["%s\\Inc" % WC_BASE, ".\\port3"],
-                define_macros=[('_BTWLIB', None)],
-                library_dirs=["%s\\Release" % WC_BASE, "%s\\Lib" % PSDK_PATH],
-                libraries=["WidcommSdklib", "ws2_32", "version", "user32",
-                           "Advapi32", "Winspool", "ole32", "oleaut32"],
-                sources=["widcomm\\_widcomm.cpp",
-                         "widcomm\\inquirer.cpp",
-                         "widcomm\\rfcommport.cpp",
-                         "widcomm\\rfcommif.cpp",
-                         "widcomm\\l2capconn.cpp",
-                         "widcomm\\l2capif.cpp",
-                         "widcomm\\sdpservice.cpp",
-                         "widcomm\\util.cpp"]))
-
-elif sys.platform.startswith('linux'):
-    mod1 = Extension('bluetooth._bluetooth',
-                        include_dirs = ["./port3",],
-                        libraries = ['bluetooth'],
-                        #extra_compile_args=['-O0'],
-                        sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
-    ext_modules.append(mod1)
-
-elif sys.platform.startswith("darwin"):
-    packages.append('lightblue')
-    package_dir['lightblue'] = 'macos'
-    install_requires += ['pyobjc-core>=3.1', 'pyobjc-framework-Cocoa>=3.1']
-    zip_safe = False
-    
-    # FIXME: This is inelegant, how can we cover the cases?
-    if 'install' in sys.argv or 'bdist' in sys.argv or 'bdist_egg' in sys.argv:
-        # Build the framework into macos/
-        import subprocess
-        subprocess.check_call([
-            'xcodebuild', 'install',
-            '-project', 'macos/LightAquaBlue/LightAquaBlue.xcodeproj',
-            '-scheme', 'LightAquaBlue',
-            'DSTROOT=' + os.path.join(os.getcwd(), 'macos'),
-            'INSTALL_PATH=/',
-            'DEPLOYMENT_LOCATION=YES',
-        ])
-        
-        # We can't seem to list a directory as package_data, so we will
-        # recursively add all all files we find
-        package_data['lightblue'] = []
-        for path, _, files in os.walk('macos/LightAquaBlue.framework'):
-            for f in files:
-                include = os.path.join(path, f)[6:]  # trim off macos/
-                package_data['lightblue'].append(include)
-    
-        # This should allow us to use the framework from an egg [untested]
-        eager_resources.append('macos/LightAquaBlue.framework')
-        
-else:
-    raise Exception("This platform (%s) is currently not supported by pybluez."
-                    % sys.platform)
 
 
-setup(name='PyBluez',
-      version='0.22',
-      description='Bluetooth Python extension module',
-      author="Albert Huang",
-      author_email="ashuang@alum.mit.edu",
-      url="http://pybluez.github.io/",
-      ext_modules=ext_modules,
-      packages=packages,
-# for the python cheese shop
-      classifiers=['Development Status :: 4 - Beta',
-                   'License :: OSI Approved :: GNU General Public License (GPL)',
-                   'Programming Language :: Python',
-                   'Programming Language :: Python :: 2',
-                   'Programming Language :: Python :: 3',
-                   'Topic :: Communications'],
-      download_url='https://github.com/pybluez/pybluez',
-      long_description='Bluetooth Python extension module to allow Python "\
-                "developers to use system Bluetooth resources. PyBluez works "\
-                "with GNU/Linux, macOS, and Windows XP.',
-      maintainer='Piotr Karulis',
-      license='GPL',
-      extras_require={'ble': ['gattlib==0.20150805']},
-      package_dir=package_dir,
-      use_2to3=True,
-      install_requires=install_requires,
-      package_data=package_data,
-      eager_resources=eager_resources,
-      zip_safe=zip_safe)
+def main():
+
+    packages = ['bluetooth']
+    package_dir = dict()
+    ext_modules = list()
+    install_requires = list()
+    package_data = dict()
+    eager_resources = list()
+    zip_safe = True
+
+    if sys.platform == 'win32':
+        try:
+            PSDK_PATH = find_MS_SDK()
+        except SDKException as e:
+            raise SystemExit(e)
+        lib_path = os.path.join(PSDK_PATH, 'Lib')
+        if '64' in platform.architecture()[0]:
+            lib_path = os.path.join(lib_path, 'x64')
+        ext_modules.append(Extension('bluetooth._msbt',
+                              include_dirs=["%s\\Include" % PSDK_PATH, ".\\port3"],
+                              library_dirs=[lib_path],
+                              libraries=["WS2_32", "Irprops"],
+                              sources=['msbt\\_msbt.c']))
+        # widcomm
+        WC_BASE = os.path.join(os.getenv('ProgramFiles'), r"Widcomm\BTW DK\SDK")
+        if os.path.exists(WC_BASE):
+            ext_modules.append(Extension('bluetooth._widcomm',
+                    include_dirs=["%s\\Inc" % WC_BASE, ".\\port3"],
+                    define_macros=[('_BTWLIB', None)],
+                    library_dirs=["%s\\Release" % WC_BASE, "%s\\Lib" % PSDK_PATH],
+                    libraries=["WidcommSdklib", "ws2_32", "version", "user32",
+                               "Advapi32", "Winspool", "ole32", "oleaut32"],
+                    sources=["widcomm\\_widcomm.cpp",
+                             "widcomm\\inquirer.cpp",
+                             "widcomm\\rfcommport.cpp",
+                             "widcomm\\rfcommif.cpp",
+                             "widcomm\\l2capconn.cpp",
+                             "widcomm\\l2capif.cpp",
+                             "widcomm\\sdpservice.cpp",
+                             "widcomm\\util.cpp"]))
+
+    elif sys.platform.startswith('linux'):
+        mod1 = Extension('bluetooth._bluetooth',
+                            include_dirs = ["./port3",],
+                            libraries = ['bluetooth'],
+                            #extra_compile_args=['-O0'],
+                            sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
+        ext_modules.append(mod1)
+
+    elif sys.platform.startswith("darwin"):
+        packages.append('lightblue')
+        package_dir['lightblue'] = 'macos'
+        install_requires += ['pyobjc-core>=3.1', 'pyobjc-framework-Cocoa>=3.1']
+        zip_safe = False
+
+        # FIXME: This is inelegant, how can we cover the cases?
+        if 'install' in sys.argv or 'bdist' in sys.argv or 'bdist_egg' in sys.argv:
+            # Build the framework into macos/
+            import subprocess
+            subprocess.check_call([
+                'xcodebuild', 'install',
+                '-project', 'macos/LightAquaBlue/LightAquaBlue.xcodeproj',
+                '-scheme', 'LightAquaBlue',
+                'DSTROOT=' + os.path.join(os.getcwd(), 'macos'),
+                'INSTALL_PATH=/',
+                'DEPLOYMENT_LOCATION=YES',
+            ])
+
+            # We can't seem to list a directory as package_data, so we will
+            # recursively add all all files we find
+            package_data['lightblue'] = []
+            for path, _, files in os.walk('macos/LightAquaBlue.framework'):
+                for f in files:
+                    include = os.path.join(path, f)[6:]  # trim off macos/
+                    package_data['lightblue'].append(include)
+
+            # This should allow us to use the framework from an egg [untested]
+            eager_resources.append('macos/LightAquaBlue.framework')
+
+    else:
+        raise Exception("This platform (%s) is currently not supported by pybluez."
+                        % sys.platform)
+
+    setup(name = __project__,
+          version = __version__,
+          description = __doc__,
+          maintainer = __maintainer__,
+          author =__author__,
+          author_email = __author_email__,
+          url = __url__,
+          ext_modules = ext_modules,
+          packages = packages,
+          classifiers = __classifiers__,
+          download_url = __download_url__,
+          long_description = 'Bluetooth Python extension module to allow Python "\
+                    "developers to use system Bluetooth resources. PyBluez works "\
+                    "with GNU/Linux, macOS, and Windows XP.',
+          license = __license__,
+          extras_require = __extras_require__,
+          package_dir = package_dir,
+          use_2to3 = True,
+          install_requires = install_requires,
+          package_data = package_data,
+          eager_resources = eager_resources,
+          zip_safe = zip_safe)
+
+if __name__ == '__main__':
+    main()

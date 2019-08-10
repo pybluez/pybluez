@@ -4,24 +4,21 @@
 # list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
 import os
 import sys
+from datetime import datetime
+
 sys.path.insert(0, os.path.abspath('../'))
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+import setup as _setup
 
 # -- Project information -----------------------------------------------------
 
-project = 'PyBluez'
-copyright = '2004 - 2019, Albert Haung & contributors'
-author = 'Albert Haung & contributors'
-
-# The full version, including alpha/beta/rc tags
-release = 'master'
+project = _setup.__project__.title()
+copyright = '2004-{} {}'.format(datetime.now().year, _setup.__author__)
+author = _setup.__author__
+version = _setup.__version__
+release = _setup.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,6 +36,7 @@ extensions = [
     'recommonmark'
    ]
 
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -47,41 +45,48 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# we use optional to indicate a function or method parameter is optional. Sphinx throws
+# a warning in nitpick mode because option is not a python type recognised by intershpinx
+# so we are hacking a workaround to stop the warning.
+
+nitpick_ignore = [('py:class', 'optional')]
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'sphinx_rtd_theme'
+if on_rtd:
+    html_theme = 'sphinx_rtd_theme'
+    #html_theme_options = {}
+    #html_sidebars = {}
+else:
+    html_theme = 'sphinx_rtd_theme'
+    #html_theme_options = {}
+    #html_sidebars = {}
+html_title = '%s %s Documentation' % (project, version)
+#html_theme_path = []
+#html_short_title = None
+#html_logo = None
+#html_favicon = None
+html_static_path = ['_static']
+#html_extra_path = []
+#html_last_updated_fmt = '%b %d, %Y'
+#html_use_smartypants = True
+#html_additional_pages = {}
+#html_domain_indices = True
+#html_use_index = True
+#html_split_index = False
+#html_show_sourcelink = True
+#html_show_sphinx = True
+#html_show_copyright = True
+#html_use_opensearch = ''
+#html_file_suffix = None
+htmlhelp_basename = '%sdoc' % _setup.__project__
 
-html_theme_options = {
-    'canonical_url': '',
-    'analytics_id': '',  #  Provided by Google in your dashboard
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': False,
-    # Toc options
-    'collapse_navigation': True,
-    'sticky_navigation': True,
-    'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False
-}
+# Hack to make wide tables work properly in RTD
+# See https://github.com/snide/sphinx_rtd_theme/issues/117 for details
+#def setup(app):
+#    app.add_stylesheet('style_override.css')
 
-#enables the edit on github link
-html_context = {
-    "display_github": True, # Integrate GitHub
-    "github_user": "pybluez", # Username
-    "github_repo": "pybluez", # Repo name
-    "github_version": "master", # Version
-    "conf_py_path": "/docs/", # Path in the checkout to the docs root
-}
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
 
@@ -89,12 +94,8 @@ html_static_path = ['_static']
 # within files. Pybluez docs are built and published by CI on a linux box.
 # So windows and macos specific modules need to be mocked.
 autodoc_mock_imports = [
-   'gattlib',
-   'bluetooth._bluetooth',
-   'fcntl', 
-   'bluetooth._msbt', 
-   'lightblue',
-   '_widcomm'
+    'bluetooth._bluetooth',
+    'bluetooth._msbt',
   ]
 
 # Napoleon is a sphinx extension allowing autodoc to parse docstrings which don't follow

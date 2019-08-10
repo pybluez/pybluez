@@ -3,6 +3,84 @@ import bluetooth._msbt as bt
 
 bt.initwinsock ()
 
+def advertise_service (sock, name, service_id = "", service_classes = [],
+        profiles = [], provider = "", description = "", protocols = []):
+    if service_id != "" and not is_valid_uuid (service_id):
+        raise ValueError ("invalid UUID specified for service_id")
+    for uuid in service_classes:
+        if not is_valid_uuid (uuid):
+            raise ValueError ("invalid UUID specified in service_classes")
+    for uuid, version in profiles:
+        if not is_valid_uuid (uuid) or  version < 0 or  version > 0xFFFF:
+            raise ValueError ("Invalid Profile Descriptor")
+    for uuid in protocols:
+        if not is_valid_uuid (uuid):
+            raise ValueError ("invalid UUID specified in protocols")        
+
+    if sock._raw_sdp_record is not None:
+        raise IOError ("service already advertised")
+
+    avpairs = []
+
+    # service UUID
+    if len (service_id) > 0:
+        avpairs.append (("UInt16", SERVICE_ID_ATTRID))
+        avpairs.append (("UUID", service_id))
+
+    # service class list
+    if len (service_classes) > 0:
+        seq = [ ("UUID", svc_class) for svc_class in service_classes ]
+        avpairs.append (("UInt16", SERVICE_CLASS_ID_LIST_ATTRID))
+        avpairs.append (("ElemSeq", seq))
+
+    # set protocol and port information
+    assert sock._proto == RFCOMM
+    addr, port = sock.getsockname ()
+    avpairs.append (("UInt16", PROTOCOL_DESCRIPTOR_LIST_ATTRID))
+    l2cap_pd = ("ElemSeq", (("UUID", L2CAP_UUID),))
+    rfcomm_pd = ("ElemSeq", (("UUID", RFCOMM_UUID), ("UInt8", port)))
+    proto_list = [ l2cap_pd, rfcomm_pd ]
+    for proto_uuid in protocols:
+        proto_list.append (("ElemSeq", (("UUID", proto_uuid),)))
+    avpairs.append (("ElemSeq", proto_list))
+
+    # make the service publicly browseable
+    avpairs.append (("UInt16", BROWSE_GROUP_LIST_ATTRID))
+    avpairs.append (("ElemSeq", (("UUID", PUBLIC_BROWSE_GROUP),)))
+
+    # profile descriptor list
+    if len (profiles) > 0:
+        seq = [ ("ElemSeq", (("UUID",uuid), ("UInt16",version))) \
+                for uuid, version in profiles ]
+        avpairs.append (("UInt16", 
+            BLUETOOTH_PROFILE_DESCRIPTOR_LIST_ATTRID))
+        avpairs.append (("ElemSeq", seq))
+
+    # service name
+    avpairs.append (("UInt16", SERVICE_NAME_ATTRID))
+    avpairs.append (("String", name))
+
+    # service description
+    if len (description) > 0:
+        avpairs.append (("UInt16", SERVICE_DESCRIPTION_ATTRID))
+        avpairs.append (("String", description))
+    
+    # service provider
+    if len (provider) > 0:
+        avpairs.append (("UInt16", PROVIDER_NAME_ATTRID))
+        avpairs.append (("String", provider))
+
+    sock._raw_sdp_record = sdp_make_data_element ("ElemSeq", avpairs)
+#    pr = sdp_parse_raw_record (sock._raw_sdp_record)
+#    for attrid, val in pr.items ():
+#        print "%5s: %s" % (attrid, val)
+#    print binascii.hexlify (sock._raw_sdp_record)
+#    print repr (sock._raw_sdp_record)
+
+    sock._sdp_handle = bt.set_service_raw (sock._raw_sdp_record, True)
+
+
+
 # ============== SDP service registration and unregistration ============
 
 def discover_devices (duration=8, flush_cache=True, lookup_names=False,
@@ -30,10 +108,8 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False,
             ret.append(tuple(i for i in item))
     return ret
 
-
 def read_local_bdaddr():
     return bt.list_local()
-
 
 def lookup_name (address, timeout=10):
     if not is_valid_address (address): 
@@ -42,6 +118,15 @@ def lookup_name (address, timeout=10):
         return bt.lookup_name(address)
     except OSError:
         return None
+
+def set_packet_timeout (address, timeout):
+    raise NotImplementedError
+
+def get_acl_conn_handle(hci_sock, addr):
+    raise NotImplementedError
+
+def get_l2cap_options(sock):
+    raise NotImplementedError
 
 
 class BluetoothSocket:
@@ -130,82 +215,6 @@ class BluetoothSocket:
         raise Exception("Not yet implemented")
 
 
-def advertise_service (sock, name, service_id = "", service_classes = [], \
-        profiles = [], provider = "", description = "", protocols = []):
-    if service_id != "" and not is_valid_uuid (service_id):
-        raise ValueError ("invalid UUID specified for service_id")
-    for uuid in service_classes:
-        if not is_valid_uuid (uuid):
-            raise ValueError ("invalid UUID specified in service_classes")
-    for uuid, version in profiles:
-        if not is_valid_uuid (uuid) or  version < 0 or  version > 0xFFFF:
-            raise ValueError ("Invalid Profile Descriptor")
-    for uuid in protocols:
-        if not is_valid_uuid (uuid):
-            raise ValueError ("invalid UUID specified in protocols")        
-
-    if sock._raw_sdp_record is not None:
-        raise IOError ("service already advertised")
-
-    avpairs = []
-
-    # service UUID
-    if len (service_id) > 0:
-        avpairs.append (("UInt16", SERVICE_ID_ATTRID))
-        avpairs.append (("UUID", service_id))
-
-    # service class list
-    if len (service_classes) > 0:
-        seq = [ ("UUID", svc_class) for svc_class in service_classes ]
-        avpairs.append (("UInt16", SERVICE_CLASS_ID_LIST_ATTRID))
-        avpairs.append (("ElemSeq", seq))
-
-    # set protocol and port information
-    assert sock._proto == RFCOMM
-    addr, port = sock.getsockname ()
-    avpairs.append (("UInt16", PROTOCOL_DESCRIPTOR_LIST_ATTRID))
-    l2cap_pd = ("ElemSeq", (("UUID", L2CAP_UUID),))
-    rfcomm_pd = ("ElemSeq", (("UUID", RFCOMM_UUID), ("UInt8", port)))
-    proto_list = [ l2cap_pd, rfcomm_pd ]
-    for proto_uuid in protocols:
-        proto_list.append (("ElemSeq", (("UUID", proto_uuid),)))
-    avpairs.append (("ElemSeq", proto_list))
-
-    # make the service publicly browseable
-    avpairs.append (("UInt16", BROWSE_GROUP_LIST_ATTRID))
-    avpairs.append (("ElemSeq", (("UUID", PUBLIC_BROWSE_GROUP),)))
-
-    # profile descriptor list
-    if len (profiles) > 0:
-        seq = [ ("ElemSeq", (("UUID",uuid), ("UInt16",version))) \
-                for uuid, version in profiles ]
-        avpairs.append (("UInt16", 
-            BLUETOOTH_PROFILE_DESCRIPTOR_LIST_ATTRID))
-        avpairs.append (("ElemSeq", seq))
-
-    # service name
-    avpairs.append (("UInt16", SERVICE_NAME_ATTRID))
-    avpairs.append (("String", name))
-
-    # service description
-    if len (description) > 0:
-        avpairs.append (("UInt16", SERVICE_DESCRIPTION_ATTRID))
-        avpairs.append (("String", description))
-    
-    # service provider
-    if len (provider) > 0:
-        avpairs.append (("UInt16", PROVIDER_NAME_ATTRID))
-        avpairs.append (("String", provider))
-
-    sock._raw_sdp_record = sdp_make_data_element ("ElemSeq", avpairs)
-#    pr = sdp_parse_raw_record (sock._raw_sdp_record)
-#    for attrid, val in pr.items ():
-#        print "%5s: %s" % (attrid, val)
-#    print binascii.hexlify (sock._raw_sdp_record)
-#    print repr (sock._raw_sdp_record)
-
-    sock._sdp_handle = bt.set_service_raw (sock._raw_sdp_record, True)
-
 def stop_advertising (sock):
     if sock._raw_sdp_record is None:
         raise IOError ("service isn't advertised, " \
@@ -276,7 +285,39 @@ def find_service (name = None, uuid = None, address = None):
             results.extend ([ d for d in dresults if d["name"] == name ])
     return results
 
+# ================ BlueZ internal methods ================
+def _gethcisock (device_id = -1):
+    raise NotImplementedError
+
+def get_acl_conn_handle (hci_sock, addr):
+    raise NotImplementedError
+
+def write_flush_timeout (addr, timeout):
+    raise NotImplementedError
+
+def read_flush_timeout (addr):
+    raise NotImplementedError
+
 # =============== DeviceDiscoverer ==================
+def byte_to_signed_int(byte_):
+    """Convert a byte into a signed integer.
+    
+    Parameters
+    ----------
+    byte_ : int
+        A positive integer value between 0 and 255
+    
+    Returns
+    -------
+    int
+        An integer value between -128 and +127.
+        
+    """
+    if byte_ > 127:
+        return byte_ - 256
+    else:
+        return byte_
+
 class DeviceDiscoverer:
     def __init__ (self):
         raise NotImplementedError
