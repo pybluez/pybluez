@@ -15,7 +15,7 @@ User Guide
    :titlesonly:
    :glob:
 
-   user/install
+   install
 
 ##################
 Contributors Guide
