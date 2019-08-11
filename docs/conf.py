@@ -39,6 +39,7 @@ extensions = [
     'recommonmark'
    ]
 
+todo_include_todos = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -87,15 +88,11 @@ html_static_path = ['_static']
 
 # Sphinx needs to import modules to read their docstrings and follows imports
 # within files. Pybluez docs are built and published by CI on a linux box.
-# So windows and macos specific modules need to be mocked.
+# So windows and macos specific modules may need to be mocked.
 autodoc_mock_imports = [
-   'gattlib',
-   'bluetooth._bluetooth',
-   'fcntl', 
-   'bluetooth._msbt', 
-   'lightblue',
-   '_widcomm'
-  ]
+   'bluetooth._bluetooth', 
+   'bluetooth._msbt',
+]
 
 # Napoleon is a sphinx extension allowing autodoc to parse docstrings which don't follow
 # restructured text formatting rules. It will currently attempt to parse google and numpy
