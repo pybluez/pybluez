@@ -91,7 +91,7 @@ active.
 Installation
 ------------
 
-Please refer to the [installation instructions](/docs/user/install.rst).
+Please refer to the [installation instructions](/docs/install.rst).
 
 License
 -------
