@@ -35,6 +35,9 @@ or download the latest version using the links below.
 | master.zip_ | master.tar.gz_ | 
 +------+------+----------------+
 
+.. _master.zip: https://github.com/pybluez/pybluez/archive/master.zip
+.. _master.tar.gz: https://github.com/pybluez/pybluez/archive/master.tar.gz
+
 Extract the zip or tar and cd to the extracted file directory, then:
 ::
 
@@ -78,8 +81,3 @@ macOS Dependencies
 """""""""""""""""" 
 - Xcode
 - PyObjc 3.1b or later (https://pythonhosted.org/pyobjc/install.html#manual-installation)
-
-
-
-.. _master.zip: https://github.com/pybluez/pybluez/archive/master.zip
-.. _master.tar.gz: https://github.com/pybluez/pybluez/archive/master.tar.gz
