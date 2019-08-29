@@ -1,9 +1,24 @@
 #!/usr/bin/env python
+import os
+import platform
+import sys
 
 from setuptools import setup, Extension
-import sys
-import platform
-import os
+
+
+# This marks the wheel as always being platform-specific and not pure Python
+# See: https://stackoverflow.com/q/45150304/145504
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    class impure_bdist_wheel(_bdist_wheel):
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+except ImportError:
+    # If the wheel module isn't available, no problem -- we're not doing a
+    # bdist_wheel in that case anyway.
+    impure_bdist_wheel = None
+
 
 packages = ['bluetooth']
 package_dir = dict()
@@ -14,27 +29,27 @@ eager_resources = list()
 zip_safe = True
 
 class SDKException(Exception):
-	def __init__(self,message=None):
-		self.message = message
+    def __init__(self,message=None):
+        self.message = message
 
-		if sys.version < '3.3':
-			vs_version = 9
-		elif '3.3' <= sys.version < '3.5':
-			vs_version = 10
-		elif sys.version >= '3.5':
-			vs_version = 14
-		else:
-			vs_version = None
+        if sys.version_info < (3,3):
+            vs_version = 9
+        elif sys.version_info < (3,5):
+            vs_version = 10
+        elif sys.version_info >= (3,5):
+            vs_version = 14
+        else:
+            vs_version = None
 
-		if vs_version != None:
-			self.info = "For python {0}.{1} ".format(
+        if vs_version != None:
+            self.info = "For python {0}.{1} ".format(
                                 sys.version_info.major, 
                                 sys.version_info.minor)
-			self.info = self.info + "consider installing Visual Studio {0}".format(
+            self.info = self.info + "consider installing Visual Studio {0}".format(
                                 vs_version)
-	def __str__(self):
-		return self.message+"\n"+self.info
-		
+    def __str__(self):
+        return self.message+"\n"+self.info
+        
 
 def find_MS_SDK():
     candidate_roots = (os.getenv('ProgramFiles'), os.getenv('ProgramW6432'),
@@ -68,7 +83,7 @@ def find_MS_SDK():
             if os.path.exists(candidate_sdk):
                 return candidate_sdk
     raise SDKException("Could not find the Windows Platform SDK.")
-	
+    
 if sys.platform == 'win32':
     try:
         PSDK_PATH = find_MS_SDK()
@@ -105,18 +120,22 @@ if sys.platform == 'win32':
 
 elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
-                        include_dirs = ["./port3",],
-                        libraries = ['bluetooth'],
-                        #extra_compile_args=['-O0'],
-                        sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
+                     include_dirs = ["./port3",],
+                     libraries = ['bluetooth'],
+                     #extra_compile_args=['-O0'],
+                     sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
     ext_modules.append(mod1)
 
 elif sys.platform.startswith("darwin"):
     packages.append('lightblue')
     package_dir['lightblue'] = 'macos'
-    install_requires += ['pyobjc-core>=3.1', 'pyobjc-framework-Cocoa>=3.1']
     zip_safe = False
-    
+
+    if sys.version_info >= (3,6):
+        install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6']
+    else:
+        install_requires += ['pyobjc-core>=3.1,<6', 'pyobjc-framework-Cocoa>=3.1,<6']
+
     # FIXME: This is inelegant, how can we cover the cases?
     build_cmds = set(['bdist', 'bdist_egg', 'bdist_wheel'])
     if build_cmds & set(sys.argv):
@@ -163,9 +182,9 @@ setup(name='PyBluez',
                    'Programming Language :: Python :: 3',
                    'Topic :: Communications'],
       download_url='https://github.com/pybluez/pybluez',
-      long_description='Bluetooth Python extension module to allow Python "\
-                "developers to use system Bluetooth resources. PyBluez works "\
-                "with GNU/Linux, macOS, and Windows XP.',
+      long_description='Bluetooth Python extension module to allow Python '\
+                'developers to use system Bluetooth resources. PyBluez works '\
+                'with GNU/Linux, macOS, and Windows.',
       maintainer='Piotr Karulis',
       license='GPL',
       extras_require={'ble': ['gattlib==0.20150805']},
@@ -174,4 +193,6 @@ setup(name='PyBluez',
       install_requires=install_requires,
       package_data=package_data,
       eager_resources=eager_resources,
-      zip_safe=zip_safe)
+      zip_safe=zip_safe,
+      cmdclass={'bdist_wheel': impure_bdist_wheel},
+)

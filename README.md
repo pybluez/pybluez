@@ -1,7 +1,7 @@
 PyBluez
 =======
 
-[![Build Status](https://travis-ci.org/pybluez/pybluez.svg?branch=master)](https://travis-ci.org/pybluez/pybluez)
+[![Build Status](https://github.com/pybluez/pybluez/workflows/Build/badge.svg)](https://github.com/pybluez/pybluez/actions?query=workflow%3ABuild)
 
 The PyBluez module allows Python code to access the host machine's Bluetooth
 resources.
@@ -108,4 +108,3 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 > You should have received a copy of the GNU General Public License along with
 PyBluez; if not, write to the Free Software Foundation, Inc., 51 Franklin St,
 Fifth Floor, Boston, MA 02110-1301 USA
-
