@@ -8,8 +8,10 @@
 from bluetooth import *
 import sys
 
-if sys.version < '3':
+try:
     input = raw_input
+except NameError:
+    pass  # Python 3
 
 addr = None
 
