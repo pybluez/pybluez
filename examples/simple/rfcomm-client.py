@@ -18,6 +18,7 @@ addr = None
 if len(sys.argv) < 2:
     print("no device specified.  Searching all nearby bluetooth devices for")
     print("the SampleServer service")
+    sys.exit(2)
 else:
     addr = sys.argv[1]
     print("Searching for SampleServer on %s" % addr)
