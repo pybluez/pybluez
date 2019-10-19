@@ -1,11 +1,10 @@
 # performs a simple device inquiry, followed by a remote name request of each
 # discovered device
 
-import os
-import sys
 import struct
-import bluetooth._bluetooth as bluez
+import sys
 import bluetooth
+import bluetooth._bluetooth as bluez
 
 def printpacket(pkt):
     for c in pkt:

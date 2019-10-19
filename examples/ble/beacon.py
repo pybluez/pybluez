@@ -1,5 +1,5 @@
-from bluetooth.ble import BeaconService
 import time
+from bluetooth.ble import BeaconService
 
 service = BeaconService()
 

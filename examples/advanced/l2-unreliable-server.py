@@ -1,4 +1,3 @@
-import sys
 import bluetooth
 
 server_sock=bluetooth.BluetoothSocket( bluetooth.L2CAP )

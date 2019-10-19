@@ -1,6 +1,3 @@
-import os
-import sys
-import struct
 import bluetooth
 
 

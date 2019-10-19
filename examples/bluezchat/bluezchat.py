@@ -9,10 +9,6 @@ sessions with them.
 """
 
 
-import os
-import sys
-import time
-
 import gtk
 import gobject
 import gtk.glade

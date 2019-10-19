@@ -1,7 +1,4 @@
 import sys
-import fcntl
-import struct
-import array
 import bluetooth
 import bluetooth._bluetooth as bt   # low level bluetooth wrappers.
 

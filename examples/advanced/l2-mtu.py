@@ -1,5 +1,4 @@
 import sys
-import struct
 import bluetooth
 
 def usage():

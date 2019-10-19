@@ -6,8 +6,8 @@
 #
 # XXX Linux only (5/5/2006)
 
-import bluetooth
 import select
+import bluetooth
 
 class MyDiscoverer(bluetooth.DeviceDiscoverer):
     

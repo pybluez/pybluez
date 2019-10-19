@@ -1,6 +1,5 @@
-import os
-import sys
 import struct
+import sys
 import bluetooth._bluetooth as bluez
 
 def read_inquiry_scan_activity(sock):
