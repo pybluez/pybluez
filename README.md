@@ -8,7 +8,7 @@ resources.
 
 | Linux  | Raspberry Pi | macOS | Windows |
 | ------ | ------------ | ----- | ------- |
-|        |              |       |         |
+|  Ok    |   Ok         |  Ok   | Ok      |
 
 
 
