@@ -1,10 +1,9 @@
 import sys
 import bluetooth
-import bluetooth._bluetooth as bt   # low level bluetooth wrappers.
-
+import bluetooth._bluetooth as bt  # low level bluetooth wrappers
 
 # Create the client socket
-sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
+sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
 
 if len(sys.argv) < 4:
     print("Usage: l2-unreliable-client.py <addr> <timeout> <num_packets>")
@@ -13,7 +12,7 @@ if len(sys.argv) < 4:
     print("  num_packets - number of 627-byte packets to send on connect")
     sys.exit(2)
 
-bt_addr=sys.argv[1]
+bt_addr = sys.argv[1]
 timeout = int(sys.argv[2])
 num_packets = int(sys.argv[3])
 
@@ -24,7 +23,7 @@ sock.connect((bt_addr, port))
 print("Connected. Adjusting link parameters.")
 print("Current flush timeout is {} ms".format(bluetooth.read_flush_timeout(bt_addr)))
 try:
-    bluetooth.write_flush_timeout( bt_addr, timeout )
+    bluetooth.write_flush_timeout(bt_addr, timeout)
 except bt.error as e:
     print("Error setting flush timeout. Are you sure you're superuser?")
     print(e)
@@ -35,6 +34,6 @@ totalsent = 0
 for i in range(num_packets):
     pkt = "0" * 672
     totalsent += sock.send(pkt)
-print("Sent {} bytes total.".format(totalsent))
 
+print("Sent {} bytes total.".format(totalsent))
 sock.close()

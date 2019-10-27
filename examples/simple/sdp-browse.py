@@ -12,7 +12,8 @@ if len(sys.argv) < 2:
     sys.exit(2)
 
 target = sys.argv[1]
-if target == "all": target = None
+if target == "all":
+    target = None
 
 services = bluetooth.find_service(address=target)
 

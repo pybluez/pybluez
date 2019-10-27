@@ -1,6 +1,4 @@
 import bluetooth
 
-
 if __name__ == "__main__":
-    bdaddr = bluetooth.read_local_bdaddr()
-    print(bdaddr)
+    print(bluetooth.read_local_bdaddr())

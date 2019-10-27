@@ -4,20 +4,18 @@
 
 import bluetooth
 
-server_sock=bluetooth.BluetoothSocket( bluetooth.L2CAP )
+server_sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
 
 port = 0x1001
 
-server_sock.bind(("",port))
+server_sock.bind(("", port))
 server_sock.listen(1)
 
 #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ef"
-#bluetooth.advertise_service( server_sock, "SampleServerL2CAP",
-#                   service_id = uuid,
-#                   service_classes = [ uuid ]
-#                    )
+#bluetooth.advertise_service(server_sock, "SampleServerL2CAP",
+#                            service_id=uuid, service_classes = [uuid])
                    
-client_sock,address = server_sock.accept()
+client_sock, address = server_sock.accept()
 print("Accepted connection from {}".format(address))
 
 data = client_sock.recv(1024)

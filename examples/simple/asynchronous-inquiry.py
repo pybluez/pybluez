@@ -9,6 +9,7 @@
 import select
 import bluetooth
 
+
 class MyDiscoverer(bluetooth.DeviceDiscoverer):
     
     def pre_inquiry(self):
@@ -21,13 +22,9 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
         # voodoo magic specified at:
         #
         # https://www.bluetooth.org/foundry/assignnumb/document/baseband
-        major_classes = ( "Miscellaneous", 
-                          "Computer", 
-                          "Phone", 
-                          "LAN/Network Access point", 
-                          "Audio/Video", 
-                          "Peripheral", 
-                          "Imaging" )
+        major_classes = ("Miscellaneous", "Computer", "Phone",
+                         "LAN/Network Access point", "Audio/Video",
+                         "Peripheral", "Imaging" )
         major_class = (device_class >> 8) & 0xf
         if major_class < 7:
             print("  {}".format(major_classes[major_class]))
@@ -35,14 +32,10 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
             print("  Uncategorized")
 
         print("  Services:")
-        service_classes = ( (16, "positioning"), 
-                            (17, "networking"), 
-                            (18, "rendering"), 
-                            (19, "capturing"),
-                            (20, "object transfer"), 
-                            (21, "audio"), 
-                            (22, "telephony"), 
-                            (23, "information"))
+        service_classes = ((16, "positioning"), (17, "networking"),
+                           (18, "rendering"), (19, "capturing"),
+                           (20, "object transfer"), (21, "audio"),
+                           (22, "telephony"), (23, "information"))
 
         for bitpos, classname in service_classes:
             if device_class & (1 << (bitpos-1)):
@@ -52,15 +45,17 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
     def inquiry_complete(self):
         self.done = True
 
-d = MyDiscoverer()
-d.find_devices(lookup_names = True)
 
-readfiles = [ d, ]
+d = MyDiscoverer()
+d.find_devices(lookup_names=True)
+
+readfiles = [d, ]
 
 while True:
-    rfds = select.select( readfiles, [], [] )[0]
+    rfds = select.select(readfiles, [], [])[0]
 
     if d in rfds:
         d.process_event()
 
-    if d.done: break
+    if d.done:
+        break
