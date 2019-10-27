@@ -15,7 +15,7 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
         self.done = False
     
     def device_discovered(self, address, device_class, rssi, name):
-        print("%s - %s" % (address, name))
+        print("{} - {}".format(address, name))
         
         # get some information out of the device class and display it.
         # voodoo magic specified at:
@@ -30,11 +30,11 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
                           "Imaging" )
         major_class = (device_class >> 8) & 0xf
         if major_class < 7:
-            print("  %s" % major_classes[major_class])
+            print("  {}".format(major_classes[major_class]))
         else:
             print("  Uncategorized")
 
-        print("  services:")
+        print("  Services:")
         service_classes = ( (16, "positioning"), 
                             (17, "networking"), 
                             (18, "rendering"), 
@@ -46,8 +46,8 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
 
         for bitpos, classname in service_classes:
             if device_class & (1 << (bitpos-1)):
-                print("    %s" % classname)
-        print("  RSSI: " + str(rssi))
+                print("    {}".format(classname))
+        print("  RSSI: {}".format(str(rssi)))
 
     def inquiry_complete(self):
         self.done = True

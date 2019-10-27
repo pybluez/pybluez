@@ -2,10 +2,9 @@ import sys
 import bluetooth
 
 def usage():
-    print("usage: l2-mtu < server | client > [options]")
-    print("")
-    print("l2-mtu server            to start in server mode")
-    print("l2-mtu client <addr>     to start in client mode and connect to addr")
+    print("Usage: l2-mtu.py < server | client > [options]")
+    print("  l2-mtu.py server - to start in server mode")
+    print("  l2-mtu.py client <addr> - to start in client mode and connect to addr")
     sys.exit(2)
 
 if len(sys.argv) < 2: usage()
@@ -19,12 +18,12 @@ if mode == "server":
     bluetooth.set_l2cap_mtu( server_sock, 65535 )
     server_sock.listen(1)
     while True:
-        print("waiting for incoming connection")
+        print("Waiting for incoming connection...")
         client_sock,address = server_sock.accept()
-        print("Accepted connection from %s" % str(address))
+        print("Accepted connection from {}.".format(str(address)))
 
 
-        print("waiting for data")
+        print("Waiting for data...")
         total = 0
         while True:
             try:
@@ -32,20 +31,20 @@ if mode == "server":
             except bluetooth.BluetoothError as e:
                 break
             if len(data) == 0: break
-            print("received packet of size %d" % len(data))
+            print("Received packet of size {}.".format(len(data)))
 
         client_sock.close()
 
-        print("connection closed")
+        print("Connection closed.")
 
     server_sock.close()
 else:
     sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
-    print("connected.  Adjusting link parameters.")
+    print("Connected. Adjusting link parameters.")
     bluetooth.set_l2cap_mtu( sock, 65535 )
 
     bt_addr = sys.argv[2]
-    print("trying to connect to %s:1001" % bt_addr)
+    print("Trying to connect to {}:1001...".format(bt_addr))
     port = 0x1001
     sock.connect((bt_addr, port))
 
@@ -54,6 +53,6 @@ else:
     for i in range(1, 65535, 100):
         pkt = "0" * i
         sent = sock.send(pkt)
-        print("sent packet of size %d (tried %d)" % (sent, len(pkt)))
+        print("Sent packet of size {} (tried {}).".format(sent, len(pkt)))
 
     sock.close()

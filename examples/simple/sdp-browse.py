@@ -7,8 +7,8 @@ import sys
 import bluetooth
 
 if len(sys.argv) < 2:
-    print("usage: sdp-browse <addr>")
-    print("   addr can be a bluetooth address, \"localhost\", or \"all\"")
+    print("Usage: sdp-browse.py <addr>")
+    print("   addr - can be a bluetooth address, \"localhost\", or \"all\"")
     sys.exit(2)
 
 target = sys.argv[1]
@@ -17,19 +17,17 @@ if target == "all": target = None
 services = bluetooth.find_service(address=target)
 
 if len(services) > 0:
-    print("found %d services on %s" % (len(services), sys.argv[1]))
-    print("")
+    print("Found {} services on {}.".format(len(services), sys.argv[1]))
 else:
-    print("no services found")
+    print("No services found.")
 
 for svc in services:
-    print("Service Name: %s"    % svc["name"])
-    print("    Host:        %s" % svc["host"])
-    print("    Description: %s" % svc["description"])
-    print("    Provided By: %s" % svc["provider"])
-    print("    Protocol:    %s" % svc["protocol"])
-    print("    channel/PSM: %s" % svc["port"])
-    print("    svc classes: %s "% svc["service-classes"])
-    print("    profiles:    %s "% svc["profiles"])
-    print("    service id:  %s "% svc["service-id"])
-    print("")
+    print("\nService Name: {}".format(svc["name"]))
+    print("    Host:        {}".format(svc["host"]))
+    print("    Description: {}".format(svc["description"]))
+    print("    Provided By: {}".format(svc["provider"]))
+    print("    Protocol:    {}".format(svc["protocol"]))
+    print("    channel/PSM: {}".format(svc["port"]))
+    print("    svc classes: {}".format(svc["service-classes"]))
+    print("    profiles:    {}".format(svc["profiles"]))
+    print("    service id:  {}".format(svc["service-id"]))

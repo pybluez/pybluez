@@ -13,23 +13,23 @@ except NameError:
 sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
 
 if len(sys.argv) < 2:
-    print("usage: l2capclient.py <addr>")
+    print("Usage: l2capclient.py <addr>")
     sys.exit(2)
 
 bt_addr=sys.argv[1]
 port = 0x1001
 
-print("trying to connect to %s on PSM 0x%X" % (bt_addr, port))
+print("Trying to connect to %s on PSM 0x%X..." % (bt_addr, port))
 
 sock.connect((bt_addr, port))
 
-print("connected.  type stuff")
+print("Connected. Type something...")
 while True:
     data = input()
     if(len(data) == 0): break
     sock.send(data)
     data = sock.recv(1024)
-    print("Data received:", str(data))
+    print("Data received: {}".format(str(data)))
 
 sock.close()
 
