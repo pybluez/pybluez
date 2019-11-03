@@ -1,8 +1,11 @@
-#!/usr/bin/python
-# -*- mode: python; coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez example read_name.py
 
-# Copyright (C) 2014, Oscar Acena <oscaracena@gmail.com>
-# This software is under the terms of GPLv3 or later.
+Copyright (C) 2014, Oscar Acena <oscaracena@gmail.com>
+This software is under the terms of GPLv3 or later.
+"""
 
 import sys
 from bluetooth.ble import GATTRequester

@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez advanced example l2-unreliable-server.py
+"""
+
 import bluetooth
 
 server_sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)

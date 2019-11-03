@@ -1,7 +1,13 @@
-# file: sdp-browse.py
-# auth: Albert Huang <albert@csail.mit.edu>
-# desc: displays services being advertised on a specified bluetooth device
-# $Id: sdp-browse.py 393 2006-02-24 20:30:15Z albert $
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez simple example sdp-browse.py
+
+Displays services being advertised on a specified bluetooth device.
+
+Author: Albert Huang <albert@csail.mit.edu>
+$Id: sdp-browse.py 393 2006-02-24 20:30:15Z albert $
+"""
 
 import sys
 import bluetooth

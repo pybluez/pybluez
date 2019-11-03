@@ -1,10 +1,15 @@
-# file: asynchronous-inquiry.py
-# auth: Albert Huang <albert@csail.mit.edu>
-# desc: demonstration of how to do asynchronous device discovery by subclassing
-#       the DeviceDiscoverer class
-# $Id: asynchronous-inquiry.py 405 2006-05-06 00:39:50Z albert $
-#
-# XXX Linux only (5/5/2006)
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez simple example asyncronous-inquiry.py
+
+Demonstration of how to do asynchronous device discovery by subclassing
+the DeviceDiscoverer class
+Linux only (5/5/2006)
+
+Author: Albert Huang <albert@csail.mit.edu>
+$Id: asynchronous-inquiry.py 405 2006-05-06 00:39:50Z albert $
+"""
 
 import select
 import bluetooth

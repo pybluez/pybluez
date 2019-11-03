@@ -1,6 +1,12 @@
-# file: l2capclient.py
-# desc: Demo L2CAP server for pybluez.
-# $Id: l2capserver.py 524 2007-08-15 04:04:52Z albert $
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez simple example l2capserver.py
+
+Demo L2CAP server for pybluez.
+
+$Id: l2capserver.py 524 2007-08-15 04:04:52Z albert $
+"""
 
 import bluetooth
 

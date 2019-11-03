@@ -1,6 +1,12 @@
-# file: l2capclient.py
-# desc: Demo L2CAP client for bluetooth module.
-# $Id: l2capclient.py 524 2007-08-15 04:04:52Z albert $
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez simple example l2capclient.py
+
+Demo L2CAP client for bluetooth module.
+
+$Id: l2capclient.py 524 2007-08-15 04:04:52Z albert $
+"""
 
 import sys
 import bluetooth

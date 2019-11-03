@@ -1,5 +1,11 @@
-# performs a simple device inquiry, followed by a remote name request of each
-# discovered device
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez advanced example inquiry-with-rssi.py
+
+Perform a simple device inquiry, followed by a remote name request of each
+discovered device
+"""
 
 import struct
 import sys

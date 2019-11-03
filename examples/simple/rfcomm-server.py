@@ -1,8 +1,13 @@
-# file: rfcomm-server.py
-# auth: Albert Huang <albert@csail.mit.edu>
-# desc: simple demonstration of a server application that uses RFCOMM sockets
-#
-# $Id: rfcomm-server.py 518 2007-08-10 07:20:07Z albert $
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+PyBluez simple example rfcomm-server.py
+
+Simple demonstration of a server application that uses RFCOMM sockets.
+
+Author: Albert Huang <albert@csail.mit.edu>
+$Id: rfcomm-server.py 518 2007-08-10 07:20:07Z albert $
+"""
 
 import bluetooth
 
