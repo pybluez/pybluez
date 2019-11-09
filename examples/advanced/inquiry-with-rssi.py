@@ -37,7 +37,7 @@ def read_inquiry_mode(sock):
                        bluez.OCF_READ_INQUIRY_MODE)
 
     pkt = sock.recv(255)
-    status,mode = struct.unpack("xxxxxxBB", pkt)
+    status, mode = struct.unpack("xxxxxxBB", pkt)
     if not status:
         mode = -1
 
@@ -57,7 +57,7 @@ def write_inquiry_mode(sock, mode):
     opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL,
                                    bluez.OCF_WRITE_INQUIRY_MODE)
     bluez.hci_filter_set_ptype(flt, bluez.HCI_EVENT_PKT)
-    bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE);
+    bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE)
     bluez.hci_filter_set_opcode(flt, opcode)
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, flt)
 

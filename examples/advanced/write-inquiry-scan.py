@@ -21,7 +21,7 @@ def read_inquiry_scan_activity(sock):
     opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL, 
             bluez.OCF_READ_INQ_ACTIVITY)
     bluez.hci_filter_set_ptype(flt, bluez.HCI_EVENT_PKT)
-    bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE);
+    bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE)
     bluez.hci_filter_set_opcode(flt, opcode)
     sock.setsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, flt )
 
@@ -57,7 +57,7 @@ def write_inquiry_scan_activity(sock, interval, window):
     bluez.hci_filter_set_opcode(flt, opcode)
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, flt)
 
-    # send the command!
+    # send the command
     bluez.hci_send_cmd(sock, bluez.OGF_HOST_CTL, bluez.OCF_WRITE_INQ_ACTIVITY,
                        struct.pack("HH", interval, window))
 
