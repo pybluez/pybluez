@@ -14,6 +14,7 @@ sessions with them.
 import gtk
 import gobject
 import gtk.glade
+
 import bluetooth
 import bluetooth._bluetooth as bluez
 

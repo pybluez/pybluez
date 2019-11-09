@@ -8,6 +8,7 @@ This software is under the terms of GPLv3 or later.
 """
 
 import sys
+
 from bluetooth.ble import GATTRequester
 
 

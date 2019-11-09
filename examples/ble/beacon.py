@@ -7,6 +7,7 @@ Advertises a bluethooth low energy beacon for 15 seconds.
 """
 
 import time
+
 from bluetooth.ble import BeaconService
 
 service = BeaconService()

@@ -5,6 +5,7 @@ PyBluez advanced example l2-mtu.py
 """
 
 import sys
+
 import bluetooth
 
 def usage():

@@ -11,6 +11,7 @@ $Id: rfcomm-client.py 424 2006-08-24 03:35:54Z albert $
 """
 
 import sys
+
 import bluetooth
 
 addr = None

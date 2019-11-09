@@ -10,6 +10,7 @@ $Id: sdp-browse.py 393 2006-02-24 20:30:15Z albert $
 """
 
 import sys
+
 import bluetooth
 
 if len(sys.argv) < 2:

@@ -9,6 +9,7 @@ $Id: l2capclient.py 524 2007-08-15 04:04:52Z albert $
 """
 
 import sys
+
 import bluetooth
 
 sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)

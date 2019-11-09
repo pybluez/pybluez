@@ -5,8 +5,9 @@ PyBluez advanced example l2-unreliable-client.py
 """
 
 import sys
+
 import bluetooth
-import bluetooth._bluetooth as bt  # low level bluetooth wrappers
+import bluetooth._bluetooth as bluez  # low level bluetooth wrappers
 
 # Create the client socket
 sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
@@ -30,7 +31,7 @@ print("Connected. Adjusting link parameters.")
 print("Current flush timeout is {} ms.".format(bluetooth.read_flush_timeout(bt_addr)))
 try:
     bluetooth.write_flush_timeout(bt_addr, timeout)
-except bt.error as e:
+except bluez.error as e:
     print("Error setting flush timeout. Are you sure you're superuser?")
     print(e)
     sys.exit(1)

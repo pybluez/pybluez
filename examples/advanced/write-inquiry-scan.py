@@ -6,7 +6,8 @@ PyBluez advanced example write-inquiry-scan.py
 
 import struct
 import sys
-import bluetooth._bluetooth as bluez
+
+import bluetooth._bluetooth as bluez  # low level bluetooth wrappers
 
 def read_inquiry_scan_activity(sock):
     """returns the current inquiry scan interval and window, 

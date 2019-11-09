@@ -9,8 +9,9 @@ discovered device
 
 import struct
 import sys
+
 import bluetooth
-import bluetooth._bluetooth as bluez
+import bluetooth._bluetooth as bluez  # low level bluetooth wrappers
 
 def printpacket(pkt):
     for c in pkt:

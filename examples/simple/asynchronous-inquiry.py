@@ -12,6 +12,7 @@ $Id: asynchronous-inquiry.py 405 2006-05-06 00:39:50Z albert $
 """
 
 import select
+
 import bluetooth
 
 
