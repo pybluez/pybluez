@@ -15,7 +15,7 @@ import bluetooth._bluetooth as bluez  # low level bluetooth wrappers
 
 def printpacket(pkt):
     for c in pkt:
-        sys.stdout.write("%02x " % struct.unpack("B", c)[0])
+        sys.stdout.write("{%02x} ".format(struct.unpack("B", c)[0]))
 
 def read_inquiry_mode(sock):
     """returns the current mode, or -1 on failure"""
@@ -125,7 +125,7 @@ def device_inquiry_with_with_rssi(sock):
                 results.append((addr, -1))
                 print("[{}] (no RRSI)".format(addr))
         else:
-            print("Unrecognized packet type 0x%02x." % ptype)
+            print("Unrecognized packet type 0x{%02x}.".format(ptype))
 
     # restore old filter
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, old_filter)
