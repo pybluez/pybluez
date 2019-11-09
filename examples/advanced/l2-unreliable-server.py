@@ -22,7 +22,7 @@ while True:
             data = client_sock.recv(1024)
         except bluetooth.BluetoothError as e:
             break
-        if len(data) == 0:
+        if not data:
             break
         total += len(data)
         print("Total byte read:", total)

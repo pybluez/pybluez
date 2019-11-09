@@ -34,7 +34,7 @@ def read_inquiry_scan_activity(sock):
     interval = bluez.btohs(interval)
     interval = (interval >> 8) | ((interval & 0xFF) << 8)
     window = (window >> 8) | ((window & 0xFF) << 8)
-    if status != 0:
+    if status:
         mode = -1
 
     # restore old filter
@@ -66,7 +66,7 @@ def write_inquiry_scan_activity(sock, interval, window):
 
     # restore old filter
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, old_filter)
-    if status != 0:
+    if status:
         return -1
     return 0
 

@@ -39,7 +39,7 @@ if mode == "server":
                 data = client_sock.recv(65535)
             except bluetooth.BluetoothError as e:
                 break
-            if len(data) == 0:
+            if not data:
                 break
             print("Received packet of size", len(data))
         client_sock.close()

@@ -38,7 +38,7 @@ def read_inquiry_mode(sock):
 
     pkt = sock.recv(255)
     status,mode = struct.unpack("xxxxxxBB", pkt)
-    if status != 0:
+    if not status:
         mode = -1
 
     # restore old filter
@@ -71,7 +71,7 @@ def write_inquiry_mode(sock, mode):
 
     # restore old filter
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, old_filter)
-    if status != 0:
+    if not status:
         return -1
 
     return 0
@@ -113,7 +113,7 @@ def device_inquiry_with_with_rssi(sock):
             break
         elif event == bluez.EVT_CMD_STATUS:
             status, ncmd, opcode = struct.unpack("BBH", pkt[3:7])
-            if status != 0:
+            if status:
                 print("Uh oh...")
                 printpacket(pkt[3:7])
                 break
@@ -156,7 +156,7 @@ if mode != 1:
         print("Error writing inquiry mode.  Are you sure you're root?")
         print(e)
         sys.exit(1)
-    if result != 0:
+    if result:
         print("Error while setting inquiry mode")
     print("Result: ", result)
 

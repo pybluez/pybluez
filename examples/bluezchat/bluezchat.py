@@ -90,7 +90,7 @@ class BluezChatGui:
 
     def send_button_clicked(self, widget):
         text = self.input_tb.get_text()
-        if len(text) == 0:
+        if not text:
             return
 
         for addr, sock in list(self.peers.items()):
@@ -136,7 +136,7 @@ class BluezChatGui:
         address = self.addresses[sock]
         data = sock.recv(1024)
 
-        if len(data) == 0:
+        if not data:
             self.add_text("\nlost connection with " + address)
             gobject.source_remove(self.sources[address])
             del self.sources[address]
