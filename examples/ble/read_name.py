@@ -7,6 +7,7 @@ Copyright (C) 2014, Oscar Acena <oscaracena@gmail.com>
 This software is under the terms of GPLv3 or later.
 """
 
+from __future__ import print_function  # Python 2 compatibility
 import sys
 
 from bluetooth.ble import GATTRequester
