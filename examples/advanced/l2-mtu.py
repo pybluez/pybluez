@@ -29,7 +29,7 @@ if mode == "server":
     while True:
         print("Waiting for incoming connection...")
         client_sock,address = server_sock.accept()
-        print("Accepted connection from {}.".format(str(address)))
+        print("Accepted connection from", str(address))
 
         print("Waiting for data...")
         total = 0
@@ -40,7 +40,7 @@ if mode == "server":
                 break
             if len(data) == 0:
                 break
-            print("Received packet of size {}.".format(len(data)))
+            print("Received packet of size", len(data))
         client_sock.close()
         print("Connection closed.")
 

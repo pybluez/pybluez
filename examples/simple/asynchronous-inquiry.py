@@ -32,7 +32,7 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
                          "Peripheral", "Imaging" )
         major_class = (device_class >> 8) & 0xf
         if major_class < 7:
-            print("  {}".format(major_classes[major_class]))
+            print(" ", major_classes[major_class])
         else:
             print("  Uncategorized")
 
@@ -44,8 +44,8 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
 
         for bitpos, classname in service_classes:
             if device_class & (1 << (bitpos-1)):
-                print("    {}".format(classname))
-        print("  RSSI: {}".format(str(rssi)))
+                print("   ", classname)
+        print("  RSSI:", rssi)
 
     def inquiry_complete(self):
         self.done = True

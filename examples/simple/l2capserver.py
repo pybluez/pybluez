@@ -22,15 +22,15 @@ server_sock.listen(1)
 #                            service_id=uuid, service_classes = [uuid])
                    
 client_sock, address = server_sock.accept()
-print("Accepted connection from {}".format(address))
+print("Accepted connection from", address)
 
 data = client_sock.recv(1024)
-print("Data received: {}".format(str(data)))
+print("Data received:", str(data))
 
 while data:
-    client_sock.send("Echo => {}".format(str(data)))
+    client_sock.send("Echo =>", str(data))
     data = client_sock.recv(1024)
-    print("Data received: {}".format(str(data)))
+    print("Data received:", str(data))
 
 client_sock.close()
 server_sock.close()

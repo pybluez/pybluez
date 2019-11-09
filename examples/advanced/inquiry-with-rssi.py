@@ -14,7 +14,7 @@ import bluetooth._bluetooth as bluez
 
 def printpacket(pkt):
     for c in pkt:
-        sys.stdout.write("%02x {}".format(struct.unpack("B", c)[0]))
+        sys.stdout.write("%02x " % struct.unpack("B", c)[0])
 
 def read_inquiry_mode(sock):
     """returns the current mode, or -1 on failure"""
@@ -113,7 +113,7 @@ def device_inquiry_with_with_rssi(sock):
         elif event == bluez.EVT_CMD_STATUS:
             status, ncmd, opcode = struct.unpack("BBH", pkt[3:7])
             if status != 0:
-                print("uh oh...")
+                print("Uh oh...")
                 printpacket(pkt[3:7])
                 break
         elif event == bluez.EVT_INQUIRY_RESULT:
@@ -145,7 +145,7 @@ except Exception as e:
     print("Are you sure this a bluetooth 1.2 device?")
     print(e)
     sys.exit(1)
-print("Current inquiry mode is {}".format(mode))
+print("Current inquiry mode is", mode)
 
 if mode != 1:
     print("Writing inquiry mode...")
@@ -157,6 +157,6 @@ if mode != 1:
         sys.exit(1)
     if result != 0:
         print("Error while setting inquiry mode")
-    print("Result: {}".format(result))
+    print("Result: ", result)
 
 device_inquiry_with_with_rssi(sock)

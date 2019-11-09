@@ -16,8 +16,8 @@ import bluetooth
 addr = None
 
 if len(sys.argv) < 2:
-    print("No device specified. Searching all nearby bluetooth devices for t" \
-          "he SampleServer service...")
+    print("No device specified. Searching all nearby bluetooth devices for " \
+          "the SampleServer service...")
 else:
     addr = sys.argv[1]
     print("Searching for SampleServer on {}...".format(addr))

@@ -20,7 +20,7 @@ if len(sys.argv) < 2:
 bt_addr = sys.argv[1]
 port = 0x1001
 
-print("Trying to connect to %s on PSM 0x%X..." % (bt_addr, port))
+print("Trying to connect to {} on PSM 0x{}...".format(bt_addr, port))
 
 sock.connect((bt_addr, port))
 
@@ -31,6 +31,6 @@ while True:
         break
     sock.send(data)
     data = sock.recv(1024)
-    print("Data received: {}".format(str(data)))
+    print("Data received:", str(data))
 
 sock.close()

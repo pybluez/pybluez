@@ -29,9 +29,9 @@ class Reader(object):
         data = self.requester.read_by_uuid(
             "00002a00-0000-1000-8000-00805f9b34fb")[0]
         try:
-            print("Device name: {}".format(data.decode("utf-8")))
+            print("Device name:", data.decode("utf-8"))
         except AttributeError:
-            print("Device name: {}".format(data))
+            print("Device name:", data)
 
 
 if __name__ == "__main__":

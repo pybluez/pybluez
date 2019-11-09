@@ -13,7 +13,7 @@ server_sock.listen(1)
 while True:
     print("Waiting for incoming connection...")
     client_sock, address = server_sock.accept()
-    print("Accepted connection from {}.".format(str(address)))
+    print("Accepted connection from", str(address))
 
     print("Waiting for data...")
     total = 0
@@ -25,9 +25,9 @@ while True:
         if len(data) == 0:
             break
         total += len(data)
-        print("Total byte read: {}".format(total))
+        print("Total byte read:", total)
 
     client_sock.close()
-    print("Connection closed.")
+    print("Connection closed")
 
 server_sock.close()

@@ -96,17 +96,17 @@ class BluezChatGui:
             sock.send(text)
 
         self.input_tb.set_text("")
-        self.add_text("\nme - %s" % text)
+        self.add_text("\nme - " + text)
 
     def chat_button_clicked(self, widget):
         (model, iter) = self.devices_tv.get_selection().get_selected()
         if iter is not None:
             addr = model.get_value(iter, 0)
             if addr not in self.peers:
-                self.add_text("\nconnecting to %s" % addr)
+                self.add_text("\nconnecting to " + addr)
                 self.connect(addr)
             else:
-                self.add_text("\nAlready connected to %s!" % addr)
+                self.add_text("\nAlready connected to " + addr)
 
     def devices_tv_cursor_changed(self, widget):
         (model, iter) = self.devices_tv.get_selection().get_selected()
@@ -121,7 +121,7 @@ class BluezChatGui:
         sock, info = self.server_sock.accept()
         address, psm = info
 
-        self.add_text("\naccepted connection from %s" % str(address))
+        self.add_text("\naccepted connection from " + str(address))
 
         # add new connection to list of peers
         self.peers[address] = sock
@@ -136,14 +136,14 @@ class BluezChatGui:
         data = sock.recv(1024)
 
         if len(data) == 0:
-            self.add_text("\nlost connection with %s" % address)
+            self.add_text("\nlost connection with " + address)
             gobject.source_remove(self.sources[address])
             del self.sources[address]
             del self.peers[address]
             del self.addresses[sock]
             sock.close()
         else:
-            self.add_text("\n%s - %s" % (address, str(data)))
+            self.add_text("\n{} - {}".format(address, str(data)))
         return True
 
     # --- other stuff
@@ -156,7 +156,7 @@ class BluezChatGui:
         try:
             sock.connect((addr, 0x1001))
         except bluez.error as e:
-            self.add_text("\n%s" % str(e))
+            self.add_text("\n" + str(e))
             sock.close()
             return
 
@@ -177,7 +177,7 @@ class BluezChatGui:
                              self.incoming_connection)
 
     def run(self):
-        self.text_buffer.insert(self.text_buffer.get_end_iter(), "loading..")
+        self.text_buffer.insert(self.text_buffer.get_end_iter(), "loading...")
         self.start_server()
         gtk.main()
 
