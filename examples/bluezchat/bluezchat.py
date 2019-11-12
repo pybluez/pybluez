@@ -61,7 +61,7 @@ class BluezChatGui:
         self.input_tb = self.main_window_xml.get_widget("input_tb")
         self.text_buffer = self.main_text.get_buffer()
         self.chat_button.set_sensitive(False)
-    
+
         self.listed_devs = []
         self.peers = {}
         self.sources = {}
@@ -79,7 +79,7 @@ class BluezChatGui:
         self.quit_button.set_sensitive(False)
         self.scan_button.set_sensitive(False)
         # self.chat_button.set_sensitive(False)
-        
+
         self.discovered.clear()
         for addr, name in bluetooth.discover_devices(lookup_names=True):
             self.discovered.append((addr, name))

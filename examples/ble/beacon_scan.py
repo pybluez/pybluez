@@ -8,7 +8,7 @@ from bluetooth.ble import BeaconService
 
 
 class Beacon(object):
-    
+
     def __init__(self, data, address):
         self._uuid = data[0]
         self._major = data[1]
@@ -16,7 +16,7 @@ class Beacon(object):
         self._power = data[3]
         self._rssi = data[4]
         self._address = address
-        
+
     def __str__(self):
         ret = "Beacon: address:{ADDR} uuid:{UUID} major:{MAJOR} " \
               "minor:{MINOR} txpower:{POWER} rssi:{RSSI}" \

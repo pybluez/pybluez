@@ -13,17 +13,17 @@ def read_inquiry_scan_activity(sock):
     """returns the current inquiry scan interval and window, 
     or -1 on failure"""
     # save current filter
-    old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
+    old_filter = sock.getsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, 14)
 
     # Setup socket filter to receive only events related to the
     # read_inquiry_mode command
     flt = bluez.hci_filter_new()
-    opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL, 
-            bluez.OCF_READ_INQ_ACTIVITY)
+    opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL,
+                                   bluez.OCF_READ_INQ_ACTIVITY)
     bluez.hci_filter_set_ptype(flt, bluez.HCI_EVENT_PKT)
     bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE)
     bluez.hci_filter_set_opcode(flt, opcode)
-    sock.setsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, flt )
+    sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, flt)
 
     # first read the current inquiry mode.
     bluez.hci_send_cmd(sock, bluez.OGF_HOST_CTL, bluez.OCF_READ_INQ_ACTIVITY)
@@ -81,8 +81,8 @@ except Exception as e:
     print("Error reading inquiry scan activity.")
     print(e)
     sys.exit(1)
-print("Current inquiry scan interval: {} (0x{:02x}) window: {} (0x{:02x})" \
-    .format(interval, interval, window, window))
+print("Current inquiry scan interval: {} (0x{:02x}) window: {} (0x{:02x})"
+      .format(interval, interval, window, window))
 
 if len(sys.argv) == 3:
     interval = int(sys.argv[1])
@@ -90,5 +90,5 @@ if len(sys.argv) == 3:
     print("Target interval: {} window {}".format(interval, window))
     write_inquiry_scan_activity(sock, interval, window)
     interval, window = read_inquiry_scan_activity(sock)
-    print("Current inquiry scan interval: {} (0x{:02x}) window: {} (0x{:02x})" \
-        .format(interval, interval, window, window))
+    print("Current inquiry scan interval: {} (0x{:02x}) window: {} (0x{:02x})"
+          .format(interval, interval, window, window))

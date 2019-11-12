@@ -29,7 +29,7 @@ if mode == "server":
 
     while True:
         print("Waiting for incoming connection...")
-        client_sock,address = server_sock.accept()
+        client_sock, address = server_sock.accept()
         print("Accepted connection from", str(address))
 
         print("Waiting for data...")
@@ -48,7 +48,7 @@ if mode == "server":
     server_sock.close()
 
 else:
-    sock=bluetooth.BluetoothSocket(bluetooth.L2CAP)
+    sock = bluetooth.BluetoothSocket(bluetooth.L2CAP)
     print("Connected. Adjusting link parameters.")
     bluetooth.set_l2cap_mtu(sock, 65535)
 
@@ -57,7 +57,7 @@ else:
     port = 0x1001
     sock.connect((bt_addr, port))
 
-    totalsent = 0 
+    totalsent = 0
     for i in range(1, 65535, 100):
         pkt = "0" * i
         sent = sock.send(pkt)

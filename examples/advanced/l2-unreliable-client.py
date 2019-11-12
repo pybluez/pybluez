@@ -28,16 +28,18 @@ port = 0x1001
 sock.connect((bt_addr, port))
 
 print("Connected. Adjusting link parameters.")
-print("Current flush timeout is {} ms.".format(bluetooth.read_flush_timeout(bt_addr)))
+print("Current flush timeout is {} ms.".format(
+    bluetooth.read_flush_timeout(bt_addr)))
 try:
     bluetooth.write_flush_timeout(bt_addr, timeout)
 except bluez.error as e:
     print("Error setting flush timeout. Are you sure you're superuser?")
     print(e)
     sys.exit(1)
-print("New flush timeout is {} ms.".format(bluetooth.read_flush_timeout(bt_addr)))
+print("New flush timeout is {} ms.".format(
+    bluetooth.read_flush_timeout(bt_addr)))
 
-totalsent = 0 
+totalsent = 0
 for i in range(num_packets):
     pkt = "0" * 672
     totalsent += sock.send(pkt)
