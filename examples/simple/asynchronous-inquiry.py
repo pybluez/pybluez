@@ -30,10 +30,10 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
         major_classes = ("Miscellaneous",
                          "Computer",
                          "Phone",
-                         "LAN/Network Access point",
+                         "LAN/Network Access Point",
                          "Audio/Video",
                          "Peripheral",
-                         "Imaging" )
+                         "Imaging")
         major_class = (device_class >> 8) & 0xf
         if major_class < 7:
             print(" ", major_classes[major_class])

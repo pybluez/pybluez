@@ -38,8 +38,6 @@ def read_inquiry_mode(sock):
 
     pkt = sock.recv(255)
     status, mode = struct.unpack("xxxxxxBB", pkt)
-    if not status:
-        mode = -1
 
     # restore old filter
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, old_filter)
