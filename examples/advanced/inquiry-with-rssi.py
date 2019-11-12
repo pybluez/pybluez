@@ -123,7 +123,7 @@ def device_inquiry_with_with_rssi(sock):
                 results.append((addr, -1))
                 print("[{}] (no RRSI)".format(addr))
         else:
-            print("Unrecognized packet type 0x{%02x}.".format(ptype))
+            print("Unrecognized packet type 0x{:02x}.".format(ptype))
 
     # restore old filter
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, old_filter)
@@ -151,11 +151,11 @@ if mode != 1:
     try:
         result = write_inquiry_mode(sock, 1)
     except Exception as e:
-        print("Error writing inquiry mode.  Are you sure you're root?")
+        print("Error writing inquiry mode. Are you sure you're root?")
         print(e)
         sys.exit(1)
     if result:
         print("Error while setting inquiry mode")
-    print("Result: ", result)
+    print("Result:", result)
 
 device_inquiry_with_with_rssi(sock)

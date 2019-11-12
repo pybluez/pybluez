@@ -36,7 +36,7 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
                          "Imaging")
         major_class = (device_class >> 8) & 0xf
         if major_class < 7:
-            print(" ", major_classes[major_class])
+            print(" " + major_classes[major_class])
         else:
             print("  Uncategorized")
 

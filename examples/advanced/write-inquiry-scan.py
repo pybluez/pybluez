@@ -81,7 +81,7 @@ except Exception as e:
     print("Error reading inquiry scan activity.")
     print(e)
     sys.exit(1)
-print("Current inquiry scan interval: {} (0x{}) window: {} (0x{})" \
+print("Current inquiry scan interval: {} (0x{:02x}) window: {} (0x{:02x})" \
     .format(interval, interval, window, window))
 
 if len(sys.argv) == 3:
@@ -90,5 +90,5 @@ if len(sys.argv) == 3:
     print("Target interval: {} window {}".format(interval, window))
     write_inquiry_scan_activity(sock, interval, window)
     interval, window = read_inquiry_scan_activity(sock)
-    print("Current inquiry scan interval: {} (0x{}) window: {} (0x{})" \
+    print("Current inquiry scan interval: {} (0x{:02x}) window: {} (0x{:02x})" \
         .format(interval, interval, window, window))
