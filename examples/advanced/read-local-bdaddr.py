@@ -1,9 +1,11 @@
-import os
-import sys
-import struct
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""PyBluez advanced example read-local-bdaddr.py
+
+Read the local Bluetooth device address
+"""
+
 import bluetooth
 
-
 if __name__ == "__main__":
-    bdaddr = bluetooth.read_local_bdaddr()
-    print(bdaddr)
+    print(bluetooth.read_local_bdaddr())
