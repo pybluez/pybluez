@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez simple example sdp-browse.py
+"""PyBluez simple example sdp-browse.py
 
 Displays services being advertised on a specified bluetooth device.
 

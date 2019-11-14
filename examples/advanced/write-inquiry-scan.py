@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez advanced example write-inquiry-scan.py
-"""
+"""PyBluez advanced example write-inquiry-scan.py"""
 
 import struct
 import sys

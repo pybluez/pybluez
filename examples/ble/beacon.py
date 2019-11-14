@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez ble example beacon.py
+"""PyBluez ble example beacon.py
 
 Advertises a bluethooth low energy beacon for 15 seconds.
 """

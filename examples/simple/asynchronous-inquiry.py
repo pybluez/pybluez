@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez simple example asyncronous-inquiry.py
+"""PyBluez simple example asyncronous-inquiry.py
 
 Demonstration of how to do asynchronous device discovery by subclassing
 the DeviceDiscoverer class

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez example read_name.py
+"""PyBluez example read_name.py
 
 Copyright (C) 2014, Oscar Acena <oscaracena@gmail.com>
 This software is under the terms of GPLv3 or later.

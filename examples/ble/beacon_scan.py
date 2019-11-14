@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez ble example beacon_scan.py
-"""
+"""PyBluez ble example beacon_scan.py"""
 
 from bluetooth.ble import BeaconService
 

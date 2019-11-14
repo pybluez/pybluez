@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez simple example inquiry.py
+"""PyBluez simple example inquiry.py
 
 Performs a simple device inquiry followed by a remote name request of each
 discovered device

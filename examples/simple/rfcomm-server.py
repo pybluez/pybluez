@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez simple example rfcomm-server.py
+"""PyBluez simple example rfcomm-server.py
 
 Simple demonstration of a server application that uses RFCOMM sockets.
 

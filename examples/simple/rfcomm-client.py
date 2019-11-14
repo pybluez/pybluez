@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez simple example rfcomm-client.py
+"""PyBluez simple example rfcomm-client.py
 
 Simple demonstration of a client application that uses RFCOMM sockets intended
 for use with rfcomm-server.

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez example bluezchat.py
+"""PyBluez example bluezchat.py
 
 A simple graphical chat client to demonstrate the use of pybluez.
 

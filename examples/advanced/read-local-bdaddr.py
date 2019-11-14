@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-PyBluez advanced example read-local-bdaddr.py
+"""PyBluez advanced example read-local-bdaddr.py
+
+Read the local Bluetooth device address
 """
 
 import bluetooth
