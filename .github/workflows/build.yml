@@ -27,8 +27,6 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu-')
       run: |
         sudo apt install bluez libbluetooth-dev
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
     - name: Lint
       run: |
         pip install flake8
