@@ -23,7 +23,7 @@ jobs:
     - name: Install Windows dependencies
       if: startsWith(matrix.os, 'windows-')
       run: |
-        choco install windows-sdk-10.0
+        choco install visualcpp-build-tools windows-sdk-10.0
     - name: Install Linux dependencies
       if: startsWith(matrix.os, 'ubuntu-')
       run: |
