@@ -24,17 +24,17 @@ bluetooth.advertise_service(server_sock, "SampleServer", service_id=uuid,
                             # protocols=[bluetooth.OBEX_UUID]
                             )
 
-print("Waiting for connection on RFCOMM channel", port)
+print("Waiting for connection on RFCOMM channel {}".format(port))
 
 client_sock, client_info = server_sock.accept()
-print("Accepted connection from", client_info)
+print("Accepted connection from {}".format(client_info))
 
 try:
     while True:
         data = client_sock.recv(1024)
         if not data:
             break
-        print("Received", data)
+        print("Received {}".format(data.decode())
 except IOError:
     pass
 

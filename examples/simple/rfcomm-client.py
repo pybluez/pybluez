@@ -45,13 +45,13 @@ print("Connecting to \"{}\" on {}".format(name, host))
 
 # Create the client socket
 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-sock.connect((host, port))
+sock.connect((host.decode(), port))
 
 print("Connected. Type something...")
 while True:
     data = input()
     if not data:
         break
-    sock.send(data)
+    sock.send(str.encode(data))
 
 sock.close()
