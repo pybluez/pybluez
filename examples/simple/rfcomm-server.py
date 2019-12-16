@@ -34,7 +34,7 @@ try:
         data = client_sock.recv(1024)
         if not data:
             break
-        print("Received {}".format(data.decode())
+        print("Received {}".format(data.decode()))
 except IOError:
     pass
 

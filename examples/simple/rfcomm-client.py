@@ -39,13 +39,13 @@ if len(service_matches) == 0:
 first_match = service_matches[0]
 port = first_match["port"]
 name = first_match["name"]
-host = first_match["host"]
+host = first_match["host"].decode()
 
 print("Connecting to \"{}\" on {}".format(name, host))
 
 # Create the client socket
 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-sock.connect((host.decode(), port))
+sock.connect((host, port))
 
 print("Connected. Type something...")
 while True:
