@@ -1268,17 +1268,18 @@ Like recv(buffersize, flags) but also return the sender's address info.");
 static PyObject *
 sock_send(PySocketSockObject *s, PyObject *args)
 {
-	char *buf;
-	int len, n = 0, flags = 0, timeout;
+	Py_buffer buf;
+	int n = 0, flags = 0, timeout;
 
-	if (!PyArg_ParseTuple(args, "s#|i:send", &buf, &len, &flags))
+	if (!PyArg_ParseTuple(args, "s*|i:send", &buf, &flags))
 		return NULL;
 
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 1);
 	if (!timeout)
-		n = send(s->sock_fd, buf, len, flags);
+		n = send(s->sock_fd, buf.buf, buf.len, flags);
 	Py_END_ALLOW_THREADS
+	PyBuffer_Release(&buf);
 
 	if (timeout) {
 		PyErr_SetString(socket_timeout, "timed out");
@@ -1302,24 +1303,29 @@ sent; this may be less than len(data) if the network is busy.");
 static PyObject *
 sock_sendall(PySocketSockObject *s, PyObject *args)
 {
-	char *buf;
+	Py_buffer buf;
+	char *raw_buf;
 	int len, n = 0, flags = 0, timeout;
 
-	if (!PyArg_ParseTuple(args, "s#|i:sendall", &buf, &len, &flags))
+	if (!PyArg_ParseTuple(args, "s*|i:sendall", &buf, &flags))
 		return NULL;
 
 	Py_BEGIN_ALLOW_THREADS
+	raw_buf = buf.buf;
+	len = buf.len;
 	do {
 		timeout = internal_select(s, 1);
 		if (timeout)
 			break;
-		n = send(s->sock_fd, buf, len, flags);
+		n = send(s->sock_fd, raw_buf, len, flags);
 		if (n < 0)
 			break;
-		buf += n;
+		raw_buf += n;
 		len -= n;
 	} while (len > 0);
+	raw_buf = NULL;
 	Py_END_ALLOW_THREADS
+	PyBuffer_Release(&buf);
 
 	if (timeout) {
 		PyErr_SetString(socket_timeout, "timed out");
@@ -1346,14 +1352,14 @@ static PyObject *
 sock_sendto(PySocketSockObject *s, PyObject *args)
 {
 	PyObject *addro;
-	char *buf;
+	Py_buffer buf;
 	struct sockaddr addr = { 0 };
-	int addrlen, len, n = 0, flags, timeout;
+	int addrlen, n = 0, flags, timeout;
 
 	flags = 0;
-	if (!PyArg_ParseTuple(args, "s#O:sendto", &buf, &len, &addro)) {
+	if (!PyArg_ParseTuple(args, "s*O:sendto", &buf, &addro)) {
 		PyErr_Clear();
-		if (!PyArg_ParseTuple(args, "s#iO:sendto", &buf, &len, &flags, &addro))
+		if (!PyArg_ParseTuple(args, "s*iO:sendto", &buf, &flags, &addro))
 			return NULL;
 	}
 
@@ -1363,8 +1369,9 @@ sock_sendto(PySocketSockObject *s, PyObject *args)
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 1);
 	if (!timeout)
-		n = sendto(s->sock_fd, buf, len, flags, &addr, addrlen);
+		n = sendto(s->sock_fd, buf.buf, buf.len, flags, &addr, addrlen);
 	Py_END_ALLOW_THREADS
+	PyBuffer_Release(&buf);
 
 	if (timeout) {
 		PyErr_SetString(socket_timeout, "timed out");
