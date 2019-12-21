@@ -263,17 +263,17 @@ static PyObject *
 msbt_send(PyObject *self, PyObject *args)
 {
     int sockfd = -1;
-    char *data = NULL;
-    int datalen = -1;
+    Py_buffer data;
     int flags = 0;
     int sent = 0;
 
-    if(!PyArg_ParseTuple(args, "is#|i", &sockfd, &data, &datalen, &flags)) 
+    if(!PyArg_ParseTuple(args, "is*|i", &sockfd, &data, &flags)) 
         return 0;
 
     Py_BEGIN_ALLOW_THREADS;
-    sent = send(sockfd, data, datalen, flags);
+    sent = send(sockfd, data.buf, data.len, flags);
     Py_END_ALLOW_THREADS;
+    Py_Buffer_Release(&data);
 
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sent );
     
