@@ -164,7 +164,7 @@ msbt_bind(PyObject *self, PyObject *args)
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
 
-    if(!PyArg_ParseTuple(args, "is#i", &sockfd, &addrstr, &addrstrlen, &port))
+    if(!PyArg_ParseTuple(args, "iu#i", &sockfd, &addrstr, &addrstrlen, &port))
         return 0;
 
     if( addrstrlen == 0 ) {
@@ -239,7 +239,7 @@ msbt_connect(PyObject *self, PyObject *args)
     int sa_len = sizeof(sa);
     DWORD status;
 
-    if(!PyArg_ParseTuple(args, "isi", &sockfd, &addrstr, &port)) return 0;
+    if(!PyArg_ParseTuple(args, "iui", &sockfd, &addrstr, &port)) return 0;
 
     if( SOCKET_ERROR == WSAStringToAddress( addrstr, AF_BTH, NULL, 
                 (LPSOCKADDR)&sa, &sa_len ) ) {
@@ -551,7 +551,7 @@ msbt_lookup_name(PyObject *self, PyObject *args)
     int sa_len = sizeof(sa);
     DWORD status;
 
-    if(!PyArg_ParseTuple(args,"s",&addrstr)) return 0;
+    if(!PyArg_ParseTuple(args,"u",&addrstr)) return 0;
     
     _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddress( addrstr, \
                 AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len ) );
@@ -825,7 +825,7 @@ msbt_set_service(PyObject *self, PyObject *args)
     GUID uuid = { 0 };
     int sockfd;
 
-    if(!PyArg_ParseTuple(args, "iisss", &sockfd, &advertise, &service_name, 
+    if(!PyArg_ParseTuple(args, "iiuus", &sockfd, &advertise, &service_name, 
                 &service_desc, &service_class_id_str))
         return 0;
 
