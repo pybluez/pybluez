@@ -273,7 +273,7 @@ msbt_send(PyObject *self, PyObject *args)
     Py_BEGIN_ALLOW_THREADS;
     sent = send(sockfd, data.buf, data.len, flags);
     Py_END_ALLOW_THREADS;
-    Py_Buffer_Release(&data);
+    PyBuffer_Release(&data);
 
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sent );
     
