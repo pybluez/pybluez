@@ -1055,6 +1055,7 @@ PyInit__msbt(void)
     m = PyModule_Create(&moduledef);
 #endif
 
+    ADD_INT_CONSTANT(m, AF_BTH);
     ADD_INT_CONSTANT(m, SOCK_STREAM);
     ADD_INT_CONSTANT(m, BTHPROTO_RFCOMM);
     ADD_INT_CONSTANT(m, BT_PORT_ANY);

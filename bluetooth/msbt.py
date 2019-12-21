@@ -64,6 +64,18 @@ class BluetoothSocket:
         self._blocking = True
         self._timeout = False
 
+    @property
+    def family (self):
+        return bt.AF_BTH
+
+    @property
+    def type (self):
+        return bt.SOCK_STREAM
+
+    @property
+    def proto (self):
+        return bt.BTHPROTO_RFCOMM
+
     def bind (self, addrport):
         if self._proto == RFCOMM:
             addr, port = addrport
