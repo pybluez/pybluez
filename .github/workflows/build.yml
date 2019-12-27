@@ -12,7 +12,7 @@ jobs:
         exclude:
           # pyObjC wants Python >= 3.6
           - os: macOS-latest
-            node: 3.5
+            python-version: 3.5
 
     runs-on: ${{ matrix.os }}
 
