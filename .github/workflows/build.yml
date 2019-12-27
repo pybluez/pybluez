@@ -40,6 +40,7 @@ jobs:
     - name: Create wheel
       id: create_wheel
       run: |
+        pip install wheel
         python setup.py bdist_wheel
         run: echo "::set-output name=file::$(echo ./dist/PyBluez/*.whl)"
     - name: Upload wheel
