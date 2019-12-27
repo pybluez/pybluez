@@ -5,15 +5,14 @@ on: [push]
 jobs:
   build:
     strategy:
-      max-parallel: 4
       fail-fast: false
       matrix:
         python-version: [2.7, 3.5, 3.6, 3.7]
         os: [macOS-latest, ubuntu-latest, windows-latest]
         exclude:
-          # pyObjC wants Python >= 3.6
-          - os: macOS-latest
-            python-version: 3.5
+          # we don't have the right version of Visual Studio
+          - os: windows-latest
+            python-version: 2.7
 
     runs-on: ${{ matrix.os }}
 
@@ -47,9 +46,12 @@ jobs:
       run: |
         pip install wheel
         python setup.py bdist_wheel
-        echo "::set-output name=file::$(echo ./dist/*.whl)"
+        find . -iname '*.whl'
+        WHEEL_FILE=$(echo ./dist/*.whl)
+        echo "::set-output name=whl_file::$WHEEL_FILE"
+        echo "::set-output name=whl_name::$(basename "$WHEEL_FILE")" 
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
-        name: Python Wheel
-        path: ${{ steps.create_wheel.outputs.file }}
+        name: ${{ steps.create_wheel.outputs.whl_name }}
+        path: ${{ steps.create_wheel.outputs.whl_file }}
