@@ -46,10 +46,7 @@ jobs:
       run: |
         pip install wheel
         python setup.py bdist_wheel
-        find . -iname '*.whl'
-        WHEEL_FILE=$(echo ./dist/*.whl)
-        echo "::set-output name=whl_file::$WHEEL_FILE"
-        echo "::set-output name=whl_name::$(basename "$WHEEL_FILE")" 
+        python -c 'import glob,os; file=next(glob.iglob("dist/*.whl")); print("::set-output name=whl_file::" + file); print("::set-output name=whl_name::" + os.path.basename(file))'
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
