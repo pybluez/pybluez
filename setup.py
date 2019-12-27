@@ -118,7 +118,8 @@ elif sys.platform.startswith("darwin"):
     zip_safe = False
     
     # FIXME: This is inelegant, how can we cover the cases?
-    if 'install' in sys.argv or 'bdist' in sys.argv or 'bdist_egg' in sys.argv:
+    build_cmds = set(['bdist', 'bdist_egg', 'bdist_wheel'])
+    if build_cmds & set(sys.argv):
         # Build the framework into macos/
         import subprocess
         subprocess.check_call([
