@@ -7,7 +7,9 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.5, 3.6, 3.7]
+        # python 2.7 disabled: no note
+        # python 3.5 disabled: on macOS, pyobjc doesn't support < 3.6
+        python-version: [3.6, 3.7]
         os: [macOS-latest, ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
