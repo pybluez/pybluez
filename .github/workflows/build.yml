@@ -46,4 +46,5 @@ jobs:
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
+        name: Python Wheel
         path: ${{ steps.create_wheel.outputs.file }}
