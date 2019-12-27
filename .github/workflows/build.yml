@@ -19,7 +19,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Windows dependencies
-      if: startsWith(matrix.os, 'windows-') and matrix.python-version < 3.6
+      if: startsWith(matrix.os, 'windows-') && matrix.python-version < 3.6
       run: |
         choco install visualcpp-build-tools windows-sdk-10.0
     - name: Install Linux dependencies
