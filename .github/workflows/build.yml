@@ -42,7 +42,7 @@ jobs:
       run: |
         pip install wheel
         python setup.py bdist_wheel
-        echo "::set-output name=file::$(echo ./dist/PyBluez/*.whl)"
+        echo "::set-output name=file::$(echo ./dist/*.whl)"
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
