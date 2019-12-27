@@ -7,10 +7,12 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        # python 2.7 disabled: no note
-        # python 3.5 disabled: on macOS, pyobjc doesn't support < 3.6
-        python-version: [3.6, 3.7]
+        python-version: [2.7, 3.5, 3.6, 3.7]
         os: [macOS-latest, ubuntu-latest, windows-latest]
+        exclude:
+          # pyObjC wants Python >= 3.6
+          - os: macOS-latest
+            node: 3.5
 
     runs-on: ${{ matrix.os }}
 
