@@ -17,11 +17,11 @@ class SDKException(Exception):
 	def __init__(self,message=None):
 		self.message = message
 
-		if sys.version < '3.3':
+		if sys.version_info < (3,3):
 			vs_version = 9
-		elif '3.3' <= sys.version < '3.5':
+		elif sys.version_info < (3,5):
 			vs_version = 10
-		elif sys.version >= '3.5':
+		elif sys.version_info >= (3,5):
 			vs_version = 14
 		else:
 			vs_version = None
@@ -114,9 +114,13 @@ elif sys.platform.startswith('linux'):
 elif sys.platform.startswith("darwin"):
     packages.append('lightblue')
     package_dir['lightblue'] = 'macos'
-    install_requires += ['pyobjc-core>=3.1', 'pyobjc-framework-Cocoa>=3.1']
     zip_safe = False
-    
+
+    if sys.version_info >= (3,6):
+    	install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6']
+    else:
+	install_requires += ['pyobjc-core>=3.1,<6', 'pyobjc-framework-Cocoa>=3.1,<6']
+
     # FIXME: This is inelegant, how can we cover the cases?
     build_cmds = set(['bdist', 'bdist_egg', 'bdist_wheel'])
     if build_cmds & set(sys.argv):
