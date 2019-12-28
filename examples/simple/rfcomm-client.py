@@ -13,11 +13,6 @@ import sys
 
 import bluetooth
 
-# Python 2 compatibility
-try:
-    input = raw_input
-except NameError:
-    pass  # Python 3
 
 addr = None
 

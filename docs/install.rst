@@ -3,8 +3,7 @@
 Installing PyBluez
 ==================
 
-PyBluez can be installed on GNU/Linux, Windows and macOS systems and is compatible 
-with Python 2.7 and 3. 
+PyBluez can be installed on GNU/Linux, Windows and macOS systems.
 
 .. note:: Before you install **PyBluez** please install the dependencies required for
 		  your system as described in the sections below.
@@ -51,7 +50,7 @@ for Bluetooth Low Energy support (GNU/Linux only):
 GNU/Linux Dependencies
 """"""""""""""""""""""
 
-- Python 2.7 or more recent version
+- Python 3.5 or newer
 - Python distutils (standard in most Python distros, separate package python-dev in Debian)
 - BlueZ libraries and header files
 
@@ -59,7 +58,7 @@ Windows Dependencies
 """"""""""""""""""""
 
 - Windows 7/8/8.1/10
-- Python 3.5 or more recent version
+- Python 3.5 or newer
 
 PyBluez requires a C++ compiler installed on your system to build CPython modules.
 
@@ -79,5 +78,6 @@ For Python 3.5 or higher
 
 macOS Dependencies
 """""""""""""""""" 
+
 - Xcode
 - PyObjc 3.1b or later (https://pythonhosted.org/pyobjc/install.html#manual-installation)
