@@ -9,10 +9,6 @@ jobs:
       matrix:
         python-version: [2.7, 3.5, 3.6, 3.7]
         os: [macOS-latest, ubuntu-latest, windows-latest]
-        exclude:
-          # we don't have the right version of Visual Studio
-          - os: windows-latest
-            python-version: 2.7
 
     runs-on: ${{ matrix.os }}
 
@@ -22,14 +18,15 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Windows dependencies
-      if: startsWith(matrix.os, 'windows-')
-      run: |
-        choco install visualcpp-build-tools windows-sdk-10.0
+    - name: Install Windows Visual C++ for Python 2.7
+      if: startsWith(matrix.os, 'windows-') && matrix.python-version < 3
+      run: choco install vcpython27
+    - name: Install Windows 10 SDK for Python 3.5
+      if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
+      run: choco install windows-sdk-10.0
     - name: Install Linux dependencies
       if: startsWith(matrix.os, 'ubuntu-')
-      run: |
-        sudo apt install bluez libbluetooth-dev
+      run: sudo apt install bluez libbluetooth-dev
     - name: Lint
       run: |
         pip install flake8
