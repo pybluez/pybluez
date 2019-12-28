@@ -5,7 +5,7 @@ if sys.version < '3':
 else:
     from bluetooth.btcommon import *
 
-__version__ = 0.22
+__version__ = 0.23
 
 def _dbg(*args):
     return
