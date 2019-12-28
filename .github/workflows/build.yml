@@ -22,8 +22,8 @@ jobs:
       if: startsWith(matrix.os, 'windows-') && matrix.python-version < 3.3
       run: choco install vcpython27
     - name: Install Windows py3.5 fixes
-      if: startsWith(matrix.os, 'windows-') && matrix.python-version < 3.6
-      run: choco install visualcpp-build-tools
+      if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
+      run: choco install vcredist2010
     - name: Install Linux dependencies
       if: startsWith(matrix.os, 'ubuntu-')
       run: |
