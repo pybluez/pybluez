@@ -38,14 +38,24 @@ jobs:
       run: |
         pip install wheel
         python setup.py bdist_wheel
-    - name: Find wheel
-      id: find_wheel
-      run: |
-        # This needs to be compatible with both Bash and PowerShell
-        echo "::set-output name=whl_file::$(ls ./dist/*.whl)"
-        echo "::set-output name=whl_name::$(basename $(ls ./dist/*.whl))"
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
-        name: ${{ steps.find_wheel.outputs.whl_name }}
-        path: ${{ steps.find_wheel.outputs.whl_file }}
+        name: dist
+        path: dist
+
+  package_source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Make source distribution
+        run: python setup.py sdist
+      - name: Upload source distribution
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
