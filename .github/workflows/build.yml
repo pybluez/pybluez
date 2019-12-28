@@ -23,7 +23,7 @@ jobs:
       run: choco install vcpython27
     - name: Install Windows py3.5 fixes
       if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
-      run: choco install vcredist2010
+      run: choco install windows-sdk-10.0
     - name: Install Linux dependencies
       if: startsWith(matrix.os, 'ubuntu-')
       run: |
