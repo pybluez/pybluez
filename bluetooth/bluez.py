@@ -9,7 +9,7 @@ import bluetooth._bluetooth as _bt
 from bluetooth._bluetooth import HCI, RFCOMM, L2CAP, SCO, SOL_L2CAP, \
                                     SOL_RFCOMM, L2CAP_OPTIONS
 
-get_byte = ord if sys.version_info.major < 3 else int
+get_byte = int
 
 # ============== SDP service registration and unregistration ============
 

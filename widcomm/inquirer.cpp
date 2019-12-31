@@ -564,12 +564,7 @@ wcinquirer_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcinquirer_type = {
-#if PY_MAJOR_VERSION < 3
-    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
-    0,                  /* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
     "_widcomm._WCInquirer",            /* tp_name */
     sizeof(WCInquirerPyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */

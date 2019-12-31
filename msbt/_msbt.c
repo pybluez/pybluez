@@ -1030,12 +1030,6 @@ PyDoc_STRVAR(msbt_doc, "TODO\n");
 
 #define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
 
-#if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC
-init_msbt(void)
-{
-    PyObject * m = Py_InitModule3("_msbt", msbt_methods, msbt_doc);
-#else
 PyMODINIT_FUNC
 PyInit__msbt(void)
 {
@@ -1053,7 +1047,6 @@ PyInit__msbt(void)
         NULL
     };
     m = PyModule_Create(&moduledef);
-#endif
 
     ADD_INT_CONSTANT(m, AF_BTH);
     ADD_INT_CONSTANT(m, SOCK_STREAM);
@@ -1067,7 +1060,5 @@ PyInit__msbt(void)
     ADD_INT_CONSTANT(m, SO_BTH_MTU_MAX);
     ADD_INT_CONSTANT(m, SO_BTH_MTU_MIN);
 
-#if PY_MAJOR_VERSION >= 3
     return m;
-#endif
 }

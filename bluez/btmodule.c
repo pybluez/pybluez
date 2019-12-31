@@ -544,14 +544,10 @@ str2uuid( const char *uuid_str, uuid_t *uuid )
 int
 pyunicode2uuid( PyObject *item, uuid_t *uuid )
 {
-#if PY_MAJOR_VERSION >= 3
     PyObject* ascii = PyUnicode_AsASCIIString( item );
     int ret =  str2uuid( PyBytes_AsString( ascii ), uuid );
     Py_XDECREF( ascii );
     return ret;
-#else
-    return str2uuid( PyString_AsString( item ), NULL );
-#endif
 }
 
 void
@@ -1147,13 +1143,7 @@ sock_makefile(PySocketSockObject *s, PyObject *args)
 			close(fd);
 		return s->errorhandler();
 	}
-#if PY_MAJOR_VERSION >= 3
 	f = PyFile_FromFd(fd, "<socket>", mode, bufsize, NULL, NULL, NULL, 1);
-#else
-	f = PyFile_FromFile(fp, "<socket>", mode, fclose);
-	if (f != NULL)
-		PyFile_SetBufSize(f, bufsize);
-#endif
 	return f;
 }
 
@@ -1617,12 +1607,7 @@ sock_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 /* Type object for socket objects. */
 
 PyTypeObject sock_type = {
-#if PY_MAJOR_VERSION < 3
-	PyObject_HEAD_INIT(0)	/* Must fill in type value later */
-	0,					/* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
 	"_bluetooth.btsocket",			/* tp_name */
 	sizeof(PySocketSockObject),		/* tp_basicsize */
 	0,					/* tp_itemsize */
@@ -2951,7 +2936,6 @@ PyDoc_STRVAR(socket_doc,
 \n\
 See the bluetooth module for documentation.");
 
-#if PY_MAJOR_VERSION >= 3
 #define INITERROR return NULL
 
 static struct PyModuleDef moduledef = {
@@ -2968,20 +2952,10 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC
 PyInit__bluetooth(void)
-#else
-#define INITERROR return
-
-PyMODINIT_FUNC
-init_bluetooth(void)
-#endif
 {
     Py_TYPE(&sock_type) = &PyType_Type;
     Py_TYPE(&sdp_session_type) = &PyType_Type;
-#if PY_MAJOR_VERSION >= 3
     PyObject *m = PyModule_Create(&moduledef);
-#else
-    PyObject *m = Py_InitModule3("_bluetooth", bt_methods, socket_doc);
-#endif
     if (m == NULL)
         INITERROR;
 
@@ -3695,9 +3669,7 @@ init_bluetooth(void)
 #endif
     PyModule_AddIntMacro(m, SOL_BLUETOOTH);
 
-#if PY_MAJOR_VERSION >= 3
     return m;
-#endif
 }
 
 /*

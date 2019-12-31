@@ -125,12 +125,7 @@ wcrfcommif_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcrfcommif_type = {
-#if PY_MAJOR_VERSION < 3
-    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
-    0,                  /* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
     "_widcomm._WCRfCommIf",            /* tp_name */
     sizeof(WCRfCommIfPyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */
