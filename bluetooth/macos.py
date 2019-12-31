@@ -1,8 +1,10 @@
 import lightblue
 from .btcommon import *
 
-def discover_devices(duration=8, flush_cache=True, lookup_names=False,
-        lookup_class=False, device_id=-1):
+
+def discover_devices(
+    duration=8, flush_cache=True, lookup_names=False, lookup_class=False, device_id=-1
+):
     # This is order of discovered device attributes in C-code.
     btAddresIndex = 0
     namesIndex = 1
@@ -13,7 +15,7 @@ def discover_devices(duration=8, flush_cache=True, lookup_names=False,
 
     ret = list()
     for device in devices:
-        item = [device[btAddresIndex], ]
+        item = [device[btAddresIndex]]
         if lookup_names:
             item.append(device[namesIndex])
         if lookup_class:
@@ -30,8 +32,9 @@ def discover_devices(duration=8, flush_cache=True, lookup_names=False,
 def lookup_name(address, timeout=10):
     print("TODO: implement")
 
-# TODO: After a little looking around, it seems that we can go into some of the 
-# lightblue internals and enhance the amount of SDP information that is returned 
+
+# TODO: After a little looking around, it seems that we can go into some of the
+# lightblue internals and enhance the amount of SDP information that is returned
 # (e.g., CID/PSM, protocol, provider information).
 #
 # See: _searchservices() in _lightblue.py
@@ -75,8 +78,16 @@ def read_local_bdaddr():
     return [lightblue.gethostaddr()]
 
 
-def advertise_service(sock, name, service_id="", service_classes=None,
-        profiles=None, provider="", description="", protocols=None):
+def advertise_service(
+    sock,
+    name,
+    service_id="",
+    service_classes=None,
+    profiles=None,
+    provider="",
+    description="",
+    protocols=None,
+):
 
     if protocols is None or protocols == RFCOMM:
         protocols = [lightblue.RFCOMM]
@@ -90,7 +101,6 @@ def stop_advertising(sock):
 
 # ============================= BluetoothSocket ============================== #
 class BluetoothSocket:
-
     def __init__(self, proto=RFCOMM, _sock=None):
         if _sock is None:
             _sock = lightblue.socket()
@@ -148,8 +158,10 @@ class BluetoothSocket:
     def makefile(self, mode, bufsize):
         return self.makefile(mode, bufsize)
 
+
 # ============================= DeviceDiscoverer ============================= #
 
+
 class DeviceDiscoverer:
-    def __init__ (self):
+    def __init__(self):
         raise NotImplementedError

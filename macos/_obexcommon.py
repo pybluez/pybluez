@@ -18,25 +18,55 @@
 
 from . import _lightbluecommon
 
-__all__ = ('OBEXResponse', 'OBEXError',
-     'CONTINUE', 'OK', 'CREATED', 'ACCEPTED', 'NON_AUTHORITATIVE_INFORMATION',
-     'NO_CONTENT', 'RESET_CONTENT', 'PARTIAL_CONTENT',
-     'MULTIPLE_CHOICES', 'MOVED_PERMANENTLY', 'MOVED_TEMPORARILY', 'SEE_OTHER',
-     'NOT_MODIFIED', 'USE_PROXY',
-     'BAD_REQUEST', 'UNAUTHORIZED', 'PAYMENT_REQUIRED', 'FORBIDDEN',
-     'NOT_FOUND', 'METHOD_NOT_ALLOWED', 'NOT_ACCEPTABLE',
-     'PROXY_AUTHENTICATION_REQUIRED', 'REQUEST_TIME_OUT', 'CONFLICT', 'GONE',
-     'LENGTH_REQUIRED', 'PRECONDITION_FAILED', 'REQUESTED_ENTITY_TOO_LARGE',
-     'REQUEST_URL_TOO_LARGE', 'UNSUPPORTED_MEDIA_TYPE',
-     'INTERNAL_SERVER_ERROR', 'NOT_IMPLEMENTED', 'BAD_GATEWAY',
-     'SERVICE_UNAVAILABLE', 'GATEWAY_TIMEOUT', 'HTTP_VERSION_NOT_SUPPORTED',
-     'DATABASE_FULL', 'DATABASE_LOCKED')
+__all__ = (
+    "OBEXResponse",
+    "OBEXError",
+    "CONTINUE",
+    "OK",
+    "CREATED",
+    "ACCEPTED",
+    "NON_AUTHORITATIVE_INFORMATION",
+    "NO_CONTENT",
+    "RESET_CONTENT",
+    "PARTIAL_CONTENT",
+    "MULTIPLE_CHOICES",
+    "MOVED_PERMANENTLY",
+    "MOVED_TEMPORARILY",
+    "SEE_OTHER",
+    "NOT_MODIFIED",
+    "USE_PROXY",
+    "BAD_REQUEST",
+    "UNAUTHORIZED",
+    "PAYMENT_REQUIRED",
+    "FORBIDDEN",
+    "NOT_FOUND",
+    "METHOD_NOT_ALLOWED",
+    "NOT_ACCEPTABLE",
+    "PROXY_AUTHENTICATION_REQUIRED",
+    "REQUEST_TIME_OUT",
+    "CONFLICT",
+    "GONE",
+    "LENGTH_REQUIRED",
+    "PRECONDITION_FAILED",
+    "REQUESTED_ENTITY_TOO_LARGE",
+    "REQUEST_URL_TOO_LARGE",
+    "UNSUPPORTED_MEDIA_TYPE",
+    "INTERNAL_SERVER_ERROR",
+    "NOT_IMPLEMENTED",
+    "BAD_GATEWAY",
+    "SERVICE_UNAVAILABLE",
+    "GATEWAY_TIMEOUT",
+    "HTTP_VERSION_NOT_SUPPORTED",
+    "DATABASE_FULL",
+    "DATABASE_LOCKED",
+)
 
 
 class OBEXError(_lightbluecommon.BluetoothError):
     """
     Generic exception raised for OBEX-related errors.
     """
+
     pass
 
 
@@ -81,21 +111,26 @@ class OBEXResponse:
         self.__reason = _OBEX_RESPONSES.get(code, "Unknown response code")
         self.__rawheaders = rawheaders
         self.__headers = None
-    code = property(lambda self: self.__code,
-            doc='The response code, without the final bit set.')
-    reason = property(lambda self: self.__reason,
-            doc='A string description of the response code.')
-    rawheaders = property(lambda self: self.__rawheaders,
-            doc='The response headers, as a dictionary with header ID (unsigned byte) keys.')
+
+    code = property(
+        lambda self: self.__code, doc="The response code, without the final bit set."
+    )
+    reason = property(
+        lambda self: self.__reason, doc="A string description of the response code."
+    )
+    rawheaders = property(
+        lambda self: self.__rawheaders,
+        doc="The response headers, as a dictionary with header ID (unsigned byte) keys.",
+    )
 
     def getheader(self, header, default=None):
-        '''
+        """
         Returns the response header value for the given header, which may
         either be a string (not case-sensitive) or the raw byte
         value of the header ID.
 
         Returns the specified default value if the header is not present.
-        '''
+        """
         if isinstance(header, str):
             return self.headers.get(header.lower(), default)
         return self.__rawheaders.get(header, default)
@@ -109,16 +144,23 @@ class OBEXResponse:
                 else:
                     self.__headers["0x%02x" % headerid] = value
         return self.__headers
-    headers = property(__getheaders,
-            doc='The response headers, as a dictionary with string keys.')
+
+    headers = property(
+        __getheaders, doc="The response headers, as a dictionary with string keys."
+    )
 
     def __repr__(self):
-        return "<OBEXResponse reason='%s' code=0x%02x (0x%02x) headers=%s>" % \
-            (self.__reason, self.__code, (self.__code | 0x80), str(self.headers))
+        return "<OBEXResponse reason='%s' code=0x%02x (0x%02x) headers=%s>" % (
+            self.__reason,
+            self.__code,
+            (self.__code | 0x80),
+            str(self.headers),
+        )
 
 
 try:
     import datetime
+
     # as from python docs example
     class UTC(datetime.tzinfo):
         """UTC"""
@@ -131,14 +173,19 @@ try:
 
         def dst(self, dt):
             return datetime.timedelta(0)
+
+
 except:
-    pass    # no datetime on pys60
+    pass  # no datetime on pys60
 
 
 _LOCAL_TIME_FORMAT = "%Y%m%dT%H%M%S"
 _UTC_TIME_FORMAT = _LOCAL_TIME_FORMAT + "Z"
+
+
 def _datetimefromstring(s):
     import time
+
     if s[-1:] == "Z":
         # add UTC() instance as tzinfo
         args = (time.strptime(s, _UTC_TIME_FORMAT)[0:6]) + (0, UTC())
@@ -148,24 +195,24 @@ def _datetimefromstring(s):
 
 
 _HEADER_STRINGS_TO_IDS = {
-    "count": 0xc0,
+    "count": 0xC0,
     "name": 0x01,
     "type": 0x42,
-    "length": 0xc3,
+    "length": 0xC3,
     "time": 0x44,
     "description": 0x05,
     "target": 0x46,
     "http": 0x47,
-    "who": 0x4a,
-    "connection-id": 0xcb,
-    "application-parameters": 0x4c,
-    "authentication-challenge": 0x4d,
-    "authentication-response": 0x4e,
-    "creator-id": 0xcf,
+    "who": 0x4A,
+    "connection-id": 0xCB,
+    "application-parameters": 0x4C,
+    "authentication-challenge": 0x4D,
+    "authentication-response": 0x4E,
+    "creator-id": 0xCF,
     "wan-uuid": 0x50,
     "object-class": 0x51,
     "session-parameters": 0x52,
-    "session-sequence-number": 0x93
+    "session-sequence-number": 0x93,
 }
 
 _HEADER_IDS_TO_STRINGS = {}
@@ -186,14 +233,12 @@ _OBEX_RESPONSES = {
     0x24: "No Content",
     0x25: "Reset Content",
     0x26: "Partial Content",
-
     0x30: "Multiple Choices",
     0x31: "Moved Permanently",
     0x32: "Moved Temporarily",  # but is 'Found' (302) in httplib.response???
     0x33: "See Other",
     0x34: "Not Modified",
     0x35: "Use Proxy",
-
     0x40: "Bad Request",
     0x41: "Unauthorized",
     0x42: "Payment Required",
@@ -210,21 +255,18 @@ _OBEX_RESPONSES = {
     0x4D: "Request Entity Too Large",
     0x4E: "Request-URI Too Long",
     0x4F: "Unsupported Media Type",
-
     0x50: "Internal Server Error",
     0x51: "Not Implemented",
     0x52: "Bad Gateway",
     0x53: "Service Unavailable",
     0x54: "Gateway Timeout",
     0x55: "HTTP Version Not Supported",
-
     0x60: "Database Full",
-    0x61: "Database Locked"
+    0x61: "Database Locked",
 }
 
 
-_obexclientclassdoc = \
-    """
+_obexclientclassdoc = """
     An OBEX client class. (Note this is not available on Python for Series 60.)
 
     For example, to connect to an OBEX server and send a file:
@@ -303,16 +345,14 @@ _obexclientclassdoc = \
     """
 
 _obexclientdocs = {
-"__init__":
-    """
+    "__init__": """
     Creates an OBEX client.
 
     Arguments:
         - address: the address of the remote device
         - channel: the RFCOMM channel of the remote OBEX service
     """,
-"connect":
-    """
+    "connect": """
     Establishes the Bluetooth connection to the remote OBEX server and sends
     a Connect request to open the OBEX session. Returns an OBEXResponse
     instance containing the server response.
@@ -326,8 +366,7 @@ _obexclientdocs = {
     Arguments:
         - headers={}: the headers to send for the Connect request
     """,
-"disconnect":
-    """
+    "disconnect": """
     Sends a Disconnect request to end the OBEX session and closes the Bluetooth
     connection to the remote OBEX server. Returns an OBEXResponse
     instance containing the server response.
@@ -341,8 +380,7 @@ _obexclientdocs = {
     Arguments:
         - headers={}: the headers to send for the request
     """,
-"put":
-    """
+    "put": """
     Sends a Put request. Returns an OBEXResponse instance containing the
     server response.
 
@@ -368,8 +406,7 @@ _obexclientdocs = {
         <OBEXResponse reason='OK' code=0x20 (0xa0) headers={}>
         >>>
     """,
-"delete":
-    """
+    "delete": """
     Sends a Put-Delete request in order to delete a file or folder on the remote
     server. Returns an OBEXResponse instance containing the server response.
 
@@ -393,8 +430,7 @@ _obexclientdocs = {
         <OBEXResponse reason='Unauthorized' code=0x41 (0xc1) headers={}>
         >>>
     """,
-"get":
-    """
+    "get": """
     Sends a Get request. Returns an OBEXResponse instance containing the server
     response.
 
@@ -422,8 +458,7 @@ _obexclientdocs = {
         'test file'
         >>>
     """,
-"setpath":
-    """
+    "setpath": """
     Sends a SetPath request in order to set the "current path" on the remote
     server for file transfers. Returns an OBEXResponse instance containing the
     server response.
@@ -466,7 +501,7 @@ _obexclientdocs = {
         >>> client.setpath({"name": ""})
         <OBEXResponse reason='OK' code=0x20 (0xa0) headers={}>
         >>>
-    """
+    """,
 }
 
 

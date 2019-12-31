@@ -6,11 +6,13 @@ import sys
 
 import bluetooth
 
+
 def usage():
     print("Usage: l2-mtu.py < server | client > [options]")
     print("  l2-mtu.py server - to start in server mode")
     print("  l2-mtu.py client <addr> - to start in client mode and connect to addr")
     sys.exit(2)
+
 
 if len(sys.argv) < 2:
     usage()

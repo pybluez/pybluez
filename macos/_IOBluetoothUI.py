@@ -41,17 +41,24 @@ import objc
 
 try:
     # mac os 10.5 loads frameworks using bridgesupport metadata
-    __bundle__ = objc.initFrameworkWrapper("IOBluetoothUI",
-            frameworkIdentifier="com.apple.IOBluetoothUI",
-            frameworkPath=objc.pathForFramework(
-                "/System/Library/Frameworks/IOBluetoothUI.framework"),
-            globals=globals())
+    __bundle__ = objc.initFrameworkWrapper(
+        "IOBluetoothUI",
+        frameworkIdentifier="com.apple.IOBluetoothUI",
+        frameworkPath=objc.pathForFramework(
+            "/System/Library/Frameworks/IOBluetoothUI.framework"
+        ),
+        globals=globals(),
+    )
 
 except (AttributeError, ValueError):
     # earlier versions use loadBundle() and setSignatureForSelector()
 
-    objc.loadBundle("IOBluetoothUI", globals(),
-       bundle_path=objc.pathForFramework('/System/Library/Frameworks/IOBluetoothUI.framework'))
+    objc.loadBundle(
+        "IOBluetoothUI",
+        globals(),
+        bundle_path=objc.pathForFramework(
+            "/System/Library/Frameworks/IOBluetoothUI.framework"
+        ),
+    )
 
 del objc
-

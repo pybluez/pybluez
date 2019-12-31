@@ -29,28 +29,29 @@ from . import _lightbluecommon
 # for mac os 10.5
 try:
     from Foundation import NSUIntegerMax
+
     NSAnyEventMask = NSUIntegerMax
 except:
     pass
 
 # values of constants used in _IOBluetooth.framework
-kIOReturnSuccess = 0       # defined in <IOKit/IOReturn.h>
+kIOReturnSuccess = 0  # defined in <IOKit/IOReturn.h>
 kIOBluetoothUserNotificationChannelDirectionIncoming = 1
-        # defined in <IOBluetooth/IOBluetoothUserLib.h>
-kBluetoothHCIErrorPageTimeout = 0x04   # <IOBluetooth/Bluetooth.h>
+# defined in <IOBluetooth/IOBluetoothUserLib.h>
+kBluetoothHCIErrorPageTimeout = 0x04  # <IOBluetooth/Bluetooth.h>
 
 # defined in <IOBluetooth/IOBluetoothUserLib.h>
 kIOBluetoothServiceBrowserControllerOptionsNone = 0
 
 
-LIGHTBLUE_NOTIFY_ID = 5444 # any old number
+LIGHTBLUE_NOTIFY_ID = 5444  # any old number
 WAIT_MAX_TIMEOUT = 3
 
 
 # IOBluetoothSDPUUID objects for RFCOMM and OBEX protocol UUIDs
 PROTO_UUIDS = {
     _lightbluecommon.RFCOMM: _IOBluetooth.IOBluetoothSDPUUID.uuid16_(0x0003),
-    _lightbluecommon.OBEX: _IOBluetooth.IOBluetoothSDPUUID.uuid16_(0x0008)
+    _lightbluecommon.OBEX: _IOBluetooth.IOBluetoothSDPUUID.uuid16_(0x0008),
 }
 
 
@@ -65,7 +66,8 @@ def formatdevaddr(addr):
     # addresses
     # can safely encode to ascii cos BT addresses are only in hex (pyobjc
     # returns all strings in unicode)
-    return addr.replace("-", ":").encode('ascii').upper()
+    return addr.replace("-", ":").encode("ascii").upper()
+
 
 def createbtdevaddr(addr):
     # in mac 10.5, can use BluetoothDeviceAddress directly
@@ -75,6 +77,7 @@ def createbtdevaddr(addr):
         return btdevaddr
     except:
         return chars
+
 
 def btaddrtochars(addr):
     """
@@ -96,13 +99,15 @@ def btaddrtochars(addr):
     if not _lightbluecommon._isbtaddr(addr):
         raise TypeError("address %s not valid bluetooth address" % str(addr))
     if addr.find(":") == -1:
-        addr = addr.replace("-", ":")   # consider alternative addr separator
+        addr = addr.replace("-", ":")  # consider alternative addr separator
 
     # unhexlify gives binary value like '\x0e', then ord to get the char value.
     # unhexlify throws TypeError if value is not a hex pair.
     import binascii
+
     chars = [ord(binascii.unhexlify(part)) for part in addr.split(":")]
     return tuple(chars)
+
 
 def looponce():
     app = NSApplication.sharedApplication()
@@ -111,8 +116,11 @@ def looponce():
     # use NSEventTrackingRunLoopMode or NSDefaultRunLoopMode?
     for i in range(2):
         event = app.nextEventMatchingMask_untilDate_inMode_dequeue_(
-            NSAnyEventMask, NSDate.dateWithTimeIntervalSinceNow_(0.02),
-            NSDefaultRunLoopMode, False)
+            NSAnyEventMask,
+            NSDate.dateWithTimeIntervalSinceNow_(0.02),
+            NSDefaultRunLoopMode,
+            False,
+        )
 
 
 def waituntil(conditionfunc, timeout=None):
@@ -141,28 +149,45 @@ def waituntil(conditionfunc, timeout=None):
     if timeout is None:
         timeout = NSDate.distantFuture().timeIntervalSinceNow()
     if not isinstance(timeout, (int, float)):
-        raise TypeError("timeout must be int or float, was %s" % \
-                type(timeout))
+        raise TypeError("timeout must be int or float, was %s" % type(timeout))
     endtime = starttime + timeout
     while True:
         currtime = time.time()
         if currtime >= endtime:
             return False
         # use WAIT_MAX_TIMEOUT, don't wait forever in case of KeyboardInterrupt
-        e = app.nextEventMatchingMask_untilDate_inMode_dequeue_(NSAnyEventMask, NSDate.dateWithTimeIntervalSinceNow_(min(endtime - currtime, WAIT_MAX_TIMEOUT)), NSDefaultRunLoopMode, True)
+        e = app.nextEventMatchingMask_untilDate_inMode_dequeue_(
+            NSAnyEventMask,
+            NSDate.dateWithTimeIntervalSinceNow_(
+                min(endtime - currtime, WAIT_MAX_TIMEOUT)
+            ),
+            NSDefaultRunLoopMode,
+            True,
+        )
         if e is not None:
-            if (e.type() == NSApplicationDefined and e.subtype() == LIGHTBLUE_NOTIFY_ID):
+            if e.type() == NSApplicationDefined and e.subtype() == LIGHTBLUE_NOTIFY_ID:
                 if conditionfunc():
                     return True
             else:
                 app.postEvent_atStart_(e, True)
+
 
 def interruptwait():
     """
     If waituntil() has been called, this will interrupt the waiting process so
     it can check whether it should stop waiting.
     """
-    evt = NSEvent.otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2_(NSApplicationDefined, NSPoint(), NSApplicationDefined, 0, 1, None, LIGHTBLUE_NOTIFY_ID, 0, 0)
+    evt = NSEvent.otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2_(
+        NSApplicationDefined,
+        NSPoint(),
+        NSApplicationDefined,
+        0,
+        1,
+        None,
+        LIGHTBLUE_NOTIFY_ID,
+        0,
+        0,
+    )
     NSApplication.sharedApplication().postEvent_atStart_(evt, True)
 
 
@@ -175,14 +200,17 @@ class BBCocoaSleeper(NSObject):
     @objc.python_method
     def sleep(self, timeout):
         NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
-                timeout, self, "timedOut:", None, False)
+            timeout, self, "timedOut:", None, False
+        )
         self.timedout = False
         waituntil(lambda: self.timedout)
 
     def timedOut_(self, timer):
         self.timedout = True
         interruptwait()
+
     timedOut_ = objc.selector(timedOut_, signature=b"v@:@")
+
 
 def waitfor(timeout):
     sleeper = BBCocoaSleeper.alloc().init()
@@ -202,8 +230,8 @@ class BBFileLikeObjectReader(NSObject):
         self = super(BBFileLikeObjectReader, self).init()
         self.__fileobj = fileobj
         return self
-    initWithFileLikeObject_ = objc.selector(initWithFileLikeObject_,
-        signature=b"@@:@")
+
+    initWithFileLikeObject_ = objc.selector(initWithFileLikeObject_, signature=b"@@:@")
 
     def readDataWithMaxLength_(self, maxlength):
         try:
@@ -211,8 +239,10 @@ class BBFileLikeObjectReader(NSObject):
         except Exception:
             return None
         return memoryview(data.encode())
-    readDataWithMaxLength_ = objc.selector(readDataWithMaxLength_,
-            signature=b"@@:I")    #"@12@0:4I8"    #"@:I"
+
+    readDataWithMaxLength_ = objc.selector(
+        readDataWithMaxLength_, signature=b"@@:I"
+    )  # "@12@0:4I8"    #"@:I"
 
 
 class BBFileLikeObjectWriter(NSObject):
@@ -228,8 +258,8 @@ class BBFileLikeObjectWriter(NSObject):
         self = super(BBFileLikeObjectWriter, self).init()
         self.__fileobj = fileobj
         return self
-    initWithFileLikeObject_ = objc.selector(initWithFileLikeObject_,
-        signature=b"@@:@")
+
+    initWithFileLikeObject_ = objc.selector(initWithFileLikeObject_, signature=b"@@:@")
 
     def write_(self, data):
         try:
@@ -237,5 +267,5 @@ class BBFileLikeObjectWriter(NSObject):
         except Exception:
             return -1
         return data.length()
-    write_ = objc.selector(write_, signature=b"i12@0:4@8")    #i12@0:4@8  #i@:@
 
+    write_ = objc.selector(write_, signature=b"i12@0:4@8")  # i12@0:4@8  #i@:@

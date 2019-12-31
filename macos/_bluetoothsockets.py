@@ -39,11 +39,10 @@ from . import _lightbluecommon
 from . import _macutil
 from ._LightAquaBlue import BBServiceAdvertiser, BBBluetoothChannelDelegate
 
-#import sets     # python 2.3
+# import sets     # python 2.3
 
 try:
-    SHUT_RD, SHUT_WR, SHUT_RDWR = \
-        _socket.SHUT_RD, _socket.SHUT_WR, _socket.SHUT_RDWR
+    SHUT_RD, SHUT_WR, SHUT_RDWR = _socket.SHUT_RD, _socket.SHUT_WR, _socket.SHUT_RDWR
 except AttributeError:
     # python 2.3
     SHUT_RD, SHUT_WR, SHUT_RDWR = (0, 1, 2)
@@ -57,16 +56,26 @@ def _getavailableport(proto):
 
     if proto == _lightbluecommon.RFCOMM:
         try:
-            result, channelID, servicerecordhandle = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None, None, None)
+            result, channelID, servicerecordhandle = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
+                BBServiceAdvertiser.serialPortProfileDictionary(),
+                "DummyService",
+                None,
+                None,
+                None,
+            )
         except:
-            result, channelID, servicerecordhandle = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None)
+            result, channelID, servicerecordhandle = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(
+                BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None
+            )
         if result != _macutil.kIOReturnSuccess:
-            raise _lightbluecommon.BluetoothError(result, \
-                "Could not retrieve an available service channel")
+            raise _lightbluecommon.BluetoothError(
+                result, "Could not retrieve an available service channel"
+            )
         result = BBServiceAdvertiser.removeService_(servicerecordhandle)
         if result != _macutil.kIOReturnSuccess:
-            raise _lightbluecommon.BluetoothError(result, \
-                "Could not retrieve an available service channel")
+            raise _lightbluecommon.BluetoothError(
+                result, "Could not retrieve an available service channel"
+            )
         return channelID
 
     else:
@@ -78,32 +87,29 @@ def _checkaddrpair(address, checkbtaddr=True):
     # (for binding to a server address)
 
     if not isinstance(address, tuple):
-        raise TypeError("address must be (address, port) tuple, was %s" % \
-            type(address))
+        raise TypeError("address must be (address, port) tuple, was %s" % type(address))
 
     if len(address) != 2:
-        raise TypeError("address tuple must have 2 items (has %d)" % \
-            len(address))
+        raise TypeError("address tuple must have 2 items (has %d)" % len(address))
 
     if not isinstance(address[0], str):
-        raise TypeError("address host value must be string, was %s" % \
-            type(address[0]))
+        raise TypeError("address host value must be string, was %s" % type(address[0]))
 
     if checkbtaddr:
         if not _lightbluecommon._isbtaddr(address[0]):
-            raise TypeError("address '%s' is not a bluetooth address" % \
-                address[0])
+            raise TypeError("address '%s' is not a bluetooth address" % address[0])
 
     if not isinstance(address[1], int):
-        raise TypeError("address port value must be int, was %s" % \
-            type(address[1]))
+        raise TypeError("address port value must be int, was %s" % type(address[1]))
 
 
 # from std lib socket module
 class _closedsocket(object):
     __slots__ = []
+
     def _dummy(*args):
-        raise _socket.error(errno.EBADF, 'Bad file descriptor')
+        raise _socket.error(errno.EBADF, "Bad file descriptor")
+
     send = recv = sendto = recvfrom = __getattr__ = _dummy
 
 
@@ -120,22 +126,22 @@ class _ByteQueue(object):
 
     def write(self, data):
         with self.lock:
-          self.buffered.extend(data)
+            self.buffered.extend(data)
 
     def __len__(self):
-        #calculate length without needing to _build_str
+        # calculate length without needing to _build_str
         return len(self.buffered)
 
     def read(self, count):
         with self.lock:
-            #get data requested by caller
+            # get data requested by caller
             result = self.buffered[:count]
-            #remove requested data from buffer
+            # remove requested data from buffer
             del self.buffered[:count]
         return result
 
 
-#class _SocketWrapper(_socket._socketobject):
+# class _SocketWrapper(_socket._socketobject):
 class _SocketWrapper(object):
     """
     A Bluetooth socket object has the same interface as a socket object from
@@ -175,10 +181,12 @@ class _SocketWrapper(object):
     def accept(self):
         sock, addr = self._sock.accept()
         return _SocketWrapper(sock), addr
+
     accept.__doc__ = _lightbluecommon._socketdocs["accept"]
 
     def dup(self):
         return _SocketWrapper(self._sock)
+
     dup.__doc__ = _lightbluecommon._socketdocs["dup"]
 
     def close(self):
@@ -189,14 +197,17 @@ class _SocketWrapper(object):
 
         try:
             import lightblue
+
             lightblue.stopadvertise(self)
         except:
             pass
+
     close.__doc__ = _lightbluecommon._socketdocs["close"]
 
-    def makefile(self, mode='r', bufsize=-1):
+    def makefile(self, mode="r", bufsize=-1):
         # use std lib socket's _fileobject
         return _socket._fileobject(self._sock, mode, bufsize)
+
     makefile.__doc__ = _lightbluecommon._socketdocs["makefile"]
 
     # delegate all other method calls to internal sock obj
@@ -207,8 +218,7 @@ class _SocketWrapper(object):
 # internal _sock object for RFCOMM and L2CAP sockets
 class _BluetoothSocket(object):
 
-    _boundports = { _lightbluecommon.L2CAP: set(),
-                    _lightbluecommon.RFCOMM: set() }
+    _boundports = {_lightbluecommon.L2CAP: set(), _lightbluecommon.RFCOMM: set()}
 
     # conn is the associated _RFCOMMConnection or _L2CAPConnection
     def __init__(self, conn):
@@ -222,7 +232,7 @@ class _BluetoothSocket(object):
         # timeout=None cos sockets default to blocking mode
         self.__timeout = None
 
-        #self.__isserverspawned = (conn.channel is not None)
+        # self.__isserverspawned = (conn.channel is not None)
         self.__port = 0
         self.__eventlistener = None
         self.__closed = False
@@ -237,12 +247,13 @@ class _BluetoothSocket(object):
 
     def accept(self):
         if not self.__isbound():
-            raise _socket.error('Socket not bound')
+            raise _socket.error("Socket not bound")
         if not self.__islistening():
-            raise _socket.error('Socket must be listening first')
+            raise _socket.error("Socket must be listening first")
 
         def clientconnected():
             return len(self.__queuedchannels) > 0
+
         if not clientconnected():
             self.__waituntil(clientconnected, "accept timed out")
 
@@ -261,7 +272,7 @@ class _BluetoothSocket(object):
     def bind(self, address):
         _checkaddrpair(address, False)
         if self.__isbound():
-            raise _socket.error('Socket is already bound')
+            raise _socket.error("Socket is already bound")
         elif self.__isconnected():
             raise _socket.error("Socket is already connected, cannot be bound")
 
@@ -269,19 +280,23 @@ class _BluetoothSocket(object):
             raise NotImplementedError("L2CAP server sockets not currently supported")
 
         if address[1] != 0:
-            raise _socket.error("must bind to port 0, other ports not supported on Mac OS X")
+            raise _socket.error(
+                "must bind to port 0, other ports not supported on Mac OS X"
+            )
         address = (address[0], _getavailableport(self.__conn.proto))
 
         # address must be either empty string or local device address
         if address[0] != "":
             try:
                 import lightblue
+
                 localaddr = lightblue.gethostaddr()
             except:
                 localaddr = None
             if localaddr is None or address[0] != localaddr:
                 raise _socket.error(
-                    errno.EADDRNOTAVAIL, os.strerror(errno.EADDRNOTAVAIL))
+                    errno.EADDRNOTAVAIL, os.strerror(errno.EADDRNOTAVAIL)
+                )
 
         # is this port already in use?
         if address[1] in self._boundports[self.__conn.proto]:
@@ -307,13 +322,12 @@ class _BluetoothSocket(object):
         # still open (which is what we want, cos we don't know if another
         # process is talking to the device)
         if self.__remotedevice is not None:
-            self.__remotedevice.closeConnection()   # returns err code
+            self.__remotedevice.closeConnection()  # returns err code
 
         # if you don't run the event loop a little here, it's likely you won't
         # be able to reconnect to the same remote device later
         if wasconnected:
             _macutil.waitfor(0.5)
-
 
     def connect(self, address):
         if self.__isbound():
@@ -323,38 +337,46 @@ class _BluetoothSocket(object):
         _checkaddrpair(address)
 
         # open a connection to device
-        self.__remotedevice = _IOBluetooth.IOBluetoothDevice.withAddressString_(address[0])
+        self.__remotedevice = _IOBluetooth.IOBluetoothDevice.withAddressString_(
+            address[0]
+        )
 
         if not self.__remotedevice.isConnected():
             if self.__timeout is None:
                 result = self.__remotedevice.openConnection()
             else:
                 result = self.__remotedevice.openConnection_withPageTimeout_authenticationRequired_(
-                    None, self.__timeout*1000, False)
+                    None, self.__timeout * 1000, False
+                )
 
             if result != _macutil.kIOReturnSuccess:
                 if result == _macutil.kBluetoothHCIErrorPageTimeout:
                     if self.__timeout == 0:
-                        raise _socket.error(errno.EAGAIN,
-                            "Resource temporarily unavailable")
+                        raise _socket.error(
+                            errno.EAGAIN, "Resource temporarily unavailable"
+                        )
                     else:
                         raise _socket.timeout("connect timed out")
                 else:
-                    raise _socket.error(result,
-                        "Cannot connect to %s, can't open connection." \
-                                                            % str(address[0]))
+                    raise _socket.error(
+                        result,
+                        "Cannot connect to %s, can't open connection."
+                        % str(address[0]),
+                    )
 
         # open RFCOMM or L2CAP channel
         self.__eventlistener = self.__createlistener()
-        result = self.__conn.connect(self.__remotedevice, address[1],
-                self.__eventlistener)   # pass listener as cocoa delegate
+        result = self.__conn.connect(
+            self.__remotedevice, address[1], self.__eventlistener
+        )  # pass listener as cocoa delegate
 
         if result != _macutil.kIOReturnSuccess:
             self.__remotedevice.closeConnection()
             self.__stopevents()
             self.__eventlistener = None
-            raise _socket.error(result,
-                    "Cannot connect to %d on %s" % (address[1], address[0]))
+            raise _socket.error(
+                result, "Cannot connect to %d on %s" % (address[1], address[0])
+            )
             return
 
         # if you don't run the event loop a little here, it's likely you won't
@@ -381,6 +403,7 @@ class _BluetoothSocket(object):
     def getsockname(self):
         if self.__isbound() or self.__isconnected():
             import lightblue
+
             return (lightblue.gethostaddr(), self._getport())
         else:
             return ("00:00:00:00:00:00", 0)
@@ -390,7 +413,7 @@ class _BluetoothSocket(object):
             return
 
         if not self.__isbound():
-            raise _socket.error('Socket not bound')
+            raise _socket.error("Socket not bound")
         if not isinstance(backlog, int):
             raise TypeError("backlog must be int, was %s" % type(backlog))
         if backlog < 0:
@@ -401,15 +424,15 @@ class _BluetoothSocket(object):
         # start listening for client connections
         self.__startevents()
 
-
     def _isclosed(self):
         # isOpen() check doesn't work for incoming (server-spawned) channels
-        if (self.__conn.proto == _lightbluecommon.RFCOMM and
-                self.__conn.channel is not None and
-                not self.__conn.channel.isIncoming()):
+        if (
+            self.__conn.proto == _lightbluecommon.RFCOMM
+            and self.__conn.channel is not None
+            and not self.__conn.channel.isIncoming()
+        ):
             return not self.__conn.channel.isOpen()
         return self.__closed
-
 
     def recv(self, bufsize, flags=0):
         if self.__commstate in (SHUT_RD, SHUT_RDWR):
@@ -419,7 +442,7 @@ class _BluetoothSocket(object):
         if not isinstance(bufsize, int):
             raise TypeError("buffer size must be int, was %s" % type(bufsize))
         if bufsize < 0:
-            raise ValueError("negative buffersize in recv") # as for tcp
+            raise ValueError("negative buffersize in recv")  # as for tcp
         if bufsize == 0:
             return ""
 
@@ -428,14 +451,14 @@ class _BluetoothSocket(object):
 
         if self._isclosed():
             if len(self.__incomingdata) == 0:
-                raise _socket.error(errno.ECONNRESET,
-                                    os.strerror(errno.ECONNRESET))
+                raise _socket.error(errno.ECONNRESET, os.strerror(errno.ECONNRESET))
             return self.__incomingdata.read(bufsize)
 
         # if incoming data buffer is empty, wait until data is available or
         # channel is closed
         def gotdata():
             return not self.__incomingdata.empty() or self._isclosed()
+
         if not gotdata():
             self.__waituntil(gotdata, "recv timed out")
 
@@ -444,7 +467,6 @@ class _BluetoothSocket(object):
             raise _socket.error(errno.ECONNRESET, os.strerror(errno.ECONNRESET))
 
         return self.__incomingdata.read(bufsize)
-
 
     # recvfrom() is really for datagram sockets not stream sockets but it
     # can be implemented anyway.
@@ -473,11 +495,14 @@ class _BluetoothSocket(object):
                 # in non-blocking mode
                 # isTransmissionPaused() is not available for L2CAP sockets,
                 # what to do for that?
-                if self.__conn.proto == _lightbluecommon.RFCOMM and \
-                        self.__conn.channel.isTransmissionPaused():
+                if (
+                    self.__conn.proto == _lightbluecommon.RFCOMM
+                    and self.__conn.channel.isTransmissionPaused()
+                ):
                     # sending data now will block
-                    raise _socket.error(errno.EAGAIN,
-                        "Resource temporarily unavailable")
+                    raise _socket.error(
+                        errno.EAGAIN, "Resource temporarily unavailable"
+                    )
             elif self.__timeout > 0:
                 # non-blocking with timeout
                 starttime = time.time()
@@ -497,7 +522,7 @@ class _BluetoothSocket(object):
                 sendbytecount = mtu
             else:
                 sendbytecount = bytesleft
-            #result = self.__conn.channel.writeSync_length_(
+            # result = self.__conn.channel.writeSync_length_(
             #        writebuf[:sendbytecount], sendbytecount)
             result = self.__conn.write(writebuf[:sendbytecount])
 
@@ -508,7 +533,7 @@ class _BluetoothSocket(object):
                 raise _socket.error(result, "Error sending data")
 
             bytesleft -= sendbytecount
-            writebuf = writebuf[sendbytecount:] # remove the data just sent
+            writebuf = writebuf[sendbytecount:]  # remove the data just sent
 
         return len(data) - bytesleft
 
@@ -527,8 +552,9 @@ class _BluetoothSocket(object):
         elif len(args) == 2:
             flags, address = args
         else:
-            raise TypeError("sendto takes at most 3 arguments (%d given)" % \
-                (len(args) + 1))
+            raise TypeError(
+                "sendto takes at most 3 arguments (%d given)" % (len(args) + 1)
+            )
         _checkaddrpair(address)
 
         # must already be connected, cos this is stream socket
@@ -541,28 +567,25 @@ class _BluetoothSocket(object):
     def getsockopt(self, level, optname, buflen=0):
         # see what options on Linux+s60
         # possibly have socket security option.
-        raise _socket.error(
-            errno.ENOPROTOOPT, os.strerror(errno.ENOPROTOOPT))
+        raise _socket.error(errno.ENOPROTOOPT, os.strerror(errno.ENOPROTOOPT))
 
     def setsockopt(self, level, optname, value):
         # see what options on Linux+s60
         # possibly have socket security option.
-        raise _socket.error(
-            errno.ENOPROTOOPT, os.strerror(errno.ENOPROTOOPT))
+        raise _socket.error(errno.ENOPROTOOPT, os.strerror(errno.ENOPROTOOPT))
 
     def setblocking(self, flag):
         if flag == 0:
-            self.__timeout = 0      # non-blocking
+            self.__timeout = 0  # non-blocking
         else:
-            self.__timeout = None   # blocking
+            self.__timeout = None  # blocking
 
     def gettimeout(self):
         return self.__timeout
 
     def settimeout(self, value):
         if value is not None and not isinstance(value, (float, int)):
-            msg = "timeout value must be a number or None, was %s" % \
-                type(value)
+            msg = "timeout value must be a number or None, was %s" % type(value)
             raise TypeError(msg)
         if value < 0:
             msg = "timeout value cannot be negative, was %d" % value
@@ -600,7 +623,7 @@ class _BluetoothSocket(object):
         self.__queuedchannels_lock.acquire()
         try:
             # need to implement max connections
-            #if len(self.__queuedchannels) < self.__maxqueuedconns:
+            # if len(self.__queuedchannels) < self.__maxqueuedconns:
             self.__queuedchannels.append(channel)
             _macutil.interruptwait()
         finally:
@@ -636,8 +659,9 @@ class _BluetoothSocket(object):
 
     def __createlistener(self):
         if self.__isbound():
-            return _ChannelServerEventListener.alloc().initWithDelegate_port_protocol_(self,
-                    self._getport(), self.__conn.proto)
+            return _ChannelServerEventListener.alloc().initWithDelegate_port_protocol_(
+                self, self._getport(), self.__conn.proto
+            )
         else:
             listener = _ChannelEventListener.alloc().initWithDelegate_(self)
             if self.__conn.channel is not None:
@@ -676,7 +700,7 @@ class _BluetoothSocket(object):
             raise _socket.error(errno.ENOTCONN, os.strerror(errno.ENOTCONN))
 
     # set method docstrings
-    definedmethods = locals()   # i.e. defined methods in _SocketWrapper
+    definedmethods = locals()  # i.e. defined methods in _SocketWrapper
     for name, doc in list(_lightbluecommon._socketdocs.items()):
         try:
             definedmethods[name].__doc__ = doc
@@ -697,9 +721,13 @@ class _RFCOMMConnection(object):
         # channel as well? if so need to do timeout with async callbacks)
         try:
             # pyobjc 2.0
-            result, self.channel = device.openRFCOMMChannelSync_withChannelID_delegate_(None, port, listener.delegate())
+            result, self.channel = device.openRFCOMMChannelSync_withChannelID_delegate_(
+                None, port, listener.delegate()
+            )
         except TypeError:
-            result, self.channel = device.openRFCOMMChannelSync_withChannelID_delegate_(port, listener.delegate())
+            result, self.channel = device.openRFCOMMChannelSync_withChannelID_delegate_(
+                port, listener.delegate()
+            )
         if result == _macutil.kIOReturnSuccess:
             self.channel.setDelegate_(listener.delegate())
             listener.registerclosenotif(self.channel)
@@ -710,10 +738,10 @@ class _RFCOMMConnection(object):
     def write(self, data):
         if self.channel is None:
             raise _socket.error("socket not connected")
-        return \
-            BBBluetoothChannelDelegate.synchronouslyWriteData_toRFCOMMChannel_(
-                Foundation.NSData.alloc().initWithBytes_length_(data, len(data)),
-                self.channel)
+        return BBBluetoothChannelDelegate.synchronouslyWriteData_toRFCOMMChannel_(
+            Foundation.NSData.alloc().initWithBytes_length_(data, len(data)),
+            self.channel,
+        )
 
     def getwritemtu(self):
         return self.channel.getMTU()
@@ -733,9 +761,13 @@ class _L2CAPConnection(object):
     def connect(self, device, port, listener):
         try:
             # pyobjc 2.0
-            result, self.channel = device.openL2CAPChannelSync_withPSM_delegate_(None, port, listener.delegate())
+            result, self.channel = device.openL2CAPChannelSync_withPSM_delegate_(
+                None, port, listener.delegate()
+            )
         except TypeError:
-            result, self.channel = device.openL2CAPChannelSync_withPSM_delegate_(port, listener.delegate())
+            result, self.channel = device.openL2CAPChannelSync_withPSM_delegate_(
+                port, listener.delegate()
+            )
         if result == _macutil.kIOReturnSuccess:
             self.channel.setDelegate_(listener.delegate())
             listener.registerclosenotif(self.channel)
@@ -746,9 +778,9 @@ class _L2CAPConnection(object):
     def write(self, data):
         if self.channel is None:
             raise _socket.error("socket not connected")
-        return \
-            BBBluetoothChannelDelegate.synchronouslyWriteData_toL2CAPChannel_(
-                bytes(data), self.channel)
+        return BBBluetoothChannelDelegate.synchronouslyWriteData_toL2CAPChannel_(
+            bytes(data), self.channel
+        )
 
     def getwritemtu(self):
         return self.channel.getOutgoingMTU()
@@ -789,9 +821,11 @@ class _ChannelEventListener(Foundation.NSObject):
             raise TypeError("callback object is None")
         self.__cb_obj = cb_obj
         self.__closenotif = None
-        self.__channelDelegate = \
-                BBBluetoothChannelDelegate.alloc().initWithDelegate_(self)
+        self.__channelDelegate = BBBluetoothChannelDelegate.alloc().initWithDelegate_(
+            self
+        )
         return self
+
     initWithDelegate_ = objc.selector(initWithDelegate_, signature=b"@@:@")
 
     def delegate(self):
@@ -801,8 +835,9 @@ class _ChannelEventListener(Foundation.NSObject):
     def registerclosenotif(self, channel):
         # oddly enough, sometimes the channelClosed: selector doesn't get called
         # (maybe if there's a lot of data being passed?) but this seems to work
-        notif = channel.registerForChannelCloseNotification_selector_(self,
-                "channelClosedEvent:channel:")
+        notif = channel.registerForChannelCloseNotification_selector_(
+            self, "channelClosedEvent:channel:"
+        )
         if notif is not None:
             self.__closenotif = notif
 
@@ -811,23 +846,27 @@ class _ChannelEventListener(Foundation.NSObject):
             self.__closenotif.unregister()
 
     def channelClosedEvent_channel_(self, notif, channel):
-        if hasattr(self.__cb_obj, '_handle_channelclosed'):
+        if hasattr(self.__cb_obj, "_handle_channelclosed"):
             self.__cb_obj._handle_channelclosed(channel)
+
     channelClosedEvent_channel_ = objc.selector(
-            channelClosedEvent_channel_, signature=b"v@:@@")
+        channelClosedEvent_channel_, signature=b"v@:@@"
+    )
 
     # implement method from BBBluetoothChannelDelegateObserver protocol:
     # - (void)channelData:(id)channel data:(NSData *)data;
     def channelData_data_(self, channel, data):
-        if hasattr(self.__cb_obj, '_handle_channeldata'):
+        if hasattr(self.__cb_obj, "_handle_channeldata"):
             self.__cb_obj._handle_channeldata(channel, data[:])
+
     channelData_data_ = objc.selector(channelData_data_, signature=b"v@:@@")
 
     # implement method from BBBluetoothChannelDelegateObserver protocol:
     # - (void)channelClosed:(id)channel;
     def channelClosed_(self, channel):
-        if hasattr(self.__cb_obj, '_handle_channelclosed'):
+        if hasattr(self.__cb_obj, "_handle_channelclosed"):
             self.__cb_obj._handle_channelclosed(channel)
+
     channelClosed_ = objc.selector(channelClosed_, signature=b"v@:@")
 
 
@@ -856,18 +895,31 @@ class _ChannelServerEventListener(Foundation.NSObject):
         self.__usernotif = None
 
         if proto == _lightbluecommon.RFCOMM:
-            usernotif = _IOBluetooth.IOBluetoothRFCOMMChannel.registerForChannelOpenNotifications_selector_withChannelID_direction_(self, "newChannelOpened:channel:", port, _macutil.kIOBluetoothUserNotificationChannelDirectionIncoming)
+            usernotif = _IOBluetooth.IOBluetoothRFCOMMChannel.registerForChannelOpenNotifications_selector_withChannelID_direction_(
+                self,
+                "newChannelOpened:channel:",
+                port,
+                _macutil.kIOBluetoothUserNotificationChannelDirectionIncoming,
+            )
         elif proto == _lightbluecommon.L2CAP:
-            usernotif = _IOBluetooth.IOBluetoothL2CAPChannel.registerForChannelOpenNotifications_selector_withPSM_direction_(self, "newChannelOpened:channel:", port, _macutil.kIOBluetoothUserNotificationChannelDirectionIncoming)
+            usernotif = _IOBluetooth.IOBluetoothL2CAPChannel.registerForChannelOpenNotifications_selector_withPSM_direction_(
+                self,
+                "newChannelOpened:channel:",
+                port,
+                _macutil.kIOBluetoothUserNotificationChannelDirectionIncoming,
+            )
 
         if usernotif is None:
-            raise _socket.error("Unable to register for channel-" + \
-                "opened notifications on server socket on channel/PSM %d" % \
-                port)
+            raise _socket.error(
+                "Unable to register for channel-"
+                + "opened notifications on server socket on channel/PSM %d" % port
+            )
         self.__usernotif = usernotif
         return self
+
     initWithDelegate_port_protocol_ = objc.selector(
-        initWithDelegate_port_protocol_, signature=b"@@:@ii")
+        initWithDelegate_port_protocol_, signature=b"@@:@ii"
+    )
 
     def close(self):
         if self.__usernotif is not None:
@@ -882,18 +934,23 @@ class _ChannelServerEventListener(Foundation.NSObject):
             # not sure if delegate really needs to be set
             newChannel.setDelegate_(self)
 
-            if hasattr(self.__cb_obj, '_handle_channelopened'):
+            if hasattr(self.__cb_obj, "_handle_channelopened"):
                 self.__cb_obj._handle_channelopened(newChannel)
+
     # makes this method receive notif and channel as objects
     newChannelOpened_channel_ = objc.selector(
-            newChannelOpened_channel_, signature=b"v@:@@")
+        newChannelOpened_channel_, signature=b"v@:@@"
+    )
 
 
 # -----------------------------------------------------------
 
 # protocol-specific classes
-_SOCKET_CLASSES = { _lightbluecommon.RFCOMM: _RFCOMMConnection,
-                    _lightbluecommon.L2CAP:  _L2CAPConnection }
+_SOCKET_CLASSES = {
+    _lightbluecommon.RFCOMM: _RFCOMMConnection,
+    _lightbluecommon.L2CAP: _L2CAPConnection,
+}
+
 
 def _getsocketobject(proto):
     if proto not in list(_SOCKET_CLASSES.keys()):

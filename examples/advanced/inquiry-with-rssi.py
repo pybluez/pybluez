@@ -12,9 +12,11 @@ import sys
 import bluetooth
 import bluetooth._bluetooth as bluez  # low level bluetooth wrappers
 
+
 def printpacket(pkt):
     for c in pkt:
         sys.stdout.write("{%02x} ".format(struct.unpack("B", c)[0]))
+
 
 def read_inquiry_mode(sock):
     """returns the current mode, or -1 on failure"""
@@ -24,16 +26,14 @@ def read_inquiry_mode(sock):
     # Setup socket filter to receive only events related to the
     # read_inquiry_mode command
     flt = bluez.hci_filter_new()
-    opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL,
-                                   bluez.OCF_READ_INQUIRY_MODE)
+    opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL, bluez.OCF_READ_INQUIRY_MODE)
     bluez.hci_filter_set_ptype(flt, bluez.HCI_EVENT_PKT)
     bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE)
     bluez.hci_filter_set_opcode(flt, opcode)
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, flt)
 
     # first read the current inquiry mode.
-    bluez.hci_send_cmd(sock, bluez.OGF_HOST_CTL,
-                       bluez.OCF_READ_INQUIRY_MODE)
+    bluez.hci_send_cmd(sock, bluez.OGF_HOST_CTL, bluez.OCF_READ_INQUIRY_MODE)
 
     pkt = sock.recv(255)
     status, mode = struct.unpack("xxxxxxBB", pkt)
@@ -43,6 +43,7 @@ def read_inquiry_mode(sock):
 
     return mode
 
+
 def write_inquiry_mode(sock, mode):
     """returns 0 on success, -1 on failure"""
     # save current filter
@@ -51,17 +52,16 @@ def write_inquiry_mode(sock, mode):
     # Setup socket filter to receive only events related to the
     # write_inquiry_mode command
     flt = bluez.hci_filter_new()
-    opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL,
-                                   bluez.OCF_WRITE_INQUIRY_MODE)
+    opcode = bluez.cmd_opcode_pack(bluez.OGF_HOST_CTL, bluez.OCF_WRITE_INQUIRY_MODE)
     bluez.hci_filter_set_ptype(flt, bluez.HCI_EVENT_PKT)
     bluez.hci_filter_set_event(flt, bluez.EVT_CMD_COMPLETE)
     bluez.hci_filter_set_opcode(flt, opcode)
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, flt)
 
     # send the command!
-    bluez.hci_send_cmd(sock, bluez.OGF_HOST_CTL,
-                       bluez.OCF_WRITE_INQUIRY_MODE,
-                       struct.pack("B", mode))
+    bluez.hci_send_cmd(
+        sock, bluez.OGF_HOST_CTL, bluez.OCF_WRITE_INQUIRY_MODE, struct.pack("B", mode)
+    )
 
     pkt = sock.recv(255)
     status = struct.unpack("xxxxxxB", pkt)[0]
@@ -72,6 +72,7 @@ def write_inquiry_mode(sock, mode):
         return -1
 
     return 0
+
 
 def device_inquiry_with_with_rssi(sock):
     # save current filter
@@ -88,7 +89,7 @@ def device_inquiry_with_with_rssi(sock):
 
     duration = 4
     max_responses = 255
-    cmd_pkt = struct.pack("BBBBB", 0x33, 0x8b, 0x9e, duration, max_responses)
+    cmd_pkt = struct.pack("BBBBB", 0x33, 0x8B, 0x9E, duration, max_responses)
     bluez.hci_send_cmd(sock, bluez.OGF_LINK_CTL, bluez.OCF_INQUIRY, cmd_pkt)
 
     results = []
@@ -101,9 +102,10 @@ def device_inquiry_with_with_rssi(sock):
             pkt = pkt[3:]
             nrsp = bluetooth.get_byte(pkt[0])
             for i in range(nrsp):
-                addr = bluez.ba2str(pkt[1+6*i:1+6*i+6])
+                addr = bluez.ba2str(pkt[1 + 6 * i : 1 + 6 * i + 6])
                 rssi = bluetooth.byte_to_signed_int(
-                    bluetooth.get_byte(pkt[1 + 13 * nrsp + i]))
+                    bluetooth.get_byte(pkt[1 + 13 * nrsp + i])
+                )
                 results.append((addr, rssi))
                 print("[{}] RSSI: {}".format(addr, rssi))
         elif event == bluez.EVT_INQUIRY_COMPLETE:
@@ -118,7 +120,7 @@ def device_inquiry_with_with_rssi(sock):
             pkt = pkt[3:]
             nrsp = bluetooth.get_byte(pkt[0])
             for i in range(nrsp):
-                addr = bluez.ba2str(pkt[1+6*i:1+6*i+6])
+                addr = bluez.ba2str(pkt[1 + 6 * i : 1 + 6 * i + 6])
                 results.append((addr, -1))
                 print("[{}] (no RRSI)".format(addr))
         else:
@@ -128,6 +130,7 @@ def device_inquiry_with_with_rssi(sock):
     sock.setsockopt(bluez.SOL_HCI, bluez.HCI_FILTER, old_filter)
 
     return results
+
 
 dev_id = 0
 try:

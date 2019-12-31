@@ -37,6 +37,7 @@ class BluetoothError(IOError):
     the Mac OS X implementation returns IOReturn error values from the IOKit
     framework, and OBEXError codes from <IOBluetooth/OBEX.h> for OBEX operations.
     """
+
     pass
 
 
@@ -59,10 +60,11 @@ def splitclass(classofdevice):
         try:
             classofdevice = int(classofdevice)
         except (TypeError, ValueError):
-            raise TypeError("Given device class '%s' cannot be split" % \
-                str(classofdevice))
+            raise TypeError(
+                "Given device class '%s' cannot be split" % str(classofdevice)
+            )
 
-    data = classofdevice >> 2   # skip over the 2 "format" bits
+    data = classofdevice >> 2  # skip over the 2 "format" bits
     service = data >> 11
     major = (data >> 6) & 0x1F
     minor = data & 0x3F
@@ -70,6 +72,8 @@ def splitclass(classofdevice):
 
 
 _validbtaddr = None
+
+
 def _isbtaddr(address):
     """
     Returns whether the given address is a valid bluetooth address.
@@ -81,15 +85,17 @@ def _isbtaddr(address):
     global _validbtaddr
     if _validbtaddr is None:
         import re
-        _validbtaddr = re.compile("((\d|[a-f]){2}(:|-)){5}(\d|[a-f]){2}",
-                re.IGNORECASE)
+
+        _validbtaddr = re.compile("((\d|[a-f]){2}(:|-)){5}(\d|[a-f]){2}", re.IGNORECASE)
     import types
+
     if not isinstance(address, str):
         return False
     return _validbtaddr.match(address) is not None
 
 
 # --------- other attributes ---------
+
 
 def _joinclass(codtuple):
     """
@@ -104,14 +110,13 @@ def _joinclass(codtuple):
     serviceclass = codtuple[0] << 2 << 11
     majorclass = codtuple[1] << 2 << 6
     minorclass = codtuple[2] << 2
-    return (serviceclass | majorclass | minorclass)
+    return serviceclass | majorclass | minorclass
 
 
 # Docstrings for socket objects.
 # Based on std lib socket docs.
 _socketdocs = {
-"accept":
-    """
+    "accept": """
     accept() -> (socket object, address info)
 
     Wait for an incoming connection. Return a new socket representing the
@@ -120,8 +125,7 @@ _socketdocs = {
 
     The socket must be bound and listening before calling this method.
     """,
-"bind":
-    """
+    "bind": """
     bind(address)
 
     Bind the socket to a local address. For RFCOMM sockets, the address is a
@@ -132,14 +136,12 @@ _socketdocs = {
 
     The socket must not already be bound.
     """,
-"close":
-    """
+    "close": """
     close()
 
     Close the socket.  It cannot be used after this call.
     """,
-"connect":
-    """
+    "connect": """
     connect(address)
 
     Connect the socket to a remote address. The address should be a
@@ -148,29 +150,25 @@ _socketdocs = {
 
     The socket must not be already connected.
     """,
-"connect_ex":
-    """
+    "connect_ex": """
     connect_ex(address) -> errno
 
     This is like connect(address), but returns an error code instead of raising
     an exception when an error occurs.
     """,
-"dup":
-    """
+    "dup": """
     dup() -> socket object
 
     Returns a new socket object connected to the same system resource.
     """,
-"fileno":
-    """
+    "fileno": """
     fileno() -> integer
 
     Return the integer file descriptor of the socket.
 
     Raises NotImplementedError on Mac OS X and Python For Series 60.
     """,
-"getpeername":
-    """
+    "getpeername": """
     getpeername() -> address info
 
     Return the address of the remote endpoint. The address info is a
@@ -179,8 +177,7 @@ _socketdocs = {
 
     If the socket has not been connected, socket.error will be raised.
     """,
-"getsockname":
-    """
+    "getsockname": """
     getsockname() -> address info
 
     Return the address of the local endpoint. The address info is a
@@ -190,8 +187,7 @@ _socketdocs = {
     If the socket has not been connected nor bound, this returns the tuple
     ("00:00:00:00:00:00", 0).
     """,
-"getsockopt":
-    """
+    "getsockopt": """
     getsockopt(level, option[, bufsize]) -> value
 
     Get a socket option.  See the Unix manual for level and option.
@@ -203,8 +199,7 @@ _socketdocs = {
     The Mac OS X implementation currently does not support any options at
     all and automatically raises socket.error.
     """,
-"gettimeout":
-    """
+    "gettimeout": """
     gettimeout() -> timeout
 
     Returns the timeout in floating seconds associated with socket
@@ -214,8 +209,7 @@ _socketdocs = {
     Currently not supported on Python For Series 60 implementation, which
     will always return None.
     """,
-"listen":
-    """
+    "listen": """
     listen(backlog)
 
     Enable a server to accept connections. The backlog argument must be at
@@ -226,15 +220,13 @@ _socketdocs = {
 
     Currently not implemented on Mac OS X.
     """,
-"makefile":
-    """
+    "makefile": """
     makefile([mode[, bufsize]]) -> file object
 
     Returns a regular file object corresponding to the socket.  The mode
     and bufsize arguments are as for the built-in open() function.
     """,
-"recv":
-    """
+    "recv": """
     recv(bufsize[, flags]) -> data
 
     Receive up to bufsize bytes from the socket.  For the optional flags
@@ -244,14 +236,12 @@ _socketdocs = {
 
     Currently the flags argument has no effect on Mac OS X.
     """,
-"recvfrom":
-    """
+    "recvfrom": """
     recvfrom(bufsize[, flags]) -> (data, address info)
 
     Like recv(buffersize, flags) but also return the sender's address info.
     """,
-"send":
-    """
+    "send": """
     send(data[, flags]) -> count
 
     Send a data string to the socket.  For the optional flags
@@ -262,8 +252,7 @@ _socketdocs = {
 
     Currently the flags argument has no effect on Mac OS X.
     """,
-"sendall":
-    """
+    "sendall": """
     sendall(data[, flags])
 
     Send a data string to the socket.  For the optional flags
@@ -271,15 +260,13 @@ _socketdocs = {
     until all data is sent.  If an error occurs, it's impossible
     to tell how much data has been sent.
     """,
-"sendto":
-    """
+    "sendto": """
     sendto(data[, flags], address) -> count
 
     Like send(data, flags) but allows specifying the destination address.
     For RFCOMM sockets, the address is a pair (hostaddr, channel).
     """,
-"setblocking":
-    """
+    "setblocking": """
     setblocking(flag)
 
     Set the socket to blocking (flag is true) or non-blocking (false).
@@ -293,8 +280,7 @@ _socketdocs = {
     non-blocking mode for send() and recv(), and ignores it for connect() and
     accept().
     """,
-"setsockopt":
-    """
+    "setsockopt": """
     setsockopt(level, option, value)
 
     Set a socket option.  See the Unix manual for level and option.
@@ -305,8 +291,7 @@ _socketdocs = {
     The Mac OS X implementation currently does not support any options at
     all and automatically raise socket.error.
     """,
-"settimeout":
-    """
+    "settimeout": """
     settimeout(timeout)
 
     Set a timeout on socket operations.  'timeout' can be a float,
@@ -319,13 +304,11 @@ _socketdocs = {
 
     Raises NotImplementedError on Python For Series 60.
     """,
-"shutdown":
-    """
+    "shutdown": """
     shutdown(how)
 
     Shut down the reading side of the socket (flag == socket.SHUT_RD), the
     writing side of the socket (flag == socket.SHUT_WR), or both ends
     (flag == socket.SHUT_RDWR).
-    """
+    """,
 }
-

@@ -16,7 +16,6 @@ import bluetooth
 
 
 class MyDiscoverer(bluetooth.DeviceDiscoverer):
-
     def pre_inquiry(self):
         self.done = False
 
@@ -26,31 +25,35 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
         # get some information out of the device class and display it.
         # voodoo magic specified at:
         # https://www.bluetooth.org/foundry/assignnumb/document/baseband
-        major_classes = ("Miscellaneous",
-                         "Computer",
-                         "Phone",
-                         "LAN/Network Access Point",
-                         "Audio/Video",
-                         "Peripheral",
-                         "Imaging")
-        major_class = (device_class >> 8) & 0xf
+        major_classes = (
+            "Miscellaneous",
+            "Computer",
+            "Phone",
+            "LAN/Network Access Point",
+            "Audio/Video",
+            "Peripheral",
+            "Imaging",
+        )
+        major_class = (device_class >> 8) & 0xF
         if major_class < 7:
             print(" " + major_classes[major_class])
         else:
             print("  Uncategorized")
 
         print("  Services:")
-        service_classes = ((16, "positioning"),
-                           (17, "networking"),
-                           (18, "rendering"),
-                           (19, "capturing"),
-                           (20, "object transfer"),
-                           (21, "audio"),
-                           (22, "telephony"),
-                           (23, "information"))
+        service_classes = (
+            (16, "positioning"),
+            (17, "networking"),
+            (18, "rendering"),
+            (19, "capturing"),
+            (20, "object transfer"),
+            (21, "audio"),
+            (22, "telephony"),
+            (23, "information"),
+        )
 
         for bitpos, classname in service_classes:
-            if device_class & (1 << (bitpos-1)):
+            if device_class & (1 << (bitpos - 1)):
                 print("   ", classname)
         print("  RSSI:", rssi)
 
@@ -61,7 +64,7 @@ class MyDiscoverer(bluetooth.DeviceDiscoverer):
 d = MyDiscoverer()
 d.find_devices(lookup_names=True)
 
-readfiles = [d, ]
+readfiles = [d]
 
 while True:
     rfds = select.select(readfiles, [], [])[0]

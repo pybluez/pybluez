@@ -19,9 +19,7 @@
 
 # Docstrings for attributes in this module.
 _docstrings = {
-
-"finddevices":
-    """
+    "finddevices": """
     Performs a device discovery and returns the found devices as a list of
     (address, name, class-of-device) tuples. Raises BluetoothError if an error
     occurs.
@@ -39,8 +37,7 @@ _docstrings = {
     be invoked too frequently (an interval of at least 20 seconds is
     recommended).
     """,
-"findservices":
-    """
+    "findservices": """
     Performs a service discovery and returns the found services as a list of
     (device-address, service-port, service-name) tuples. Raises BluetoothError
     if an error occurs.
@@ -60,8 +57,7 @@ _docstrings = {
     Currently the Python for Series 60 implementation will only find RFCOMM and
     OBEX services.
     """,
-"finddevicename":
-    """
+    "finddevicename": """
     Returns the name of the device with the given bluetooth address.
     finddevicename(gethostaddr()) returns the local device name.
 
@@ -73,14 +69,12 @@ _docstrings = {
 
     Raise BluetoothError if the name cannot be retrieved.
     """,
-"gethostaddr":
-    """
+    "gethostaddr": """
     Returns the address of the local bluetooth device.
 
     Raise BluetoothError if the local device is not available.
     """,
-"gethostclass":
-    """
+    "gethostclass": """
     Returns the class of device of the local bluetooth device.
 
     These values indicate the device's major services and the type of the
@@ -90,8 +84,7 @@ _docstrings = {
 
     Raise BluetoothError if the local device is not available.
     """,
-"socket":
-    """
+    "socket": """
     socket(proto=RFCOMM) -> socket object
 
     Returns a new socket object.
@@ -104,8 +97,7 @@ _docstrings = {
     only L2CAP client sockets are supported on Mac OS X and Linux (i.e. you can
     connect() the socket but not bind(), accept(), etc.).
     """,
-"advertise":
-    """
+    "advertise": """
     Starts advertising a service with the given name, using the given server
     socket. Raises BluetoothError if the service cannot be advertised.
 
@@ -121,15 +113,13 @@ _docstrings = {
     Serial Port Profile; if the servicetype is OBEX, the service will be
     advertised with the OBEX Object Push Profile.)
     """,
-"stopadvertise":
-    """
+    "stopadvertise": """
     Stops advertising the service on the given socket. Raises BluetoothError if
     no service is advertised on the socket.
 
     This will error if the given socket is already closed.
     """,
-"selectdevice":
-    """
+    "selectdevice": """
     Displays a GUI which allows the end user to select a device from a list of
     discovered devices.
 
@@ -139,8 +129,7 @@ _docstrings = {
     (On Python For Series 60, the device selection will fail if there are any
     open bluetooth connections.)
     """,
-"selectservice":
-    """
+    "selectservice": """
     Displays a GUI which allows the end user to select a service from a list of
     discovered devices and their services.
 
@@ -152,17 +141,18 @@ _docstrings = {
 
     Currently the Python for Series 60 implementation will only find RFCOMM and
     OBEX services.
-    """
+    """,
 }
 
 
 # import implementation modules
 from ._lightblue import *
 from ._lightbluecommon import *
-from . import obex     # plus submodule
+from . import obex  # plus submodule
 
 # set docstrings
 from . import _lightblue
+
 localattrs = locals()
 for attr in _lightblue.__all__:
     try:

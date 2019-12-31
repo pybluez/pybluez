@@ -17,8 +17,10 @@ import bluetooth
 addr = None
 
 if len(sys.argv) < 2:
-    print("No device specified. Searching all nearby bluetooth devices for "
-          "the SampleServer service...")
+    print(
+        "No device specified. Searching all nearby bluetooth devices for "
+        "the SampleServer service..."
+    )
 else:
     addr = sys.argv[1]
     print("Searching for SampleServer on {}...".format(addr))
@@ -36,7 +38,7 @@ port = first_match["port"]
 name = first_match["name"]
 host = first_match["host"]
 
-print("Connecting to \"{}\" on {}".format(name, host))
+print('Connecting to "{}" on {}'.format(name, host))
 
 # Create the client socket
 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)

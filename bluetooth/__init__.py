@@ -1,55 +1,63 @@
 import sys
 import os
-if sys.version < '3':
+
+if sys.version < "3":
     from .btcommon import *
 else:
     from bluetooth.btcommon import *
 
 __version__ = 0.30
 
+
 def _dbg(*args):
     return
     sys.stderr.write(*args)
     sys.stderr.write("\n")
 
+
 if sys.platform == "win32":
     _dbg("trying widcomm")
     have_widcomm = False
     dll = "wbtapi.dll"
-    sysroot = os.getenv ("SystemRoot")
-    if os.path.exists (dll) or \
-       os.path.exists (os.path.join (sysroot, "system32", dll)) or \
-       os.path.exists (os.path.join (sysroot, dll)):
+    sysroot = os.getenv("SystemRoot")
+    if (
+        os.path.exists(dll)
+        or os.path.exists(os.path.join(sysroot, "system32", dll))
+        or os.path.exists(os.path.join(sysroot, dll))
+    ):
         try:
             from . import widcomm
-            if widcomm.inquirer.is_device_ready ():
+
+            if widcomm.inquirer.is_device_ready():
                 # if the Widcomm stack is active and a Bluetooth device on that
                 # stack is detected, then use the Widcomm stack
                 from .widcomm import *
+
                 have_widcomm = True
-        except ImportError: 
+        except ImportError:
             pass
 
     if not have_widcomm:
         # otherwise, fall back to the Microsoft stack
         _dbg("Widcomm not ready. falling back to MS stack")
-        if sys.version < '3':
+        if sys.version < "3":
             from .msbt import *
         else:
             from bluetooth.msbt import *
 
 elif sys.platform.startswith("linux"):
-    if sys.version < '3':
+    if sys.version < "3":
         from .bluez import *
     else:
         from bluetooth.bluez import *
 elif sys.platform == "darwin":
     from .macos import *
 else:
-    raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
+    raise Exception(
+        "This platform (%s) is currently not supported by pybluez." % sys.platform
+    )
 
-discover_devices.__doc__ = \
-    """Perform a Bluetooth device discovery.
+discover_devices.__doc__ = """Perform a Bluetooth device discovery.
    
     This function uses the first available Bluetooth resource to discover Bluetooth devices.
 
@@ -80,8 +88,7 @@ discover_devices.__doc__ = \
 
     """
 
-lookup_name.__doc__ = \
-    """Look up the friendly name of a Bluetooth device.
+lookup_name.__doc__ = """Look up the friendly name of a Bluetooth device.
 
     This function tries to determine the friendly name (human readable) of the device with
     the specified Bluetooth address.
@@ -103,8 +110,7 @@ lookup_name.__doc__ = \
 
     """
 
-advertise_service.__doc__ = \
-    """Advertise a service with the local SDP server.
+advertise_service.__doc__ = """Advertise a service with the local SDP server.
   
     Parameters
     ----------
@@ -165,7 +171,7 @@ advertise_service.__doc__ = \
 
     """
 
-stop_advertising.__doc__ = \
+stop_advertising.__doc__ = (
     """Try to stop advertising a bluetooth service.
 
     This function instructs the local SDP server to stop advertising the service associated
@@ -181,13 +187,14 @@ stop_advertising.__doc__ = \
     BluetoothError
         When SDP fails to stop advertising for some reason.
 
-    """"""
+    """
+    """
     
 
     """
+)
 
-find_service.__doc__ = \
-    """Use to find available Bluetooth services.
+find_service.__doc__ = """Use to find available Bluetooth services.
 
     This function uses the service discovery protocol (SDP) to search for Bluetooth
     services matching the specified criteria and returns the search results.
@@ -257,8 +264,7 @@ find_service.__doc__ = \
         =============== ===========================================================
 
         """
-BluetoothSocket.__doc__ = \
-    """ A Bluetooth Socket representing one endpoint of a Bluetooth connection.
+BluetoothSocket.__doc__ = """ A Bluetooth Socket representing one endpoint of a Bluetooth connection.
 
     Parameters
     ----------
@@ -271,8 +277,7 @@ BluetoothSocket.__doc__ = \
 
     """
 
-BluetoothSocket.dup.__doc__ =\
-    """Duplicate the socket
+BluetoothSocket.dup.__doc__ = """Duplicate the socket
 
     Returns
     -------
@@ -280,8 +285,7 @@ BluetoothSocket.dup.__doc__ =\
         A new :class:`BluetoothSocket` connected to the same system resource.
         
     """
-BluetoothSocket.accept.__doc__ = \
-    """Accept a connection.
+BluetoothSocket.accept.__doc__ = """Accept a connection.
 
     Returns
     -------
@@ -293,8 +297,7 @@ BluetoothSocket.accept.__doc__ = \
     BluetoothError
         When an attempt to accept a connection fails.
     """
-BluetoothSocket.bind.__doc__ = \
-    """Bind the socket to a local address and port.
+BluetoothSocket.bind.__doc__ = """Bind the socket to a local address and port.
 
     Parameters
     ----------
@@ -308,19 +311,18 @@ BluetoothSocket.bind.__doc__ = \
 
         """
 
-#BluetoothSocket.get_l2cap_options.__doc__ =\
+# BluetoothSocket.get_l2cap_options.__doc__ =\
 #    """Get the L2CAP options for the specified L2CAP socket.
 
 #    Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
-        
+
 #    Returns
 #    -------
 #    list
 #        A list of L2CAP options available for the socket.
 
 #    """
-BluetoothError.__doc__ = \
-    """Raised when a bluetooth function or method fails for a Bluetooth I/O
+BluetoothError.__doc__ = """Raised when a bluetooth function or method fails for a Bluetooth I/O
     related reason.
 
     """

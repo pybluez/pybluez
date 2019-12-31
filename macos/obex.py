@@ -30,9 +30,7 @@ bit set). For example:
 
 # Docstrings for attributes in this module.
 _docstrings = {
-
-"sendfile":
-    """
+    "sendfile": """
     Sends a file to a remote device.
 
     Raises lightblue.obex.OBEXError if an error occurred during the request, or
@@ -57,8 +55,7 @@ _docstrings = {
         ...     raise lightblue.obex.OBEXError("server denied the Put request")
         >>>
     """,
-"recvfile":
-    """
+    "recvfile": """
     Receives a file through an OBEX service.
 
     Arguments:
@@ -75,7 +72,7 @@ _docstrings = {
         >>> s.bind(("", 0))
         >>> advertise("My OBEX Service", s, OBEX)
         >>> obex.recvfile(s, "MyFile.txt")
-    """
+    """,
 }
 
 
@@ -85,6 +82,7 @@ from ._obexcommon import *
 
 from . import _obex
 from . import _obexcommon
+
 __all__ = _obex.__all__ + _obexcommon.__all__
 
 # set docstrings

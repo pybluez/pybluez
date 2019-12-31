@@ -27,14 +27,17 @@ import objc
 import os.path
 from pkg_resources import resource_filename
 
-_FRAMEWORK_PATH = resource_filename('lightblue', 'LightAquaBlue.framework')
+_FRAMEWORK_PATH = resource_filename("lightblue", "LightAquaBlue.framework")
 if not os.path.isdir(_FRAMEWORK_PATH):
-    raise ImportError("Cannot load LightAquaBlue framework, not found at " + \
-        _FRAMEWORK_PATH)
+    raise ImportError(
+        "Cannot load LightAquaBlue framework, not found at " + _FRAMEWORK_PATH
+    )
 
-__bundle__ = objc.initFrameworkWrapper("LightAquaBlue",
-        frameworkIdentifier="com.blammit.LightAquaBlue",
-        frameworkPath=objc.pathForFramework(_FRAMEWORK_PATH),
-        globals=globals())
+__bundle__ = objc.initFrameworkWrapper(
+    "LightAquaBlue",
+    frameworkIdentifier="com.blammit.LightAquaBlue",
+    frameworkPath=objc.pathForFramework(_FRAMEWORK_PATH),
+    globals=globals(),
+)
 
 del objc

@@ -21,6 +21,7 @@ GLADEFILE = "bluezchat.glade"
 
 # *****************
 
+
 def alert(text, buttons=gtk.BUTTONS_NONE, type=gtk.MESSAGE_INFO):
     md = gtk.MessageDialog(buttons=buttons, type=type)
     md.label.set_text(text)
@@ -33,18 +34,19 @@ class BluezChatGui:
         self.main_window_xml = gtk.glade.XML(GLADEFILE, "bluezchat_window")
 
         # connect our signal handlers
-        dic = {"on_quit_button_clicked": self.quit_button_clicked,
-               "on_send_button_clicked": self.send_button_clicked,
-               "on_chat_button_clicked": self.chat_button_clicked,
-               "on_scan_button_clicked": self.scan_button_clicked,
-               "on_devices_tv_cursor_changed": self.devices_tv_cursor_changed}
+        dic = {
+            "on_quit_button_clicked": self.quit_button_clicked,
+            "on_send_button_clicked": self.send_button_clicked,
+            "on_chat_button_clicked": self.chat_button_clicked,
+            "on_scan_button_clicked": self.scan_button_clicked,
+            "on_devices_tv_cursor_changed": self.devices_tv_cursor_changed,
+        }
 
         self.main_window_xml.signal_autoconnect(dic)
 
         # prepare the floor listbox
         self.devices_tv = self.main_window_xml.get_widget("devices_tv")
-        self.discovered = gtk.ListStore(gobject.TYPE_STRING,
-                                        gobject.TYPE_STRING)
+        self.discovered = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING)
         self.devices_tv.set_model(self.discovered)
         renderer = gtk.CellRendererText()
         column1 = gtk.TreeViewColumn("addr", renderer, text=0)
@@ -173,8 +175,7 @@ class BluezChatGui:
         self.server_sock.bind(("", 0x1001))
         self.server_sock.listen(1)
 
-        gobject.io_add_watch(self.server_sock, gobject.IO_IN,
-                             self.incoming_connection)
+        gobject.io_add_watch(self.server_sock, gobject.IO_IN, self.incoming_connection)
 
     def run(self):
         self.text_buffer.insert(self.text_buffer.get_end_iter(), "loading...")

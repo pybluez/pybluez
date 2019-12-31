@@ -14,7 +14,7 @@ import bluetooth
 
 if len(sys.argv) < 2:
     print("Usage: sdp-browse.py <addr>")
-    print("   addr - can be a bluetooth address, \"localhost\", or \"all\"")
+    print('   addr - can be a bluetooth address, "localhost", or "all"')
     sys.exit(2)
 
 target = sys.argv[1]
