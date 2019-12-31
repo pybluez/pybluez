@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """PyBluez advanced example l2-mtu.py"""
 
 import sys

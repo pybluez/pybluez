@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """PyBluez simple example l2capclient.py
 
 Demo L2CAP client for bluetooth module.

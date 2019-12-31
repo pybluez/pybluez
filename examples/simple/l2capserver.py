@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """PyBluez simple example l2capserver.py
 
 Demo L2CAP server for pybluez.

@@ -81,7 +81,7 @@ def _isbtaddr(address):
     global _validbtaddr
     if _validbtaddr is None:
         import re
-        _validbtaddr = re.compile("((\d|[a-f]){2}(:|-)){5}(\d|[a-f]){2}",
+        _validbtaddr = re.compile(r"((\d|[a-f]){2}(:|-)){5}(\d|[a-f]){2}",
                 re.IGNORECASE)
     import types
     if not isinstance(address, str):

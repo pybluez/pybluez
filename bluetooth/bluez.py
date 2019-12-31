@@ -332,7 +332,7 @@ def get_acl_conn_handle (hci_sock, addr):
     request = array.array ("b", reqstr)
     try:
         fcntl.ioctl (hci_fd, _bt.HCIGETCONNINFO, request, 1)
-    except IOError as e:
+    except OSError as e:
         raise BluetoothError (e.args[0], "There is no ACL connection to %s" % addr)
 
     # XXX should this be "<8xH14x"?
@@ -630,7 +630,7 @@ class DeviceDiscoverer:
         device_class, rssi, psrm, pspm, clockoff = self.names_to_find[address]
         bdaddr = _bt.str2ba (address) #TODO not supported in python3
 
-        cmd_pkt = "%s%s\0%s" % (bdaddr, psrm, clockoff)
+        cmd_pkt = "{}{}\0{}".format(bdaddr, psrm, clockoff)
 
         try:
             _bt.hci_send_cmd (self.sock, _bt.OGF_LINK_CTL, \
@@ -669,12 +669,12 @@ class DeviceDiscoverer:
         [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
         """
         if name:
-            print(("found: %s - %s (class 0x%X, rssi %s)" % \
-                    (address, name, device_class, rssi)))
+            print("found: %s - %s (class 0x%X, rssi %s)" % \
+                    (address, name, device_class, rssi))
         else:
-            print(("found: %s (class 0x%X)" % (address, device_class)))
-            print(("found: %s (class 0x%X, rssi %s)" % \
-                    (address, device_class, rssi)))
+            print("found: {} (class 0x{:X})".format(address, device_class))
+            print("found: %s (class 0x%X, rssi %s)" % \
+                    (address, device_class, rssi))
 
     def _inquiry_complete (self):
         """

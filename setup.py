@@ -72,7 +72,7 @@ elif sys.platform.startswith("darwin"):
         install_requires += ['pyobjc-core>=3.1,<6', 'pyobjc-framework-Cocoa>=3.1,<6']
 
     # FIXME: This is inelegant, how can we cover the cases?
-    build_cmds = set(['bdist', 'bdist_egg', 'bdist_wheel'])
+    build_cmds = {'bdist', 'bdist_egg', 'bdist_wheel'}
     if build_cmds & set(sys.argv):
         # Build the framework into macos/
         import subprocess

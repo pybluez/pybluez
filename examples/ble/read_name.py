@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """PyBluez example read_name.py
 
 Copyright (C) 2014, Oscar Acena <oscaracena@gmail.com>
@@ -11,7 +10,7 @@ import sys
 from bluetooth.ble import GATTRequester
 
 
-class Reader(object):
+class Reader:
 
     def __init__(self, address):
         self.requester = GATTRequester(address, False)
