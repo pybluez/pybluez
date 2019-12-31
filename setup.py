@@ -109,11 +109,13 @@ setup(name='PyBluez',
       url="http://pybluez.github.io/",
       ext_modules=ext_modules,
       packages=packages,
+      python_requires=">=3.5",
 # for the python cheese shop
       classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: GNU General Public License (GPL)',
                    'Programming Language :: Python',
                    'Programming Language :: Python :: 3',
+                   'Programming Language :: Python :: 3 :: Only',
                    'Topic :: Communications'],
       download_url='https://github.com/pybluez/pybluez',
       long_description='Bluetooth Python extension module to allow Python '\
