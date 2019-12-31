@@ -4,7 +4,6 @@
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>
 #include <com_error.h>
-#include <port3.h>
 
 #include "util.h"
 
@@ -33,7 +32,7 @@ add_service_class_id_list (WCSdpServicePyObject *self, PyObject *arg)
 
     for (int i=0; i<nuids; i++) {
         PyObject *uuid_obj = PySequence_GetItem (arg, i);
-        char *uuid_str = PyString_AsString (uuid_obj);
+        char *uuid_str = PyBytes_AsString (uuid_obj);
         if (uuid_str){
             Py_DECREF (uuid_obj);
             goto fail;
@@ -50,7 +49,7 @@ add_service_class_id_list (WCSdpServicePyObject *self, PyObject *arg)
         self->sdpservice->AddServiceClassIdList (nuids, uuids);
 
     free (uuids);
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 fail:
     free (uuids);
     return NULL;
@@ -68,53 +67,53 @@ add_profile_descriptor_list (WCSdpServicePyObject *self, PyObject *args)
     PyWidcomm::str2uuid (uuid_str, &uuid);
     SDP_RETURN_CODE result = 
         self->sdpservice->AddProfileDescriptorList (&uuid, version);
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 }
 
 static PyObject *
 add_service_name (WCSdpServicePyObject *self, PyObject *arg)
 {
-    char *name = PyString_AsString (arg);
+    char *name = PyBytes_AsString (arg);
     if (!name) return NULL;
     SDP_RETURN_CODE result = self->sdpservice->AddServiceName (name);
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 }
 
 static PyObject *
 add_rfcomm_protocol_descriptor (WCSdpServicePyObject *self, PyObject *arg)
 {
-    int port = PyInt_AsLong (arg);
+    int port = PyLong_AsLong (arg);
     if (PyErr_Occurred ()) return NULL;
     UINT8 scn = static_cast <UINT8> (port);
     SDP_RETURN_CODE result = 
         self->sdpservice->AddRFCommProtocolDescriptor (scn);
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 }
 
 static PyObject *
 add_l2cap_protocol_descriptor (WCSdpServicePyObject *self, PyObject *arg)
 {
-    int port = PyInt_AsLong (arg);
+    int port = PyLong_AsLong (arg);
     if (PyErr_Occurred ()) return NULL;
     UINT16 psm = static_cast <UINT16> (port);
     SDP_RETURN_CODE result = self->sdpservice->AddL2CapProtocolDescriptor (psm);
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 }
 
 static PyObject *
 make_public_browseable (WCSdpServicePyObject *self)
 {
     SDP_RETURN_CODE result = self->sdpservice->MakePublicBrowseable ();
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 }
 
 static PyObject *
 set_availability (WCSdpServicePyObject *self, PyObject *arg)
 {
-    UINT8 available = static_cast <UINT8> (PyInt_AsLong (arg));
+    UINT8 available = static_cast <UINT8> (PyLong_AsLong (arg));
     if (PyErr_Occurred ()) return NULL;
     SDP_RETURN_CODE result = self->sdpservice->SetAvailability (available);
-    return PyInt_FromLong (result);
+    return PyLong_FromLong (result);
 }
 
 static PyMethodDef wcsdpservice_methods[] = {
@@ -138,7 +137,7 @@ static PyMethodDef wcsdpservice_methods[] = {
 static PyObject *
 wcsdpservice_repr(WCSdpServicePyObject *s)
 {
-    return PyString_FromString("_WCSdpService object");
+    return PyUnicode_FromString("_WCSdpService object");
 }
 
 static PyObject *
