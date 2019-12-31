@@ -31,7 +31,6 @@ zip_safe = True
 
 if sys.platform == 'win32':
     ext_modules.append(Extension('bluetooth._msbt',
-                       include_dirs=[".\\port3"],
                        libraries=["WS2_32", "Irprops"],
                        sources=['msbt\\_msbt.c']))
 
@@ -39,7 +38,7 @@ if sys.platform == 'win32':
     WC_BASE = os.path.join(os.getenv('ProgramFiles'), r"Widcomm\BTW DK\SDK")
     if os.path.exists(WC_BASE):
         ext_modules.append(Extension('bluetooth._widcomm',
-                include_dirs=["%s\\Inc" % WC_BASE, ".\\port3"],
+                include_dirs=["%s\\Inc" % WC_BASE],
                 define_macros=[('_BTWLIB', None)],
                 library_dirs=["%s\\Release" % WC_BASE],
                 libraries=["WidcommSdklib", "ws2_32", "version", "user32",
@@ -55,7 +54,6 @@ if sys.platform == 'win32':
 
 elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
-                     include_dirs = ["./port3",],
                      libraries = ['bluetooth'],
                      #extra_compile_args=['-O0'],
                      sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
