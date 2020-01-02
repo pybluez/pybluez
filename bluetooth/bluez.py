@@ -669,12 +669,12 @@ class DeviceDiscoverer:
         [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
         """
         if name:
-            print("found: %s - %s (class 0x%X, rssi %s)" % \
-                    (address, name, device_class, rssi))
+            print("found: {} - {} (class 0x{:X}, rssi {})".format(
+                address, name, device_class, rssi))
         else:
             print("found: {} (class 0x{:X})".format(address, device_class))
-            print("found: %s (class 0x%X, rssi %s)" % \
-                    (address, device_class, rssi))
+            print("found: {} (class 0x{:X}, rssi {})".format(
+                address, device_class, rssi))
 
     def _inquiry_complete (self):
         """
