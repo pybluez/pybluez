@@ -31,7 +31,6 @@ zip_safe = True
 
 if sys.platform == 'win32':
     ext_modules.append(Extension('bluetooth._msbt',
-                       include_dirs=[".\\port3"],
                        libraries=["WS2_32", "Irprops"],
                        sources=['msbt\\_msbt.c']))
 
@@ -39,7 +38,7 @@ if sys.platform == 'win32':
     WC_BASE = os.path.join(os.getenv('ProgramFiles'), r"Widcomm\BTW DK\SDK")
     if os.path.exists(WC_BASE):
         ext_modules.append(Extension('bluetooth._widcomm',
-                include_dirs=["%s\\Inc" % WC_BASE, ".\\port3"],
+                include_dirs=["%s\\Inc" % WC_BASE],
                 define_macros=[('_BTWLIB', None)],
                 library_dirs=["%s\\Release" % WC_BASE],
                 libraries=["WidcommSdklib", "ws2_32", "version", "user32",
@@ -55,7 +54,6 @@ if sys.platform == 'win32':
 
 elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
-                     include_dirs = ["./port3",],
                      libraries = ['bluetooth'],
                      #extra_compile_args=['-O0'],
                      sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
@@ -72,7 +70,7 @@ elif sys.platform.startswith("darwin"):
         install_requires += ['pyobjc-core>=3.1,<6', 'pyobjc-framework-Cocoa>=3.1,<6']
 
     # FIXME: This is inelegant, how can we cover the cases?
-    build_cmds = set(['bdist', 'bdist_egg', 'bdist_wheel'])
+    build_cmds = {'bdist', 'bdist_egg', 'bdist_wheel'}
     if build_cmds & set(sys.argv):
         # Build the framework into macos/
         import subprocess
@@ -109,6 +107,7 @@ setup(name='PyBluez',
       url="http://pybluez.github.io/",
       ext_modules=ext_modules,
       packages=packages,
+      python_requires=">=3.5",
 # for the python cheese shop
       classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -118,6 +117,7 @@ setup(name='PyBluez',
                    'Programming Language :: Python :: 3.6',
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3 :: Only',
                    'Topic :: Communications'],
       download_url='https://github.com/pybluez/pybluez',
       long_description='Bluetooth Python extension module to allow Python '\

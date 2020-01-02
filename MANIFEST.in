@@ -13,7 +13,6 @@ recursive-include widcomm *.hpp
 recursive-include widcomm *.h
 recursive-include macos *.c
 recursive-include macos *.h
-recursive-include port3 *.h
 
 recursive-include examples *.py
 

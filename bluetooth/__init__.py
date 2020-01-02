@@ -1,9 +1,6 @@
 import sys
 import os
-if sys.version < '3':
-    from .btcommon import *
-else:
-    from bluetooth.btcommon import *
+from bluetooth.btcommon import *
 
 __version__ = 0.30
 
@@ -33,16 +30,10 @@ if sys.platform == "win32":
     if not have_widcomm:
         # otherwise, fall back to the Microsoft stack
         _dbg("Widcomm not ready. falling back to MS stack")
-        if sys.version < '3':
-            from .msbt import *
-        else:
-            from bluetooth.msbt import *
+        from bluetooth.msbt import *
 
 elif sys.platform.startswith("linux"):
-    if sys.version < '3':
-        from .bluez import *
-    else:
-        from bluetooth.bluez import *
+    from bluetooth.bluez import *
 elif sys.platform == "darwin":
     from .macos import *
 else:

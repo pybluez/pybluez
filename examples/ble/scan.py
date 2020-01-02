@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """PyBluez ble example scan.py"""
 
 from bluetooth.ble import DiscoveryService

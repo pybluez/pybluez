@@ -5,7 +5,6 @@
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>
 #include <com_error.h>
-#include <port3.h>
 
 #include "util.h"
 #include "l2capif.hpp"
@@ -57,7 +56,7 @@ static PyObject *
 wc_register (PyObject *s)
 {
     WCL2CapIfPyObject *self = (WCL2CapIfPyObject*) s;
-    return PyInt_FromLong (self->l2capif->Register ());
+    return PyLong_FromLong (self->l2capif->Register ());
 }
 
 static PyObject *
@@ -73,7 +72,7 @@ get_psm (PyObject *s)
 {
     WCL2CapIfPyObject *self = (WCL2CapIfPyObject*) s;
 
-    return PyInt_FromLong (self->l2capif->GetPsm ());
+    return PyLong_FromLong (self->l2capif->GetPsm ());
 }
 
 static PyObject *
@@ -114,7 +113,7 @@ static PyMethodDef wcl2capif_methods[] = {
 static PyObject *
 wcl2capif_repr(WCL2CapIfPyObject *s)
 {
-    return PyString_FromString("_WCL2CapIf object");
+    return PyUnicode_FromString("_WCL2CapIf object");
 }
 
 static PyObject *
@@ -150,12 +149,7 @@ wcl2capif_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcl2capif_type = {
-#if PY_MAJOR_VERSION < 3
-    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
-    0,                  /* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
     "_widcomm._WCL2CapIf",            /* tp_name */
     sizeof(WCL2CapIfPyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */

@@ -17,7 +17,6 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 
-#include <port3.h>
 #include "btmodule.h"
 #include "btsdp.h"
 
@@ -33,7 +32,7 @@ static void
 dict_set_strings(PyObject *dict, const char *key, const char *val)
 {
     PyObject *valobj;
-    valobj = PyString_FromString( val );
+    valobj = PyUnicode_FromString( val );
     PyDict_SetItemString( dict, key, valobj );
     Py_DECREF( valobj );
 }
@@ -42,7 +41,7 @@ static void
 dict_set_str_long(PyObject *dict, const char *key, long val)
 {
     PyObject *valobj;
-    valobj = PyInt_FromLong(val);
+    valobj = PyLong_FromLong(val);
     PyDict_SetItemString( dict, key, valobj );
     Py_DECREF( valobj );
 }
@@ -177,7 +176,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
                 char uuid_str[40] = { 0 };
 
                 uuid2str( (uuid_t*)iter->data, uuid_str );
-                pystr = PyString_FromString( uuid_str );
+                pystr = PyUnicode_FromString( uuid_str );
                 PyList_Append( py_class_list, pystr );
                 Py_DECREF( pystr );
             }
@@ -194,8 +193,8 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
                 char uuid_str[40] = { 0 };
 
                 uuid2str( &desc->uuid, uuid_str );
-                py_uuid = PyString_FromString( uuid_str );
-                py_version = PyInt_FromLong( desc->version );
+                py_uuid = PyUnicode_FromString( uuid_str );
+                py_version = PyLong_FromLong( desc->version );
 
                 tuple = PyTuple_New( 2 );
                 PyList_Append( py_profile_list, tuple );
@@ -293,7 +292,7 @@ Closes the connection with the SDP server.  No effect if a session is not open."
 static PyObject *
 sess_fileno(PySDPSessionObject *s)
 {
-	return PyInt_FromLong((long) s->session->sock);
+	return PyLong_FromLong((long) s->session->sock);
 }
 PyDoc_STRVAR(sess_fileno_doc,
 "fileno() -> integer\n\
@@ -402,7 +401,7 @@ sess_repr(PySDPSessionObject *s)
     } else { 
         PyOS_snprintf( buf, sizeof(buf), "<SDP Session object - unconnected>");
     }
-    return PyString_FromString(buf);
+    return PyUnicode_FromString(buf);
 }
 
 
@@ -443,12 +442,7 @@ sess_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 /* Type object for socket objects. */
 
 PyTypeObject sdp_session_type = {
-#if PY_MAJOR_VERSION < 3
-    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
-    0,                  /* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
 	"_bluetooth.SDPSession",			/* tp_name */
 	sizeof(PySDPSessionObject),		/* tp_basicsize */
 	0,					/* tp_itemsize */

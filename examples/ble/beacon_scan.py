@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """PyBluez ble example beacon_scan.py"""
 
 from bluetooth.ble import BeaconService
 
 
-class Beacon(object):
+class Beacon:
 
     def __init__(self, data, address):
         self._uuid = data[0]
