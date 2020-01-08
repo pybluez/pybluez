@@ -779,7 +779,7 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
         PyErr_SetString(bluetooth_error, "getsockopt buflen out of range");
         return NULL;
     } else {
-        PyObject *buf = PyUnicode_FromStringAndSize((char *)NULL, buflen);
+        PyObject *buf = PyBytes_FromStringAndSize((char *)NULL, buflen);
         if (buf == NULL)
             return NULL;
         res = getsockopt(s->sock_fd, level, optname,
