@@ -1171,7 +1171,7 @@ sock_recv(PySocketSockObject *s, PyObject *args)
 		return NULL;
 	}
 
-	buf = PyUnicode_FromStringAndSize((char *) 0, len);
+	buf = PyBytes_FromStringAndSize((char *) 0, len);
 	if (buf == NULL)
 		return NULL;
 
