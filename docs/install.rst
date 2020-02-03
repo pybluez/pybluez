@@ -80,4 +80,4 @@ macOS Dependencies
 """""""""""""""""" 
 
 - Xcode
-- PyObjc 3.1b or later (https://pythonhosted.org/pyobjc/install.html#manual-installation)
+- PyObjc 3.1b or later (https://pyobjc.readthedocs.io/en/latest/install.html)
