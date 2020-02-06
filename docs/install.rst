@@ -22,7 +22,7 @@ for additional dependencies please take look at:
 `ble-dependencies <https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default>`_)
 ::
 
-    pip install pybluez\[ble\]
+    pip install pybluez[ble]
 
 **Installing PyBluez from source**
 
