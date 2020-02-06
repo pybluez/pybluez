@@ -45,7 +45,7 @@ Extract the zip or tar and cd to the extracted file directory, then:
 for Bluetooth Low Energy support (GNU/Linux only):
 ::
 
-    pip install -e .\[ble\]
+    pip install -e .[ble]
 
 GNU/Linux Dependencies
 """"""""""""""""""""""
