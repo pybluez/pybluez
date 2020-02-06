@@ -23,7 +23,9 @@ jobs:
       run: choco install windows-sdk-10.0
     - name: Install Linux dependencies
       if: startsWith(matrix.os, 'ubuntu-')
-      run: sudo apt install bluez libbluetooth-dev
+      run: |
+        sudo apt update
+        sudo apt install bluez libbluetooth-dev
     - name: Lint
       run: |
         pip install flake8
