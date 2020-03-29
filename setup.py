@@ -71,6 +71,7 @@ elif sys.platform.startswith("darwin"):
 
     # FIXME: This is inelegant, how can we cover the cases?
     build_cmds = {'bdist', 'bdist_egg', 'bdist_wheel'}
+
     if build_cmds & set(sys.argv):
         # Build the framework into macos/
         import subprocess
@@ -86,11 +87,12 @@ elif sys.platform.startswith("darwin"):
         # We can't seem to list a directory as package_data, so we will
         # recursively add all all files we find
         package_data['lightblue'] = []
-        for path, _, files in os.walk('macos/LightAquaBlue.framework'):
+        # This doesn't quite actually work, need a way to preserve the symlinks
+        for path, paths, files in os.walk('macos/LightAquaBlue.framework', followlinks=True):
             for f in files:
                 include = os.path.join(path, f)[6:]  # trim off macos/
                 package_data['lightblue'].append(include)
-    
+        print(package_data['lightblue'])
         # This should allow us to use the framework from an egg [untested]
         eager_resources.append('macos/LightAquaBlue.framework')
         
