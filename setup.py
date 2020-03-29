@@ -92,7 +92,7 @@ elif sys.platform.startswith("darwin"):
             for f in files:
                 include = os.path.join(path, f)[6:]  # trim off macos/
                 package_data['lightblue'].append(include)
-        print(package_data['lightblue'])
+
         # This should allow us to use the framework from an egg [untested]
         eager_resources.append('macos/LightAquaBlue.framework')
         
