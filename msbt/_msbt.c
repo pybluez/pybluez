@@ -297,7 +297,7 @@ msbt_recv(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "ii|i", &sockfd, &datalen, &flags))
         return 0;
 
-    buf = PyUnicode_FromStringAndSize((char*)0, datalen);
+    buf = PyBytes_FromStringAndSize((char*)0, datalen);
     Py_BEGIN_ALLOW_THREADS;
     received = recv(sockfd, PyBytes_AS_STRING(buf), datalen, flags);
     Py_END_ALLOW_THREADS;
