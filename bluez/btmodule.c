@@ -417,7 +417,6 @@ adv_available(PySocketSockObject *socko)
     /* get ba */
     if(getsockname(socko->sock_fd, &addr, &alen) < 0)
         return -1;
-
     switch(socko->sock_proto)
     {
     case BTPROTO_L2CAP:
@@ -2557,7 +2556,6 @@ static PyObject *
 bt_hci_le_add_white_list(PyObject *self, PyObject *args)
 {
 	PySocketSockObject *socko = NULL;
-	int err;
 	int to = 0;
 	char *addr = NULL;
 	bdaddr_t ba;
