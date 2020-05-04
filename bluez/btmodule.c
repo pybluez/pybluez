@@ -16,7 +16,7 @@ Local naming conventions:
 - names starting with bt_ are module-level functions
 
 */
-
+#include "Python.h"
 #include "btmodule.h"
 #include "structmember.h"
 
@@ -211,7 +211,7 @@ makesockaddr(PySocketSockObject *s, struct sockaddr *addr, int addrlen)
         switch(s->sock_proto) {
             case BTPROTO_HCI:
                 {
-                    return Py_BuildValue("H", 
+                    return Py_BuildValue("H",
                             ((struct sockaddr_hci*)(addr))->hci_dev );
                 }
             case BTPROTO_L2CAP:
@@ -233,7 +233,7 @@ makesockaddr(PySocketSockObject *s, struct sockaddr *addr, int addrlen)
                     return Py_BuildValue("s", ba_name);
                 }
             default:
-                PyErr_SetString(bluetooth_error, 
+                PyErr_SetString(bluetooth_error,
                         "getsockaddrarg: unknown Bluetooth protocol");
                 return 0;
         }
@@ -328,7 +328,7 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
             }
         default:
             {
-                PyErr_SetString(bluetooth_error, 
+                PyErr_SetString(bluetooth_error,
                         "getsockaddrarg: unknown Bluetooth protocol");
                 return 0;
             }
@@ -417,7 +417,6 @@ adv_available(PySocketSockObject *socko)
     /* get ba */
     if(getsockname(socko->sock_fd, &addr, &alen) < 0)
         return -1;
-        
     switch(socko->sock_proto)
     {
     case BTPROTO_L2CAP:
@@ -479,7 +478,7 @@ getsockaddrlen(PySocketSockObject *s, socklen_t *len_ret)
             *len_ret = sizeof (struct sockaddr_hci);
             return 1;
         default:
-            PyErr_SetString(bluetooth_error, 
+            PyErr_SetString(bluetooth_error,
                     "getsockaddrlen: unknown bluetooth protocol");
             return 0;
     }
@@ -550,7 +549,7 @@ pyunicode2uuid( PyObject *item, uuid_t *uuid )
 }
 
 void
-uuid2str( const uuid_t *uuid, char *dest ) 
+uuid2str( const uuid_t *uuid, char *dest )
 {
     if( uuid->type == SDP_UUID16 ) {
         sprintf(dest, "%04X", uuid->value.uuid16 );
@@ -559,11 +558,11 @@ uuid2str( const uuid_t *uuid, char *dest )
     } else if( uuid->type == SDP_UUID128 ) {
         uint32_t *data = (uint32_t*)(&uuid->value.uuid128);
         sprintf(dest, "%08X-%04X-%04X-%04X-%04X%08X",
-                ntohl(data[0]), 
-                ntohl(data[1])>>16, 
+                ntohl(data[0]),
+                ntohl(data[1])>>16,
                 (ntohl(data[1])<<16)>>16,
-                ntohl(data[2])>>16, 
-                (ntohl(data[2])<<16)>>16, 
+                ntohl(data[2])>>16,
+                (ntohl(data[2])<<16)>>16,
                 ntohl(data[3]));
     }
 }
@@ -1508,7 +1507,7 @@ sock_dealloc(PySocketSockObject *s)
 		close(s->sock_fd);
         Py_END_ALLOW_THREADS
     }
-    
+
     if( s->sdp_session ) {
         sdp_close( s->sdp_session );
         s->sdp_record_handle = 0;
@@ -1713,7 +1712,7 @@ bt_btohl(PyObject *self, PyObject *args)
 {
 	unsigned long x;
 	PyObject *arg;
-	
+
 	if (!PyArg_ParseTuple(args, "O:btohl", &arg)) {
 		return NULL;
 	}
@@ -1829,7 +1828,7 @@ bt_htobl(PyObject *self, PyObject *args)
 //                s = socket( AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM );
 //
 //                sockaddr.rc_family = AF_BLUETOOTH;
-//                bacppy( &sockaddr.rc_bdaddr, BDADDR_ANY 
+//                bacppy( &sockaddr.rc_bdaddr, BDADDR_ANY
 //            }
 //            break;
 //        case BTPROTO_L2CAP:
@@ -1842,7 +1841,7 @@ bt_htobl(PyObject *self, PyObject *args)
 //            break;
 //        default:
 //            {
-//                PyErr_SetString( PyExc_ValueError, 
+//                PyErr_SetString( PyExc_ValueError,
 //                        "protocol must be either RFCOMM or L2CAP" );
 //                return 0;
 //            }
@@ -1905,13 +1904,13 @@ When the socket module is first imported, the default is None.");
 /*
  * ----------------------------------------------------------------------
  *  HCI Section   (Calvin)
- *  
+ *
  *  This section provides the socket methods for calling HCI commands.
  *  These commands may be called statically, and implementation is
  *  independent from the rest of the module (except for bt_methods[]).
  *
  * ----------------------------------------------------------------------
- *  
+ *
  */
 
 /*
@@ -1924,7 +1923,7 @@ bt_hci_open_dev(PyObject *self, PyObject *args)
 {
     int dev = -1, fd;
 	PySocketSockObject *s = NULL;
-    
+
     if ( !PyArg_ParseTuple(args, "|i", &dev) )
     {
         return NULL;
@@ -1939,7 +1938,7 @@ bt_hci_open_dev(PyObject *self, PyObject *args)
         PyErr_SetString(bluetooth_error, "no available bluetoot devices");
         return 0;
     }
-    
+
     Py_BEGIN_ALLOW_THREADS
     fd = hci_open_dev(dev);
     Py_END_ALLOW_THREADS
@@ -1960,7 +1959,7 @@ static PyObject *
 bt_hci_close_dev(PyObject *self, PyObject *args)
 {
     int dev, err;
-    
+
     if ( !PyArg_ParseTuple(args, "i", &dev) )
     {
         return NULL;
@@ -1971,11 +1970,11 @@ bt_hci_close_dev(PyObject *self, PyObject *args)
     Py_END_ALLOW_THREADS
 
     if( err < 0 ) return set_error();
-    
+
     Py_RETURN_NONE;
 }
 
-PyDoc_STRVAR(bt_hci_close_dev_doc, 
+PyDoc_STRVAR(bt_hci_close_dev_doc,
 "hci_close_dev(dev_id)\n\
 \n\
 Closes the specified device id.  Note:  device id is NOT a btoscket.\n\
@@ -1996,7 +1995,7 @@ bt_hci_send_cmd(PyObject *self, PyObject *args)
     uint16_t ogf, ocf;
     char *param = NULL;
     int dd = 0;
-    
+
     if ( !PyArg_ParseTuple(args, "OHH|s#", &socko, &ogf, &ocf, &param, &plen)) {
         return NULL;
     }
@@ -2012,7 +2011,7 @@ bt_hci_send_cmd(PyObject *self, PyObject *args)
     return Py_BuildValue("i", err);
 }
 
-PyDoc_STRVAR(bt_hci_send_cmd_doc, 
+PyDoc_STRVAR(bt_hci_send_cmd_doc,
 "hci_send_cmd(sock, ogf, ocf, params)\n\
 \n\
 Transmits the specified HCI command to the socket.\n\
@@ -2034,7 +2033,7 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
                                 "timeout", 0 };
 
     if( !PyArg_ParseTupleAndKeywords(args, kwds, "OHHii|s#i", keywords,
-                &socko, &req.ogf, &req.ocf, &req.event, &req.rlen, 
+                &socko, &req.ogf, &req.ocf, &req.event, &req.rlen,
                 &req.cparam, &req.clen, &to) )
         return 0;
 
@@ -2119,7 +2118,7 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
         int err;
 
         ba2str( &(info+i)->bdaddr, ba_name );
-        
+
         addr_entry = PyUnicode_FromString( ba_name );
 
         if (lookup_class) {
@@ -2164,7 +2163,7 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     return rtn_list;
 }
 
-PyDoc_STRVAR(bt_hci_inquiry_doc, 
+PyDoc_STRVAR(bt_hci_inquiry_doc,
 "hci_inquiry(dev_id=0, duration=8, flush_cache=True\n\
 \n\
 Performs a device inquiry using the specified device (usually 0 or 1).\n\
@@ -2194,11 +2193,11 @@ bt_hci_read_remote_name(PyObject *self, PyObject *args, PyObject *kwds)
     memset( name, 0, sizeof(name) );
 
     Py_BEGIN_ALLOW_THREADS
-    err = hci_read_remote_name( socko->sock_fd, &ba, sizeof(name)-1, 
+    err = hci_read_remote_name( socko->sock_fd, &ba, sizeof(name)-1,
                 name, timeout );
     Py_END_ALLOW_THREADS
 
-    if( err < 0) 
+    if( err < 0)
         return PyErr_SetFromErrno(bluetooth_error);
 
     return PyUnicode_FromString( name );
@@ -2314,7 +2313,7 @@ DECL_HCI_FILTER_OP_2(clear_opcode, "clear opcode!")
 #undef DECL_HCI_FILTER_OP_2
 
 static PyObject *
-bt_cmd_opcode_pack(PyObject *self, PyObject *args ) 
+bt_cmd_opcode_pack(PyObject *self, PyObject *args )
 {
     uint16_t opcode, ogf, ocf;
     if (!PyArg_ParseTuple(args, "HH", &ogf, &ocf )) return 0;
@@ -2366,7 +2365,7 @@ PyDoc_STRVAR(bt_ba2str_doc,
 "ba2str(data)\n\
 \n\
 Converts a packed bluetooth address to a human readable string");
-    
+
 static PyObject *
 bt_str2ba(PyObject *self, PyObject *args)
 {
@@ -2381,7 +2380,7 @@ PyDoc_STRVAR(bt_str2ba_doc,
 \n\
 Converts a bluetooth address string into a packed bluetooth address.\n\
 The string should be of the form \"XX:XX:XX:XX:XX:XX\"");
-    
+
 /*
  * params:  (string) device address
  * effect: -
@@ -2453,7 +2452,7 @@ bt_hci_read_clock(PyObject *self, PyObject *args)
     int which;
     int timeout;
     uint32_t btclock;
-    uint16_t accuracy; 
+    uint16_t accuracy;
     int res;
 
     if ( !PyArg_ParseTuple(args, "iiii", &fd, &handle, &which, &timeout) )
@@ -2552,6 +2551,85 @@ Returns a new HCI filter suitable for operating on with the hci_filter_*\n\
 methods, and for passing to getsockopt and setsockopt.  The filter is\n\
 initially cleared");
 
+
+static PyObject *
+bt_hci_le_add_white_list(PyObject *self, PyObject *args)
+{
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    char *addr = NULL;
+    bdaddr_t ba;
+    int dd = 0;
+    uint8_t type;
+
+    if ( !PyArg_ParseTuple(args, "OsHi", &socko, &addr, &type, &to) ) {
+        return NULL;
+    }
+    if ( addr && strlen(addr) ){
+        str2ba( addr, &ba );
+    }
+    else {
+        return NULL;
+    }
+
+    dd = socko->sock_fd;
+    err = hci_le_add_white_list(dd, &ba, type, to);
+    if ( err < 0 ) {
+        return NULL;
+    }
+
+    return Py_BuildValue("i", err);
+}
+
+PyDoc_STRVAR(bt_hci_le_add_white_list_doc,
+"hci_le_add_white_list( dd, btaddr, type, to )\n\
+\n\
+Add the given MAC to the LE scan white list");
+
+static PyObject *
+bt_hci_le_read_white_list_size(PyObject *self, PyObject *args)
+{
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    uint8_t ret;
+    int  dd;
+    if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
+        return NULL;
+    }
+    dd = socko->sock_fd;
+    err = hci_le_read_white_list_size(dd, &ret, to);
+    if ( err < 0 ) {
+        return NULL;
+    }
+    return Py_BuildValue("i", ret);
+}
+PyDoc_STRVAR(bt_hci_le_read_white_list_size_doc,
+"hci_le_read_white_list_size( dd, size, to )\n\
+\n\
+Read the total length of the LE scan white list. This is the length of the\n\
+empty list, not the total entries in the list");
+
+static PyObject *
+bt_hci_le_clear_white_list(PyObject *self, PyObject *args)
+{
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    int dd;
+    if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
+        return NULL;
+    }
+    dd = socko->sock_fd;
+    err = hci_le_clear_white_list(dd, to);
+    return Py_BuildValue("i", err);
+}
+PyDoc_STRVAR(bt_hci_le_clear_white_list_doc,
+"hci_le_clear_white_list( dd, to )\n\
+\n\
+Clears the LE scan white list");
+
 /*
  * -------------------
  *  End of HCI section
@@ -2565,9 +2643,9 @@ PyObject *
 bt_sdp_advertise_service( PyObject *self, PyObject *args )
 {
     PySocketSockObject *socko = NULL;
-    char *name = NULL, 
-         *service_id_str = NULL, 
-         *provider = NULL, 
+    char *name = NULL,
+         *service_id_str = NULL,
+         *provider = NULL,
          *description = NULL;
     PyObject *service_classes, *profiles, *protocols;
     int namelen = 0, provlen = 0, desclen = 0;
@@ -2578,10 +2656,10 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     socklen_t addrlen;
     struct sockaddr *sockaddr;
     uuid_t root_uuid, l2cap_uuid, rfcomm_uuid;
-    sdp_list_t *l2cap_list = 0, 
+    sdp_list_t *l2cap_list = 0,
                *rfcomm_list = 0,
                *root_list = 0,
-               *proto_list = 0, 
+               *proto_list = 0,
                *profile_list = 0,
                *svc_class_list = 0,
                *access_proto_list = 0;
@@ -2592,7 +2670,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     int err = 0;
 
     if (!PyArg_ParseTuple(args, "O!s#sOOs#s#O", &sock_type, &socko, &name,
-                &namelen, &service_id_str, &service_classes, 
+                &namelen, &service_id_str, &service_classes,
                 &profiles, &provider, &provlen, &description, &desclen,
                 &protocols)) {
         return 0;
@@ -2626,7 +2704,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     for(i = 0; i < PySequence_Length(service_classes); ++i) {
         PyObject *item = PySequence_GetItem(service_classes, i);
         if( ! pyunicode2uuid( item, NULL ) ) {
-            PyErr_SetString(PyExc_ValueError, 
+            PyErr_SetString(PyExc_ValueError,
                     "service_classes must be a list of "
                     "strings, each either of the form XXXX or "
                     "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX");
@@ -2644,17 +2722,17 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         char *profile_uuid_str = NULL;
         uint16_t version;
         PyObject *tuple = PySequence_GetItem(profiles, i);
-        if ( ( ! PySequence_Check(tuple) ) || 
-             ( ! PyArg_ParseTuple(tuple, "sH", 
-                 &profile_uuid_str, &version)) || 
-             ( ! str2uuid( profile_uuid_str, NULL ) ) 
+        if ( ( ! PySequence_Check(tuple) ) ||
+             ( ! PyArg_ParseTuple(tuple, "sH",
+                 &profile_uuid_str, &version)) ||
+             ( ! str2uuid( profile_uuid_str, NULL ) )
            ) {
-            PyErr_SetString(PyExc_ValueError, 
+            PyErr_SetString(PyExc_ValueError,
                     "Each profile must be a ('uuid', version) tuple");
             return 0;
         }
     }
-    
+
     // protocols must be a list / sequence
     if (! PySequence_Check(protocols)) {
         PyErr_SetString(PyExc_ValueError, "protocols must be a sequence");
@@ -2664,7 +2742,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     for(i = 0; i < PySequence_Length(protocols); ++i) {
         PyObject *item = PySequence_GetItem(protocols, i);
         if( ! pyunicode2uuid( item, NULL ) ) {
-            PyErr_SetString(PyExc_ValueError, 
+            PyErr_SetString(PyExc_ValueError,
                     "protocols must be a list of "
                     "strings, each either of the form XXXX or "
                     "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX");
@@ -2674,7 +2752,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
 
     // verify that the socket is bound and listening
     if( ! socko->is_listening_socket ) {
-        PyErr_SetString(bluetooth_error, 
+        PyErr_SetString(bluetooth_error,
                 "must have already called socket.listen()");
         return 0;
     }
@@ -2700,9 +2778,9 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     sockaddr = (struct sockaddr *)addrbuf;
 
     // can only deal with L2CAP and RFCOMM sockets
-    if( socko->sock_proto != BTPROTO_L2CAP && 
+    if( socko->sock_proto != BTPROTO_L2CAP &&
             socko->sock_proto != BTPROTO_RFCOMM ) {
-        PyErr_SetString(bluetooth_error, 
+        PyErr_SetString(bluetooth_error,
                 "Sorry, can only advertise L2CAP and RFCOMM sockets for now");
         return 0;
     }
@@ -2717,7 +2795,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
 
     // okay, now construct the SDP service record.
     memset( &record, 0, sizeof(sdp_record_t) );
-    
+
     record.handle = 0xffffffff;
 
     // make the service record publicly browsable
@@ -2747,7 +2825,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         psm = sdp_data_alloc(SDP_UINT16, &l2cap_psm);
         sdp_list_append(l2cap_list, psm);
     }
-    
+
     // add additional protocols, if any
     sdp_list_t *extra_protos_array[PySequence_Length(protocols)];
     if (PySequence_Length(protocols) > 0) {
@@ -2755,16 +2833,16 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
             uuid_t *proto_uuid = (uuid_t*) malloc( sizeof( uuid_t ) );
             PyObject *item = PySequence_GetItem(protocols, i);
             pyunicode2uuid( item, proto_uuid );
-            
+
             sdp_list_t *new_list;
             new_list = sdp_list_append( 0, proto_uuid );
             proto_list = sdp_list_append( proto_list, new_list );
-            
+
             // keep track, to free the list later
             extra_protos_array[i] = new_list;
         }
     }
-    
+
     access_proto_list = sdp_list_append( 0, proto_list );
     sdp_set_access_protos( &record, access_proto_list );
 
@@ -2780,10 +2858,10 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     // add profiles, if any
     for(i = 0; i < PySequence_Length(profiles); i++) {
         char *profile_uuid_str;
-        sdp_profile_desc_t *profile_desc = 
+        sdp_profile_desc_t *profile_desc =
             (sdp_profile_desc_t*)malloc(sizeof(sdp_profile_desc_t));
         PyObject *tuple = PySequence_GetItem(profiles, i);
-        PyArg_ParseTuple(tuple, "sH", &profile_uuid_str, 
+        PyArg_ParseTuple(tuple, "sH", &profile_uuid_str,
                 &profile_desc->version);
         str2uuid( profile_uuid_str, &profile_desc->uuid );
         profile_list = sdp_list_append( profile_list, profile_desc );
@@ -2796,7 +2874,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     // set the general service ID, if needed
     if( strlen(service_id_str) ) sdp_set_service_id( &record, svc_uuid );
 
-    // connect to the local SDP server, register the service record, and 
+    // connect to the local SDP server, register the service record, and
     // disconnect
     Py_BEGIN_ALLOW_THREADS
     session = sdp_connect( BDADDR_ANY, BDADDR_LOCAL, 0 );
@@ -2831,7 +2909,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
 
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR( bt_sdp_advertise_service_doc, 
+PyDoc_STRVAR( bt_sdp_advertise_service_doc,
 "sdp_advertise_service( socket, name )\n\
 \n\
 Registers a service with the local SDP server.\n\
@@ -2857,7 +2935,7 @@ bt_sdp_stop_advertising( PyObject *self, PyObject *args )
     // verify that we got a real socket object
     if( ! socko || (Py_TYPE(socko) != &sock_type) ) {
         // TODO change this to a more accurate exception type
-        PyErr_SetString(bluetooth_error, 
+        PyErr_SetString(bluetooth_error,
                 "must pass in _bluetooth.socket object");
         return 0;
     }
@@ -2879,11 +2957,9 @@ PyDoc_STRVAR( bt_sdp_stop_advertising_doc,
 \n\
 Stop advertising services associated with this socket");
 
-
 /* List of functions exported by this module. */
 
-#define DECL_BT_METHOD(name, argtype) \
-{ #name, (PyCFunction)bt_ ##name, argtype, bt_ ## name ## _doc }
+#define DECL_BT_METHOD(name, argtype){ #name, (PyCFunction)bt_ ##name, argtype, bt_ ## name ## _doc }
 
 static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_devid, METH_VARARGS ),
@@ -2928,6 +3004,9 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( setdefaulttimeout, METH_O ),
     DECL_BT_METHOD( sdp_advertise_service, METH_VARARGS ),
     DECL_BT_METHOD( sdp_stop_advertising, METH_VARARGS ),
+    DECL_BT_METHOD( hci_le_add_white_list, METH_VARARGS ),
+    DECL_BT_METHOD( hci_le_read_white_list_size, METH_VARARGS ),
+    DECL_BT_METHOD( hci_le_clear_white_list, METH_VARARGS ),
 //    DECL_BT_METHOD( advertise_service, METH_VARARGS | METH_KEYWORDS ),
 	{NULL,			NULL}		 /* Sentinel */
 };
@@ -3006,7 +3085,7 @@ PyInit__bluetooth(void)
 //    PyModule_AddIntMacro(m, SOCK_DGRAM);
 //    PyModule_AddIntMacro(m, SOCK_RAW);
 //    PyModule_AddIntMacro(m, SOCK_SEQPACKET);
-    
+
 /* HCI Constants */
 
     /* HCI OGF values */
@@ -3679,17 +3758,17 @@ PyInit__bluetooth(void)
 }
 
 /*
- * Affix socket module 
+ * Affix socket module
  * Socket module for python based in the original socket module for python
  * This code is a copy from socket.c source code from python2.2 with
- * updates/modifications to support affix socket interface * 
- *   AAA     FFFFFFF FFFFFFF IIIIIII X     X    
+ * updates/modifications to support affix socket interface *
+ *   AAA     FFFFFFF FFFFFFF IIIIIII X     X
  * A     A   F       F          I     X   X
  * A     A   F       F      I      X X
  * AAAAAAA   FFFF    FFFF       I      X X
  * A     A   F       F      I     X   X
  * A     A   F       F       IIIIIII X     X
- * 
+ *
  * Any modifications of this sourcecode must keep this information !!!!!
  *
  * by Carlos Chinea
