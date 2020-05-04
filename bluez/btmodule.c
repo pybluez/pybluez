@@ -2555,77 +2555,78 @@ initially cleared");
 static PyObject *
 bt_hci_le_add_white_list(PyObject *self, PyObject *args)
 {
-	PySocketSockObject *socko = NULL;
-	int to = 0;
-	char *addr = NULL;
-	bdaddr_t ba;
-	int dd = 0;
-	uint8_t type;
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    char *addr = NULL;
+    bdaddr_t ba;
+    int dd = 0;
+    uint8_t type;
 
-	if ( !PyArg_ParseTuple(args, "OsHi", &socko, &addr, &type, &to) ) {
-        	return NULL;
-    	}
-	if ( addr && strlen(addr) ){
-		str2ba( addr, &ba );
-	}
-	else {
-		return NULL;
-	}
+    if ( !PyArg_ParseTuple(args, "OsHi", &socko, &addr, &type, &to) ) {
+        return NULL;
+    }
+    if ( addr && strlen(addr) ){
+        str2ba( addr, &ba );
+    }
+    else {
+        return NULL;
+    }
 
-	dd = socko->sock_fd;
-	err = hci_le_add_white_list(dd, &ba, type, to);
-	if ( err < 0 ) {
-		return NULL;
-	}
+    dd = socko->sock_fd;
+    err = hci_le_add_white_list(dd, &ba, type, to);
+    if ( err < 0 ) {
+        return NULL;
+    }
 
-	return Py_BuildValue("i", err);
+    return Py_BuildValue("i", err);
 }
 
 PyDoc_STRVAR(bt_hci_le_add_white_list_doc,
-"hci_le_add_white_list(dd, btaddr, type, to)\n\
+"hci_le_add_white_list( dd, btaddr, type, to )\n\
 \n\
 Add the given MAC to the LE scan white list");
 
 static PyObject *
 bt_hci_le_read_white_list_size(PyObject *self, PyObject *args)
 {
-	PySocketSockObject *socko = NULL;
-        int err;
-        int to = 0;
-	uint8_t ret;
-	int  dd;
-	if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
-                return NULL;
-        }
-	dd = socko->sock_fd;
-	err = hci_le_read_white_list_size(dd, &ret, to);
-	if ( err < 0 ) {
-                return NULL;
-        }
-	return Py_BuildValue("i", ret);
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    uint8_t ret;
+    int  dd;
+    if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
+        return NULL;
+    }
+    dd = socko->sock_fd;
+    err = hci_le_read_white_list_size(dd, &ret, to);
+    if ( err < 0 ) {
+        return NULL;
+    }
+    return Py_BuildValue("i", ret);
 }
 PyDoc_STRVAR(bt_hci_le_read_white_list_size_doc,
-"hci_le_read_white_list_size(int dd, uint8_t *size, int to)\n\
+"hci_le_read_white_list_size( dd, size, to )\n\
 \n\
-Read the total length of the LE scan white list. This is the length of the
+Read the total length of the LE scan white list. This is the length of the\n\
 empty list, not the total entries in the list");
 
 static PyObject *
 bt_hci_le_clear_white_list(PyObject *self, PyObject *args)
 {
-	PySocketSockObject *socko = NULL;
-        int err = 0;
-        int to = 0;
-	int dd;
-	if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
-                return NULL;
-        }
-	dd = socko->sock_fd;
-	err = hci_le_clear_white_list(dd, to);
-	return Py_BuildValue("i", err);
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    int dd;
+    if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
+        return NULL;
+    }
+    dd = socko->sock_fd;
+    err = hci_le_clear_white_list(dd, to);
+    return Py_BuildValue("i", err);
 }
 PyDoc_STRVAR(bt_hci_le_clear_white_list_doc,
-"hci_le_clear_white_list(int dd, int to)\n\
+"hci_le_clear_white_list( dd, to )\n\
 \n\
 Clears the LE scan white list");
 
