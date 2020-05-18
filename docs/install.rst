@@ -15,8 +15,6 @@ Open a terminal (command prompt on Windows) and enter
 
 	pip install pybluez
 
-(there are also binaries for Windows platform on PyPI or here - `Unofficial Windows Binaries for Python Extension Packages <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pybluez>`_)
-
 For experimental Bluetooth Low Energy support (only for Linux platform -
 for additional dependencies please take look at:
 `ble-dependencies <https://bitbucket.org/OscarAcena/pygattlib/src/45e04060881a20189412681f52d55ff5add9f388/DEPENDS?at=default>`_)
