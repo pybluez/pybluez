@@ -50,7 +50,7 @@ GNU/Linux Dependencies
 
 - Python 3.5 or newer
 - Python distutils (standard in most Python distros, separate package python-dev in Debian)
-- BlueZ libraries and header files
+- BlueZ libraries and header files (libbluetooth-dev)
 
 Windows Dependencies
 """"""""""""""""""""
