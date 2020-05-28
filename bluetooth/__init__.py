@@ -125,13 +125,18 @@ advertise_service.__doc__ = \
         There are some constants for standard services, e.g. SERIAL_PORT_CLASS that equals to
         "1101". Some class constants provided by PyBluez are:
 
-        ========================   ========================
-        SERIAL_PORT_CLASS          LAN_ACCESS_CLASS           
-        DIALUP_NET_CLASS           HEADSET_CLASS
-        CORDLESS_TELEPHONY_CLASS   AUDIO_SOURCE_CLASS
-        AUDIO_SINK_CLASS           PANU_CLASS                 
-        NAP_CLASS                  GN_CLASS
-        ========================   ========================
+        ========================   
+        SERIAL_PORT_CLASS            
+        DIALUP_NET_CLASS           
+        CORDLESS_TELEPHONY_CLASS   
+        AUDIO_SINK_CLASS             
+        NAP_CLASS                  
+        LAN_ACCESS_CLASS         
+        HEADSET_CLASS
+        AUDIO_SOURCE_CLASS
+        PANU_CLASS               
+        GN_CLASS
+        ========================  
 
     profiles : list
         A list of service profiles that thie service fulfills. Each profile is a tuple with 
@@ -172,10 +177,7 @@ stop_advertising.__doc__ = \
     BluetoothError
         When SDP fails to stop advertising for some reason.
 
-    """"""
-    
-
-    """
+    """ 
 
 find_service.__doc__ = \
     """Use to find available Bluetooth services.
@@ -247,7 +249,8 @@ find_service.__doc__ = \
                         Service ID and Service Class ID List
         =============== ===========================================================
 
-        """
+    """
+
 BluetoothSocket.__doc__ = \
     """ A Bluetooth Socket representing one endpoint of a Bluetooth connection.
 
@@ -271,6 +274,7 @@ BluetoothSocket.dup.__doc__ =\
         A new :class:`BluetoothSocket` connected to the same system resource.
         
     """
+
 BluetoothSocket.accept.__doc__ = \
     """Accept a connection.
 
@@ -283,7 +287,9 @@ BluetoothSocket.accept.__doc__ = \
     ------
     BluetoothError
         When an attempt to accept a connection fails.
+    
     """
+
 BluetoothSocket.bind.__doc__ = \
     """Bind the socket to a local address and port.
 
@@ -297,21 +303,25 @@ BluetoothSocket.bind.__doc__ = \
     BluetoothError
         When an attempt to bind the socket fails.
 
-        """
+    """
 
 #BluetoothSocket.get_l2cap_options.__doc__ =\
 #    """Get the L2CAP options for the specified L2CAP socket.
 
 #    Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
-        
+
 #    Returns
 #    -------
 #    list
 #        A list of L2CAP options available for the socket.
 
 #    """
+
 BluetoothError.__doc__ = \
     """Raised when a bluetooth function or method fails for a Bluetooth I/O
     related reason.
 
     """
+
+""" Documentation for the remaining methods of the class can be found in the file bluez/btmodule.c in the function definitions. """
+
