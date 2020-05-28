@@ -30,9 +30,9 @@ Functions
 Exceptions
 ----------
 
-BluetoothError
-""""""""""""""
-.. currentmodule:: bluetooth
 
-.. autoexception:: BluetoothError
-  :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   
+   BluetoothError
+   

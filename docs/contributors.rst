@@ -34,6 +34,7 @@ Other contributors:
 - `Eduardo Marossi`_
 - `Bill Crawford`_
 - `Christian Clauss`_
+- `Laksh M Oswal`_
 
 
 .. _Albert Huang: https://github.com/ashuang
@@ -62,3 +63,4 @@ Other contributors:
 .. _Eduardo Marossi: https://github.com/eduardomarossi
 .. _Bill Crawford: https://github.com/beadysea
 .. _Christian Clauss: https://github.com/cclauss
+.. _Laksh M Oswal: https://github.com/laksh225
