@@ -6,14 +6,15 @@ this file contains a list of changes through the different versions of PyBluez.
 changes from 0.23 to 0.30 (unreleased)
 --------------------------------------
 
-Dropped support for Python 2.7. The minimum Python version is now 3.5.
+Please refer to the commit log. Changes since the previous release are extensive
+and were not tracked in this file.
 
 
 changes from 0.22 to 0.23 (December 27, 2019)
 ---------------------------------------------
 
-Please refer to the commit log. Changes since the previous release are extensive
-and were not tracked in this file.
+Dropped support for Python 2.7. The minimum Python version is now 3.5.
+
 
 changes from 0.21 to 0.22 (August 05, 2015)
 -------------------------------------------
