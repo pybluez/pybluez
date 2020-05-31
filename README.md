@@ -6,11 +6,21 @@ PyBluez
 The PyBluez module allows Python code to access the host machine's Bluetooth
 resources.
 
+
+Platform Support
+----------------
+
 | Linux  | Raspberry Pi | macOS | Windows |
 |:------:|:------------:|:-----:|:-------:|
 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 
 
+Python Version Support
+----------------------
+
+| Python 2 | Python 3 (min 3.5) |
+|:--------:|:------------------:|
+| Till Version 0.22 | Version 0.23 and newer |
 
 
 Contributors Wanted
