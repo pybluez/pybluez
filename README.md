@@ -20,7 +20,7 @@ Python Version Support
 
 | Python 2 | Python 3 (min 3.5) |
 |:--------:|:------------------:|
-| Till Version 0.22 | Version 0.23 |
+| Till Version 0.22 | Version 0.23 and newer |
 
 
 Contributors Wanted
