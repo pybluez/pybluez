@@ -480,9 +480,7 @@ msbt_discover_devices(PyObject *self, PyObject *args, PyObject *kwds)
         tup = PyTuple_New(3);
         item_tuple = PyUnicode_FromString(buf);
         PyTuple_SetItem( tup, 0, item_tuple );
-        item_tuple = PyUnicode_FromUnicode(
-                (const Py_UNICODE*)device_info.szName,
-                wcslen(device_info.szName));
+        item_tuple = PyUnicode_FromWideChar(device_info.szName, -1);
         PyTuple_SetItem( tup, 1, item_tuple );
         item_tuple = PyLong_FromLong(device_info.ulClassofDevice);
         PyTuple_SetItem( tup, 2, item_tuple );
