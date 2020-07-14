@@ -31,7 +31,7 @@ zip_safe = True
 
 if sys.platform == 'win32':
     ext_modules.append(Extension('bluetooth._msbt',
-                       libraries=["WS2_32", "Irprops"],
+                       libraries=["WS2_32", "Bthprops"],
                        sources=['msbt\\_msbt.c']))
 
     # widcomm
