@@ -16,8 +16,9 @@ Local naming conventions:
 - names starting with bt_ are module-level functions
 
 */
-
+#include "Python.h"
 #include "btmodule.h"
+#include "structmember.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -40,7 +41,6 @@ Local naming conventions:
 #include <bluetooth/l2cap.h>
 #include <bluetooth/sco.h>
 
-#include <port3.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include "btsdp.h"
@@ -162,8 +162,7 @@ internal_select(PySocketSockObject *s, int writing)
 static double defaulttimeout = -1.0; /* Default timeout for new sockets */
 
 static void
-init_sockobject(PySocketSockObject *s,
-		int fd, int family, int type, int proto)
+init_sockobject(PySocketSockObject *s, int fd, int family, int type, int proto)
 {
 	s->sock_fd = fd;
 	s->sock_family = family;
@@ -187,8 +186,7 @@ static PySocketSockObject *
 new_sockobject(int fd, int family, int type, int proto)
 {
 	PySocketSockObject *s;
-	s = (PySocketSockObject *)
-		PyType_GenericNew(&sock_type, NULL, NULL);
+	s = (PySocketSockObject *) PyType_GenericNew(&sock_type, NULL, NULL);
 	if (s != NULL)
 		init_sockobject(s, fd, family, type, proto);
 	return s;
@@ -204,17 +202,16 @@ new_sockobject(int fd, int family, int type, int proto)
 static PyObject *
 makesockaddr(PySocketSockObject *s, struct sockaddr *addr, int addrlen)
 {
-	if (addrlen == 0) {
-		/* No address -- may be recvfrom() from known socket */
-		Py_INCREF(Py_None);
-		return Py_None;
-	} else {
+    if (addrlen == 0) {
+        /* No address -- may be recvfrom() from known socket */
+        Py_RETURN_NONE;
+    } else {
         char ba_name[18];
 
         switch(s->sock_proto) {
             case BTPROTO_HCI:
                 {
-                    return Py_BuildValue("H", 
+                    return Py_BuildValue("H",
                             ((struct sockaddr_hci*)(addr))->hci_dev );
                 }
             case BTPROTO_L2CAP:
@@ -236,9 +233,9 @@ makesockaddr(PySocketSockObject *s, struct sockaddr *addr, int addrlen)
                     return Py_BuildValue("s", ba_name);
                 }
             default:
-                PyErr_SetString(bluetooth_error, 
+                PyErr_SetString(bluetooth_error,
                         "getsockaddrarg: unknown Bluetooth protocol");
-                    return 0;
+                return 0;
         }
     }
 }
@@ -264,12 +261,12 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
                 int device;
                 int channel = HCI_CHANNEL_RAW;
                 if ( !PyArg_ParseTuple(args, "i|H", &device, &channel) ) {
-                        return 0;
+                    return 0;
                 }
                 if (device == -1) {
-                        addr->hci_dev = HCI_DEV_NONE;
+                    addr->hci_dev = HCI_DEV_NONE;
                 } else {
-                        addr->hci_dev = device;
+                    addr->hci_dev = device;
                 }
 
                 addr->hci_channel = channel;
@@ -331,7 +328,7 @@ getsockaddrarg(PySocketSockObject *s, PyObject *args,
             }
         default:
             {
-                PyErr_SetString(bluetooth_error, 
+                PyErr_SetString(bluetooth_error,
                         "getsockaddrarg: unknown Bluetooth protocol");
                 return 0;
             }
@@ -345,8 +342,7 @@ _adv_available(struct hci_dev_info *di)
 {
     uint32_t *flags = &di->flags;
 
-    if (hci_test_bit(HCI_RAW, &flags) &&
-            !bacmp(&di->bdaddr, BDADDR_ANY)) {
+    if (hci_test_bit(HCI_RAW, &flags) && !bacmp(&di->bdaddr, BDADDR_ANY)) {
         int dd = hci_open_dev(di->dev_id);
         if (dd < 0)
             return -1;
@@ -415,15 +411,12 @@ adv_available(PySocketSockObject *socko)
     struct sockaddr    addr     = {0, };
     int                dev_id   = -1;
     socklen_t          alen     = sizeof(addr);
-    struct sockaddr_l2 const *
-                       addr_l2  = (struct sockaddr_l2 const *)&addr;
-    struct sockaddr_rc const *
-                       addr_rc  = (struct sockaddr_rc const *)&addr;
+    struct sockaddr_l2 const * addr_l2  = (struct sockaddr_l2 const *)&addr;
+    struct sockaddr_rc const * addr_rc  = (struct sockaddr_rc const *)&addr;
 
     /* get ba */
     if(getsockname(socko->sock_fd, &addr, &alen) < 0)
         return -1;
-        
     switch(socko->sock_proto)
     {
     case BTPROTO_L2CAP:
@@ -447,7 +440,6 @@ adv_available(PySocketSockObject *socko)
     else
         dev_id = hci_get_route(&ba);
 
-    /**/
     if(dev_id == -1)
     /* if dev_id is not specified, inspect all devices. */
     {
@@ -486,14 +478,15 @@ getsockaddrlen(PySocketSockObject *s, socklen_t *len_ret)
             *len_ret = sizeof (struct sockaddr_hci);
             return 1;
         default:
-            PyErr_SetString(bluetooth_error, 
+            PyErr_SetString(bluetooth_error,
                     "getsockaddrlen: unknown bluetooth protocol");
             return 0;
     }
 }
 
 
-int str2uuid( const char *uuid_str, uuid_t *uuid )
+int
+str2uuid( const char *uuid_str, uuid_t *uuid )
 {
     uint32_t uuid_int[4];
     char *endptr;
@@ -546,19 +539,17 @@ int str2uuid( const char *uuid_str, uuid_t *uuid )
     return 1;
 }
 
-int pyunicode2uuid( PyObject *item, uuid_t *uuid )
+int
+pyunicode2uuid( PyObject *item, uuid_t *uuid )
 {
-#if PY_MAJOR_VERSION >= 3
     PyObject* ascii = PyUnicode_AsASCIIString( item );
     int ret =  str2uuid( PyBytes_AsString( ascii ), uuid );
     Py_XDECREF( ascii );
     return ret;
-#else
-    return str2uuid( PyString_AsString( item ), NULL );
-#endif
 }
 
-void uuid2str( const uuid_t *uuid, char *dest ) 
+void
+uuid2str( const uuid_t *uuid, char *dest )
 {
     if( uuid->type == SDP_UUID16 ) {
         sprintf(dest, "%04X", uuid->value.uuid16 );
@@ -567,20 +558,20 @@ void uuid2str( const uuid_t *uuid, char *dest )
     } else if( uuid->type == SDP_UUID128 ) {
         uint32_t *data = (uint32_t*)(&uuid->value.uuid128);
         sprintf(dest, "%08X-%04X-%04X-%04X-%04X%08X",
-                ntohl(data[0]), 
-                ntohl(data[1])>>16, 
+                ntohl(data[0]),
+                ntohl(data[1])>>16,
                 (ntohl(data[1])<<16)>>16,
-                ntohl(data[2])>>16, 
-                (ntohl(data[2])<<16)>>16, 
+                ntohl(data[2])>>16,
+                (ntohl(data[2])<<16)>>16,
                 ntohl(data[3]));
-    } 
+    }
 }
 
 // =================== socket methods ==================== //
 
 /* s.accept() method */
 
-    static PyObject *
+static PyObject *
 sock_accept(PySocketSockObject *s)
 {
     char addrbuf[256];
@@ -600,8 +591,7 @@ sock_accept(PySocketSockObject *s)
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 0);
 	if (!timeout)
-		newfd = accept(s->sock_fd, (struct sockaddr *) addrbuf,
-			       &addrlen);
+		newfd = accept(s->sock_fd, (struct sockaddr *) addrbuf, &addrlen);
 	Py_END_ALLOW_THREADS
 
 	if (timeout) {
@@ -653,15 +643,14 @@ sock_setblocking(PySocketSockObject *s, PyObject *arg)
 {
 	int block;
 
-	block = PyInt_AsLong(arg);
+	block = PyLong_AsLong(arg);
 	if (block == -1 && PyErr_Occurred())
 		return NULL;
 
 	s->sock_timeout = block ? -1.0 : 0.0;
 	internal_setblocking(s, block);
 
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setblocking_doc,
@@ -688,8 +677,7 @@ sock_settimeout(PySocketSockObject *s, PyObject *arg)
 		timeout = PyFloat_AsDouble(arg);
 		if (timeout < 0.0) {
 			if (!PyErr_Occurred())
-				PyErr_SetString(PyExc_ValueError,
-						"Timeout value out of range");
+				PyErr_SetString(PyExc_ValueError, "Timeout value out of range");
 			return NULL;
 		}
 	}
@@ -697,8 +685,7 @@ sock_settimeout(PySocketSockObject *s, PyObject *arg)
 	s->sock_timeout = timeout;
 	internal_setblocking(s, timeout < 0.0);
 
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(settimeout_doc,
@@ -714,12 +701,10 @@ Setting a timeout of zero is the same as setblocking(0).");
 static PyObject *
 sock_gettimeout(PySocketSockObject *s)
 {
-	if (s->sock_timeout < 0.0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
-	else
-		return PyFloat_FromDouble(s->sock_timeout);
+    if (s->sock_timeout < 0.0)
+        Py_RETURN_NONE;
+    else
+        return PyFloat_FromDouble(s->sock_timeout);
 }
 
 PyDoc_STRVAR(gettimeout_doc,
@@ -757,8 +742,7 @@ sock_setsockopt(PySocketSockObject *s, PyObject *args)
     res = setsockopt(s->sock_fd, level, optname, buf, buflen);
     if (res < 0)
         return s->errorhandler();
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setsockopt_doc,
@@ -789,22 +773,21 @@ sock_getsockopt(PySocketSockObject *s, PyObject *args)
 		res = getsockopt(s->sock_fd, level, optname, (void *)&flag, &flagsize);
 		if (res < 0)
 			return s->errorhandler();
-		return PyInt_FromLong(flag);
+		return PyLong_FromLong(flag);
     } else if (buflen <= 0 || buflen > 1024) {
-		PyErr_SetString(bluetooth_error,
-				"getsockopt buflen out of range");
-		return NULL;
+        PyErr_SetString(bluetooth_error, "getsockopt buflen out of range");
+        return NULL;
     } else {
-        PyObject *buf = PyString_FromStringAndSize((char *)NULL, buflen);
+        PyObject *buf = PyBytes_FromStringAndSize((char *)NULL, buflen);
         if (buf == NULL)
             return NULL;
         res = getsockopt(s->sock_fd, level, optname,
-                 (void *)PyString_AS_STRING(buf), &buflen);
+                 (void *)PyBytes_AS_STRING(buf), &buflen);
         if (res < 0) {
             Py_DECREF(buf);
             return s->errorhandler();
         }
-        _PyString_Resize(&buf, buflen);
+        _PyBytes_Resize(&buf, buflen);
         return buf;
 	}
     return NULL;
@@ -820,24 +803,21 @@ string of that length; otherwise it is an integer.");
 static PyObject *
 sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
 {
-	int level;
-        struct bt_security sec;
+    int level;
+    struct bt_security sec;
 
-	if (! PyArg_ParseTuple(args, "i:setsockopt",
-			     &level))
-		return NULL;
+    if (! PyArg_ParseTuple(args, "i:setsockopt", &level))
+        return NULL;
 
-        memset(&sec, 0, sizeof(sec));
-        sec.level = level;
+    memset(&sec, 0, sizeof(sec));
+    sec.level = level;
 
-        if (setsockopt(s->sock_fd, SOL_BLUETOOTH, BT_SECURITY, &sec,
-                                                        sizeof(sec)) == 0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
+    if (setsockopt(s->sock_fd, SOL_BLUETOOTH, BT_SECURITY, &sec,
+                                                    sizeof(sec)) == 0)
+        Py_RETURN_NONE;
 
     if (errno != ENOPROTOOPT)
-    return s->errorhandler();
+        return s->errorhandler();
 
     int lm_map[] = {
             0,
@@ -847,17 +827,15 @@ sock_setl2capsecurity(PySocketSockObject *s, PyObject *args)
     }, opt = lm_map[level];
 
     if (setsockopt(s->sock_fd, SOL_L2CAP, L2CAP_LM, &opt, sizeof(opt)) < 0)
-    return s->errorhandler();
+        return s->errorhandler();
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(setl2capsecurity_doc,
 "setl2capsecurity(BT_SECURITY_*) -> value\n\
 \n\
-Sets socket security. Levels are BT_SECURITY_SDP, LOW, MEDIUM\n\
-and HIGH.");
+Sets socket security. Levels are BT_SECURITY_SDP, LOW, MEDIUM and HIGH.");
 
 /* s.bind(sockaddr) method */
 
@@ -876,8 +854,7 @@ sock_bind(PySocketSockObject *s, PyObject *addro)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bind_doc,
@@ -890,8 +867,7 @@ Bind the socket to a local address.  address must always be a tuple.\n\
                   host should be an address e.g. \"01:23:45:67:89:ab\"\n\
                   psm should be an unsigned integer\n\
   RFCOMM sockets: ( host, channel )\n\
-  SCO sockets:    ( host )\n\
-");
+  SCO sockets:    ( host )");
 
 /* s.close() method.
    Set the file descriptor to -1 so operations tried subsequently
@@ -915,8 +891,7 @@ sock_close(PySocketSockObject *s)
         s->sdp_session = NULL;
     }
 
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(close_doc,
@@ -973,8 +948,7 @@ sock_connect(PySocketSockObject *s, PyObject *addro)
 	}
 	if (res != 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(connect_doc,
@@ -1002,7 +976,7 @@ sock_connect_ex(PySocketSockObject *s, PyObject *addro)
 	res = internal_connect(s, &addr, addrlen, &timeout);
 	Py_END_ALLOW_THREADS
 
-	return PyInt_FromLong((long) res);
+	return PyLong_FromLong((long) res);
 }
 
 PyDoc_STRVAR(connect_ex_doc,
@@ -1017,7 +991,7 @@ instead of raising an exception when an error occurs.");
 static PyObject *
 sock_fileno(PySocketSockObject *s)
 {
-	return PyInt_FromLong((long) s->sock_fd);
+	return PyLong_FromLong((long) s->sock_fd);
 }
 
 PyDoc_STRVAR(fileno_doc,
@@ -1118,7 +1092,7 @@ sock_listen(PySocketSockObject *s, PyObject *arg)
 	int backlog;
 	int res;
 
-	backlog = PyInt_AsLong(arg);
+	backlog = PyLong_AsLong(arg);
 	if (backlog == -1 && PyErr_Occurred())
 		return NULL;
 	Py_BEGIN_ALLOW_THREADS
@@ -1128,10 +1102,9 @@ sock_listen(PySocketSockObject *s, PyObject *arg)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
 
-    s->is_listening_socket = 1;
-	return Py_None;
+	s->is_listening_socket = 1;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(listen_doc,
@@ -1168,13 +1141,7 @@ sock_makefile(PySocketSockObject *s, PyObject *args)
 			close(fd);
 		return s->errorhandler();
 	}
-#if PY_MAJOR_VERSION >= 3
 	f = PyFile_FromFd(fd, "<socket>", mode, bufsize, NULL, NULL, NULL, 1);
-#else
-	f = PyFile_FromFile(fp, "<socket>", mode, fclose);
-	if (f != NULL)
-		PyFile_SetBufSize(f, bufsize);
-#endif
 	return f;
 }
 
@@ -1199,19 +1166,18 @@ sock_recv(PySocketSockObject *s, PyObject *args)
 		return NULL;
 
 	if (len < 0) {
-		PyErr_SetString(PyExc_ValueError,
-				"negative buffersize in recv");
+		PyErr_SetString(PyExc_ValueError, "negative buffersize in recv");
 		return NULL;
 	}
 
-	buf = PyString_FromStringAndSize((char *) 0, len);
+	buf = PyBytes_FromStringAndSize((char *) 0, len);
 	if (buf == NULL)
 		return NULL;
 
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 0);
 	if (!timeout)
-		n = recv(s->sock_fd, PyString_AS_STRING(buf), len, flags);
+		n = recv(s->sock_fd, PyBytes_AS_STRING(buf), len, flags);
 	Py_END_ALLOW_THREADS
 
 	if (timeout) {
@@ -1224,7 +1190,7 @@ sock_recv(PySocketSockObject *s, PyObject *args)
 		return s->errorhandler();
 	}
 	if (n != len)
-		_PyString_Resize(&buf, n);
+		_PyBytes_Resize(&buf, n);
 	return buf;
 }
 
@@ -1254,7 +1220,7 @@ sock_recvfrom(PySocketSockObject *s, PyObject *args)
 
 	if (!getsockaddrlen(s, &addrlen))
 		return NULL;
-	buf = PyString_FromStringAndSize((char *) 0, len);
+	buf = PyUnicode_FromStringAndSize((char *) 0, len);
 	if (buf == NULL)
 		return NULL;
 
@@ -1262,7 +1228,7 @@ sock_recvfrom(PySocketSockObject *s, PyObject *args)
 	memset(addrbuf, 0, addrlen);
 	timeout = internal_select(s, 0);
 	if (!timeout)
-		n = recvfrom(s->sock_fd, PyString_AS_STRING(buf), len, flags,
+		n = recvfrom(s->sock_fd, PyBytes_AS_STRING(buf), len, flags,
 			     (void *)addrbuf, &addrlen
 			);
 	Py_END_ALLOW_THREADS
@@ -1277,11 +1243,10 @@ sock_recvfrom(PySocketSockObject *s, PyObject *args)
 		return s->errorhandler();
 	}
 
-	if (n != len && _PyString_Resize(&buf, n) < 0)
+	if (n != len && _PyBytes_Resize(&buf, n) < 0)
 		return NULL;
 
-	if (!(addr = makesockaddr(s, (struct sockaddr *)addrbuf,
-				  addrlen)))
+	if (!(addr = makesockaddr(s, (struct sockaddr *)addrbuf, addrlen)))
 		goto finally;
 
 	ret = Py_BuildValue("OO", buf, addr);
@@ -1302,17 +1267,18 @@ Like recv(buffersize, flags) but also return the sender's address info.");
 static PyObject *
 sock_send(PySocketSockObject *s, PyObject *args)
 {
-	char *buf;
-	int len, n = 0, flags = 0, timeout;
+	Py_buffer buf;
+	int n = 0, flags = 0, timeout;
 
-	if (!PyArg_ParseTuple(args, "s#|i:send", &buf, &len, &flags))
+	if (!PyArg_ParseTuple(args, "s*|i:send", &buf, &flags))
 		return NULL;
 
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 1);
 	if (!timeout)
-		n = send(s->sock_fd, buf, len, flags);
+		n = send(s->sock_fd, buf.buf, buf.len, flags);
 	Py_END_ALLOW_THREADS
+	PyBuffer_Release(&buf);
 
 	if (timeout) {
 		PyErr_SetString(socket_timeout, "timed out");
@@ -1320,7 +1286,7 @@ sock_send(PySocketSockObject *s, PyObject *args)
 	}
 	if (n < 0)
 		return s->errorhandler();
-	return PyInt_FromLong((long)n);
+	return PyLong_FromLong((long)n);
 }
 
 PyDoc_STRVAR(send_doc,
@@ -1336,24 +1302,29 @@ sent; this may be less than len(data) if the network is busy.");
 static PyObject *
 sock_sendall(PySocketSockObject *s, PyObject *args)
 {
-	char *buf;
+	Py_buffer buf;
+	char *raw_buf;
 	int len, n = 0, flags = 0, timeout;
 
-	if (!PyArg_ParseTuple(args, "s#|i:sendall", &buf, &len, &flags))
+	if (!PyArg_ParseTuple(args, "s*|i:sendall", &buf, &flags))
 		return NULL;
 
 	Py_BEGIN_ALLOW_THREADS
+	raw_buf = buf.buf;
+	len = buf.len;
 	do {
 		timeout = internal_select(s, 1);
 		if (timeout)
 			break;
-		n = send(s->sock_fd, buf, len, flags);
+		n = send(s->sock_fd, raw_buf, len, flags);
 		if (n < 0)
 			break;
-		buf += n;
+		raw_buf += n;
 		len -= n;
 	} while (len > 0);
+	raw_buf = NULL;
 	Py_END_ALLOW_THREADS
+	PyBuffer_Release(&buf);
 
 	if (timeout) {
 		PyErr_SetString(socket_timeout, "timed out");
@@ -1362,8 +1333,7 @@ sock_sendall(PySocketSockObject *s, PyObject *args)
 	if (n < 0)
 		return s->errorhandler();
 
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(sendall_doc,
@@ -1381,15 +1351,14 @@ static PyObject *
 sock_sendto(PySocketSockObject *s, PyObject *args)
 {
 	PyObject *addro;
-	char *buf;
+	Py_buffer buf;
 	struct sockaddr addr = { 0 };
-	int addrlen, len, n = 0, flags, timeout;
+	int addrlen, n = 0, flags, timeout;
 
 	flags = 0;
-	if (!PyArg_ParseTuple(args, "s#O:sendto", &buf, &len, &addro)) {
+	if (!PyArg_ParseTuple(args, "s*O:sendto", &buf, &addro)) {
 		PyErr_Clear();
-		if (!PyArg_ParseTuple(args, "s#iO:sendto",
-				      &buf, &len, &flags, &addro))
+		if (!PyArg_ParseTuple(args, "s*iO:sendto", &buf, &flags, &addro))
 			return NULL;
 	}
 
@@ -1399,8 +1368,9 @@ sock_sendto(PySocketSockObject *s, PyObject *args)
 	Py_BEGIN_ALLOW_THREADS
 	timeout = internal_select(s, 1);
 	if (!timeout)
-		n = sendto(s->sock_fd, buf, len, flags, &addr, addrlen);
+		n = sendto(s->sock_fd, buf.buf, buf.len, flags, &addr, addrlen);
 	Py_END_ALLOW_THREADS
+	PyBuffer_Release(&buf);
 
 	if (timeout) {
 		PyErr_SetString(socket_timeout, "timed out");
@@ -1408,7 +1378,7 @@ sock_sendto(PySocketSockObject *s, PyObject *args)
 	}
 	if (n < 0)
 		return s->errorhandler();
-	return PyInt_FromLong((long)n);
+	return PyLong_FromLong((long)n);
 }
 
 PyDoc_STRVAR(sendto_doc,
@@ -1426,7 +1396,7 @@ sock_shutdown(PySocketSockObject *s, PyObject *arg)
 	int how;
 	int res;
 
-	how = PyInt_AsLong(arg);
+	how = PyLong_AsLong(arg);
 	if (how == -1 && PyErr_Occurred())
 		return NULL;
 	Py_BEGIN_ALLOW_THREADS
@@ -1434,8 +1404,7 @@ sock_shutdown(PySocketSockObject *s, PyObject *arg)
 	Py_END_ALLOW_THREADS
 	if (res < 0)
 		return s->errorhandler();
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(shutdown_doc,
@@ -1513,6 +1482,18 @@ static PyMethodDef sock_methods[] = {
 	{NULL,			NULL}		/* sentinel */
 };
 
+/* SockObject members */
+static PyMemberDef sock_memberlist[] = {
+    {"family", T_INT, offsetof(PySocketSockObject, sock_family), READONLY, "the socket family"},
+    {"type", T_INT, offsetof(PySocketSockObject, sock_type), READONLY, "the socket type"},
+    {"proto", T_INT, offsetof(PySocketSockObject, sock_proto), READONLY, "the socket protocol"},
+    {NULL} /* sentinel */
+};
+
+static PyGetSetDef sock_getsetlist[] = {
+    {"timeout", (getter)sock_gettimeout, NULL, PyDoc_STR("the socket timeout")},
+    {NULL} /* sentinel */
+};
 
 /* Deallocate a socket object in response to the last Py_DECREF().
    First close the file description. */
@@ -1526,7 +1507,7 @@ sock_dealloc(PySocketSockObject *s)
 		close(s->sock_fd);
         Py_END_ALLOW_THREADS
     }
-    
+
     if( s->sdp_session ) {
         sdp_close( s->sdp_session );
         s->sdp_record_handle = 0;
@@ -1558,7 +1539,7 @@ sock_repr(PySocketSockObject *s)
 		(long)s->sock_fd, s->sock_family,
 		s->sock_type,
 		s->sock_proto);
-	return PyString_FromString(buf);
+	return PyUnicode_FromString(buf);
 }
 
 
@@ -1590,10 +1571,8 @@ sock_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 	int family = AF_BLUETOOTH, type = SOCK_STREAM, proto = BTPROTO_RFCOMM;
 	static char *keywords[] = {"proto", 0};
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds,
-					 "|i:socket", keywords,
-					 &proto))
-		return -1;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|i:socket", keywords, &proto))
+        return -1;
 
     switch(proto) {
         case BTPROTO_HCI:
@@ -1633,12 +1612,7 @@ sock_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 /* Type object for socket objects. */
 
 PyTypeObject sock_type = {
-#if PY_MAJOR_VERSION < 3
-	PyObject_HEAD_INIT(0)	/* Must fill in type value later */
-	0,					/* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
 	"_bluetooth.btsocket",			/* tp_name */
 	sizeof(PySocketSockObject),		/* tp_basicsize */
 	0,					/* tp_itemsize */
@@ -1666,8 +1640,8 @@ PyTypeObject sock_type = {
 	0,					/* tp_iter */
 	0,					/* tp_iternext */
 	sock_methods,				/* tp_methods */
-	0,					/* tp_members */
-	0,					/* tp_getset */
+	sock_memberlist,			/* tp_members */
+	sock_getsetlist,			/* tp_getset */
 	0,					/* tp_base */
 	0,					/* tp_dict */
 	0,					/* tp_descr_get */
@@ -1692,16 +1666,14 @@ bt_fromfd(PyObject *self, PyObject *args)
 	PySocketSockObject *s;
 	int fd;
 	int family, type, proto = 0;
-	if (!PyArg_ParseTuple(args, "iii|i:fromfd",
-			      &fd, &family, &type, &proto))
+	if (!PyArg_ParseTuple(args, "iii|i:fromfd", &fd, &family, &type, &proto))
 		return NULL;
 	/* Dup the fd so it and the socket can be closed independently */
 	fd = dup(fd);
 	if (fd < 0)
 		return set_error();
 	s = new_sockobject(fd, family, type, proto);
-	/* From now on, ignore SIGPIPE and let the error checking
-	   do the work. */
+	/* From now on, ignore SIGPIPE and let the error checking do the work. */
 #ifdef SIGPIPE
 	(void) signal(SIGPIPE, SIG_IGN);
 #endif
@@ -1726,7 +1698,7 @@ bt_btohs(PyObject *self, PyObject *args)
 		return NULL;
 	}
 	x2 = (int)btohs((short)x1);
-	return PyInt_FromLong(x2);
+	return PyLong_FromLong(x2);
 }
 
 PyDoc_STRVAR(bt_btohs_doc,
@@ -1740,13 +1712,13 @@ bt_btohl(PyObject *self, PyObject *args)
 {
 	unsigned long x;
 	PyObject *arg;
-	
+
 	if (!PyArg_ParseTuple(args, "O:btohl", &arg)) {
 		return NULL;
 	}
 
-	if (PyInt_Check(arg)) {
-		x = PyInt_AS_LONG(arg);
+	if (PyLong_Check(arg)) {
+		x = PyLong_AS_LONG(arg);
 		if (x == (unsigned long) -1 && PyErr_Occurred())
 			return NULL;
 	}
@@ -1772,7 +1744,7 @@ bt_btohl(PyObject *self, PyObject *args)
 				    arg->ob_type->tp_name);
 	if (x == (unsigned long) -1 && PyErr_Occurred())
 		return NULL;
-	return PyInt_FromLong(btohl(x));
+	return PyLong_FromLong(btohl(x));
 }
 
 PyDoc_STRVAR(bt_btohl_doc,
@@ -1790,7 +1762,7 @@ bt_htobs(PyObject *self, PyObject *args)
 		return NULL;
 	}
 	x2 = (int)htobs((short)x1);
-	return PyInt_FromLong(x2);
+	return PyLong_FromLong(x2);
 }
 
 PyDoc_STRVAR(bt_htobs_doc,
@@ -1809,8 +1781,8 @@ bt_htobl(PyObject *self, PyObject *args)
 		return NULL;
 	}
 
-	if (PyInt_Check(arg)) {
-		x = PyInt_AS_LONG(arg);
+	if (PyLong_Check(arg)) {
+		x = PyLong_AS_LONG(arg);
 		if (x == (unsigned long) -1 && PyErr_Occurred())
 			return NULL;
 	}
@@ -1834,7 +1806,7 @@ bt_htobl(PyObject *self, PyObject *args)
 		return PyErr_Format(PyExc_TypeError,
 				    "expected int/long, %s found",
 				    arg->ob_type->tp_name);
-	return PyInt_FromLong(htobl(x));
+	return PyLong_FromLong(htobl(x));
 }
 
 //static PyObject *
@@ -1843,7 +1815,7 @@ bt_htobl(PyObject *self, PyObject *args)
 //	int protocol = -1;
 //    int s;
 //
-//	protocol = PyInt_AsLong(arg);
+//	protocol = PyLong_AsLong(arg);
 //
 //	if (protocol == -1 && PyErr_Occurred())
 //		return NULL;
@@ -1856,7 +1828,7 @@ bt_htobl(PyObject *self, PyObject *args)
 //                s = socket( AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM );
 //
 //                sockaddr.rc_family = AF_BLUETOOTH;
-//                bacppy( &sockaddr.rc_bdaddr, BDADDR_ANY 
+//                bacppy( &sockaddr.rc_bdaddr, BDADDR_ANY
 //            }
 //            break;
 //        case BTPROTO_L2CAP:
@@ -1869,14 +1841,13 @@ bt_htobl(PyObject *self, PyObject *args)
 //            break;
 //        default:
 //            {
-//                PyErr_SetString( PyExc_ValueError, 
+//                PyErr_SetString( PyExc_ValueError,
 //                        "protocol must be either RFCOMM or L2CAP" );
 //                return 0;
 //            }
 //            break;
 //    }
-//    Py_INCREF( Py_None );
-//    return Py_None;
+//    Py_RETURN_NONE;
 //}
 
 PyDoc_STRVAR(bt_htobl_doc,
@@ -1889,12 +1860,10 @@ Convert a 32-bit integer from host to bluetooth byte order.");
 static PyObject *
 bt_getdefaulttimeout(PyObject *self)
 {
-	if (defaulttimeout < 0.0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
-	else
-		return PyFloat_FromDouble(defaulttimeout);
+    if (defaulttimeout < 0.0)
+        Py_RETURN_NONE;
+    else
+        return PyFloat_FromDouble(defaulttimeout);
 }
 
 PyDoc_STRVAR(bt_getdefaulttimeout_doc,
@@ -1915,16 +1884,14 @@ bt_setdefaulttimeout(PyObject *self, PyObject *arg)
 		timeout = PyFloat_AsDouble(arg);
 		if (timeout < 0.0) {
 			if (!PyErr_Occurred())
-				PyErr_SetString(PyExc_ValueError,
-						"Timeout value out of range");
+				PyErr_SetString(PyExc_ValueError, "Timeout value out of range");
 			return NULL;
 		}
 	}
 
 	defaulttimeout = timeout;
 
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_NONE;
 }
 
 PyDoc_STRVAR(bt_setdefaulttimeout_doc,
@@ -1937,13 +1904,13 @@ When the socket module is first imported, the default is None.");
 /*
  * ----------------------------------------------------------------------
  *  HCI Section   (Calvin)
- *  
+ *
  *  This section provides the socket methods for calling HCI commands.
  *  These commands may be called statically, and implementation is
  *  independent from the rest of the module (except for bt_methods[]).
  *
  * ----------------------------------------------------------------------
- *  
+ *
  */
 
 /*
@@ -1956,7 +1923,7 @@ bt_hci_open_dev(PyObject *self, PyObject *args)
 {
     int dev = -1, fd;
 	PySocketSockObject *s = NULL;
-    
+
     if ( !PyArg_ParseTuple(args, "|i", &dev) )
     {
         return NULL;
@@ -1971,7 +1938,7 @@ bt_hci_open_dev(PyObject *self, PyObject *args)
         PyErr_SetString(bluetooth_error, "no available bluetoot devices");
         return 0;
     }
-    
+
     Py_BEGIN_ALLOW_THREADS
     fd = hci_open_dev(dev);
     Py_END_ALLOW_THREADS
@@ -1992,7 +1959,7 @@ static PyObject *
 bt_hci_close_dev(PyObject *self, PyObject *args)
 {
     int dev, err;
-    
+
     if ( !PyArg_ParseTuple(args, "i", &dev) )
     {
         return NULL;
@@ -2003,15 +1970,14 @@ bt_hci_close_dev(PyObject *self, PyObject *args)
     Py_END_ALLOW_THREADS
 
     if( err < 0 ) return set_error();
-    
-    Py_INCREF(Py_None);
-    return Py_None;
+
+    Py_RETURN_NONE;
 }
 
-PyDoc_STRVAR(bt_hci_close_dev_doc, 
+PyDoc_STRVAR(bt_hci_close_dev_doc,
 "hci_close_dev(dev_id)\n\
 \n\
-closes the specified device id.  Note:  device id is NOT a btoscket.\n\
+Closes the specified device id.  Note:  device id is NOT a btoscket.\n\
 You can also use btsocket.close() to close a specific socket.");
 
 /*
@@ -2029,7 +1995,7 @@ bt_hci_send_cmd(PyObject *self, PyObject *args)
     uint16_t ogf, ocf;
     char *param = NULL;
     int dd = 0;
-    
+
     if ( !PyArg_ParseTuple(args, "OHH|s#", &socko, &ogf, &ocf, &param, &plen)) {
         return NULL;
     }
@@ -2045,7 +2011,7 @@ bt_hci_send_cmd(PyObject *self, PyObject *args)
     return Py_BuildValue("i", err);
 }
 
-PyDoc_STRVAR(bt_hci_send_cmd_doc, 
+PyDoc_STRVAR(bt_hci_send_cmd_doc,
 "hci_send_cmd(sock, ogf, ocf, params)\n\
 \n\
 Transmits the specified HCI command to the socket.\n\
@@ -2064,10 +2030,10 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
     int dd = 0;
 
     static char *keywords[] = { "sock", "ogf", "ocf", "event", "rlen", "params",
-        "timeout", 0 };
+                                "timeout", 0 };
 
     if( !PyArg_ParseTupleAndKeywords(args, kwds, "OHHii|s#i", keywords,
-                &socko, &req.ogf, &req.ocf, &req.event, &req.rlen, 
+                &socko, &req.ogf, &req.ocf, &req.event, &req.rlen,
                 &req.cparam, &req.clen, &to) )
         return 0;
 
@@ -2080,7 +2046,7 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
 
     if( err< 0 ) return socko->errorhandler();
 
-    return PyString_FromStringAndSize(rparam, req.rlen);
+    return PyUnicode_FromStringAndSize(rparam, req.rlen);
 }
 PyDoc_STRVAR(bt_hci_send_req_doc,
 "hci_send_req(sock, ogf, ocf, event, rlen, params=None, timeout=0)\n\
@@ -2113,7 +2079,8 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     char buf[sizeof(*ir) + sizeof(inquiry_info) * 250];
 
     PyObject *rtn_list = (PyObject *)NULL;
-    static char *keywords[] = {"sock", "duration", "flush_cache", "lookup_class", "device_id", "iac", 0};
+    static char *keywords[] = {"sock", "duration", "flush_cache",
+                                "lookup_class", "device_id", "iac", 0};
 
     if( !PyArg_ParseTupleAndKeywords(args, kwds, "O|iiiii", keywords,
                 &socko, &length, &flush, &lookup_class, &dev_id, &iac) )
@@ -2121,7 +2088,7 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
         return 0;
     }
 
-    flags |= (flush)?IREQ_CACHE_FLUSH:0;
+    flags |= (flush) ? IREQ_CACHE_FLUSH : 0;
 
 
     ir = (struct hci_inquiry_req*)buf;
@@ -2151,14 +2118,16 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
         int err;
 
         ba2str( &(info+i)->bdaddr, ba_name );
-        
-        addr_entry = PyString_FromString( ba_name );
+
+        addr_entry = PyUnicode_FromString( ba_name );
 
         if (lookup_class) {
             PyObject *item_tuple = PyTuple_New(2);
 
-            int dev_class = (info+i)->dev_class[2] << 16 | (info+i)->dev_class[1] << 8 | (info+i)->dev_class[0];
-            PyObject *class_entry = PyInt_FromLong( dev_class );
+            int dev_class = (info+i)->dev_class[2] << 16 |
+                            (info+i)->dev_class[1] << 8 |
+                            (info+i)->dev_class[0];
+            PyObject *class_entry = PyLong_FromLong( dev_class );
 
             err = PyTuple_SetItem( item_tuple, 0, addr_entry );
             if (err) {
@@ -2194,7 +2163,7 @@ bt_hci_inquiry(PyObject *self, PyObject *args, PyObject *kwds)
     return rtn_list;
 }
 
-PyDoc_STRVAR(bt_hci_inquiry_doc, 
+PyDoc_STRVAR(bt_hci_inquiry_doc,
 "hci_inquiry(dev_id=0, duration=8, flush_cache=True\n\
 \n\
 Performs a device inquiry using the specified device (usually 0 or 1).\n\
@@ -2224,14 +2193,14 @@ bt_hci_read_remote_name(PyObject *self, PyObject *args, PyObject *kwds)
     memset( name, 0, sizeof(name) );
 
     Py_BEGIN_ALLOW_THREADS
-    err = hci_read_remote_name( socko->sock_fd, &ba, sizeof(name)-1, 
+    err = hci_read_remote_name( socko->sock_fd, &ba, sizeof(name)-1,
                 name, timeout );
     Py_END_ALLOW_THREADS
 
-    if( err < 0) 
+    if( err < 0)
         return PyErr_SetFromErrno(bluetooth_error);
 
-    return PyString_FromString( name );
+    return PyUnicode_FromString( name );
 }
 PyDoc_STRVAR(bt_hci_read_remote_name_doc,
 "hci_read_remote_name(sock, bdaddr, timeout=5192)\n\
@@ -2253,7 +2222,7 @@ bt_hci_opcode_name(PyObject *self, PyObject *args)
         // DPRINTF("opcode = %x\n", opcode);
         const char* cmd_name = opcode2str (opcode);
 
-    return PyString_FromString( cmd_name );
+    return PyUnicode_FromString( cmd_name );
 }
 PyDoc_STRVAR(bt_hci_opcode_name_doc,
 "hci_opcode_name(opcode)\n\
@@ -2279,7 +2248,7 @@ bt_hci_event_name(PyObject *self, PyObject *args)
            return 0;
    }
    const char* event_name = event_str[eventNum];
-   return PyString_FromString( event_name );
+   return PyUnicode_FromString( event_name );
 }
 PyDoc_STRVAR(bt_hci_event_name_doc,
 "hci_event_name(eventNum)\n\
@@ -2303,7 +2272,7 @@ static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
         return 0; \
     } \
     hci_filter_ ## name ( arg, (struct hci_filter*)param ); \
-    return PyString_FromStringAndSize(param, len); \
+    return PyUnicode_FromStringAndSize(param, len); \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
@@ -2332,7 +2301,7 @@ static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
         return 0; \
     } \
     hci_filter_ ## name ( (struct hci_filter*)param ); \
-    return PyString_FromStringAndSize(param, len); \
+    return PyUnicode_FromStringAndSize(param, len); \
 } \
 PyDoc_STRVAR(bt_hci_filter_ ## name ## _doc, docstring);
 
@@ -2344,7 +2313,7 @@ DECL_HCI_FILTER_OP_2(clear_opcode, "clear opcode!")
 #undef DECL_HCI_FILTER_OP_2
 
 static PyObject *
-bt_cmd_opcode_pack(PyObject *self, PyObject *args ) 
+bt_cmd_opcode_pack(PyObject *self, PyObject *args )
 {
     uint16_t opcode, ogf, ocf;
     if (!PyArg_ParseTuple(args, "HH", &ogf, &ocf )) return 0;
@@ -2354,7 +2323,7 @@ bt_cmd_opcode_pack(PyObject *self, PyObject *args )
 PyDoc_STRVAR(bt_cmd_opcode_pack_doc,
 "cmd_opcode_pack(ogf, ocf)\n\
 \n\
-packs an OCF and an OGF value together to form a opcode");
+Packs an OCF and an OGF value together to form a opcode");
 
 static PyObject *
 bt_cmd_opcode_ogf(PyObject *self, PyObject *args )
@@ -2389,14 +2358,14 @@ bt_ba2str(PyObject *self, PyObject *args)
     char ba_str[19] = {0};
     if (!PyArg_ParseTuple(args, "s#", &data, &len)) return 0;
     ba2str((bdaddr_t*)data, ba_str);
-    return PyString_FromString( ba_str );
+    return PyUnicode_FromString( ba_str );
 //    return Py_BuildValue("s#", ba_str, 18);
 }
 PyDoc_STRVAR(bt_ba2str_doc,
 "ba2str(data)\n\
 \n\
 Converts a packed bluetooth address to a human readable string");
-    
+
 static PyObject *
 bt_str2ba(PyObject *self, PyObject *args)
 {
@@ -2404,14 +2373,14 @@ bt_str2ba(PyObject *self, PyObject *args)
     bdaddr_t ba;
     if (!PyArg_ParseTuple(args, "s", &ba_str)) return 0;
     str2ba( ba_str, &ba );
-    return Py_BuildValue(BYTES_FORMAT_CHR, (char*)(&ba), sizeof(ba));
+    return Py_BuildValue("y#", (char*)(&ba), sizeof(ba));
 }
 PyDoc_STRVAR(bt_str2ba_doc,
 "str2ba(string)\n\
 \n\
-Converts a bluetooth address string into a packed bluetooth address.  The\n\
-string should be of the form \"XX:XX:XX:XX:XX:XX\"");
-    
+Converts a bluetooth address string into a packed bluetooth address.\n\
+The string should be of the form \"XX:XX:XX:XX:XX:XX\"");
+
 /*
  * params:  (string) device address
  * effect: -
@@ -2439,8 +2408,7 @@ bt_hci_devid(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_devid_doc,
 "hci_devid(address)\n\
 \n\
-get the device id for the local device with specified address.\n\
-");
+Get the device id for the local device with specified address.");
 
 /*
  * params:  (string) device address
@@ -2469,8 +2437,7 @@ bt_hci_role(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_role_doc,
 "hci_role(hci_fd, dev_id)\n\
 \n\
-get the role (master or slave) of the device id.\n\
-");
+Get the role (master or slave) of the device id.");
 
 /*
  * params:  (string) device address
@@ -2485,25 +2452,22 @@ bt_hci_read_clock(PyObject *self, PyObject *args)
     int which;
     int timeout;
     uint32_t btclock;
-    uint16_t accuracy; 
+    uint16_t accuracy;
     int res;
 
     if ( !PyArg_ParseTuple(args, "iiii", &fd, &handle, &which, &timeout) )
         return NULL;
 
     res = hci_read_clock(fd, handle, which, &btclock, &accuracy, timeout);
-    if (res) {
-    	Py_INCREF(Py_None);
-    	return Py_None;
-    }
+    if (res)
+        Py_RETURN_NONE;
 
     return Py_BuildValue("(ii)", btclock, accuracy);
 }
 PyDoc_STRVAR( bt_hci_read_clock_doc,
 "hci_read_clock(hci_fd, acl_handle, which_clock, timeout_ms)\n\
 \n\
-Get the Bluetooth Clock (native or piconet).\n\
-");
+Get the Bluetooth Clock (native or piconet).");
 
 /*
  * params:  (string) device address
@@ -2528,13 +2492,12 @@ bt_hci_get_route(PyObject *self, PyObject *args)
     if (dev_id < 0) {
         return PyErr_SetFromErrno(PyExc_OSError);
     }
-    return PyInt_FromLong(dev_id);
+    return PyLong_FromLong(dev_id);
 }
 PyDoc_STRVAR( bt_hci_get_route_doc,
 "hci_get_route(address)\n\
 \n\
-get the device id through which remote specified addr can be reached.\n\
-");
+Get the device id through which remote specified addr can be reached.");
 
 /*
  * params:  (string) device address
@@ -2571,8 +2534,7 @@ bt_hci_acl_conn_handle(PyObject *self, PyObject *args)
 PyDoc_STRVAR( bt_hci_acl_conn_handle_doc,
 "hci_acl_conn_handle(hci_fd, address)\n\
 \n\
-get the ACL connection handle for the given remote device addr.\n\
-");
+Get the ACL connection handle for the given remote device addr.");
 
 static PyObject *
 bt_hci_filter_new(PyObject *self, PyObject *args)
@@ -2589,6 +2551,85 @@ Returns a new HCI filter suitable for operating on with the hci_filter_*\n\
 methods, and for passing to getsockopt and setsockopt.  The filter is\n\
 initially cleared");
 
+
+static PyObject *
+bt_hci_le_add_white_list(PyObject *self, PyObject *args)
+{
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    char *addr = NULL;
+    bdaddr_t ba;
+    int dd = 0;
+    uint8_t type;
+
+    if ( !PyArg_ParseTuple(args, "OsHi", &socko, &addr, &type, &to) ) {
+        return NULL;
+    }
+    if ( addr && strlen(addr) ){
+        str2ba( addr, &ba );
+    }
+    else {
+        return NULL;
+    }
+
+    dd = socko->sock_fd;
+    err = hci_le_add_white_list(dd, &ba, type, to);
+    if ( err < 0 ) {
+        return NULL;
+    }
+
+    return Py_BuildValue("i", err);
+}
+
+PyDoc_STRVAR(bt_hci_le_add_white_list_doc,
+"hci_le_add_white_list( dd, btaddr, type, to )\n\
+\n\
+Add the given MAC to the LE scan white list");
+
+static PyObject *
+bt_hci_le_read_white_list_size(PyObject *self, PyObject *args)
+{
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    uint8_t ret;
+    int  dd;
+    if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
+        return NULL;
+    }
+    dd = socko->sock_fd;
+    err = hci_le_read_white_list_size(dd, &ret, to);
+    if ( err < 0 ) {
+        return NULL;
+    }
+    return Py_BuildValue("i", ret);
+}
+PyDoc_STRVAR(bt_hci_le_read_white_list_size_doc,
+"hci_le_read_white_list_size( dd, size, to )\n\
+\n\
+Read the total length of the LE scan white list. This is the length of the\n\
+empty list, not the total entries in the list");
+
+static PyObject *
+bt_hci_le_clear_white_list(PyObject *self, PyObject *args)
+{
+    PySocketSockObject *socko = NULL;
+    int err = 0;
+    int to = 0;
+    int dd;
+    if ( !PyArg_ParseTuple(args, "Oi", &socko, &to) ) {
+        return NULL;
+    }
+    dd = socko->sock_fd;
+    err = hci_le_clear_white_list(dd, to);
+    return Py_BuildValue("i", err);
+}
+PyDoc_STRVAR(bt_hci_le_clear_white_list_doc,
+"hci_le_clear_white_list( dd, to )\n\
+\n\
+Clears the LE scan white list");
+
 /*
  * -------------------
  *  End of HCI section
@@ -2602,9 +2643,9 @@ PyObject *
 bt_sdp_advertise_service( PyObject *self, PyObject *args )
 {
     PySocketSockObject *socko = NULL;
-    char *name = NULL, 
-         *service_id_str = NULL, 
-         *provider = NULL, 
+    char *name = NULL,
+         *service_id_str = NULL,
+         *provider = NULL,
          *description = NULL;
     PyObject *service_classes, *profiles, *protocols;
     int namelen = 0, provlen = 0, desclen = 0;
@@ -2615,10 +2656,10 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     socklen_t addrlen;
     struct sockaddr *sockaddr;
     uuid_t root_uuid, l2cap_uuid, rfcomm_uuid;
-    sdp_list_t *l2cap_list = 0, 
+    sdp_list_t *l2cap_list = 0,
                *rfcomm_list = 0,
                *root_list = 0,
-               *proto_list = 0, 
+               *proto_list = 0,
                *profile_list = 0,
                *svc_class_list = 0,
                *access_proto_list = 0;
@@ -2629,7 +2670,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     int err = 0;
 
     if (!PyArg_ParseTuple(args, "O!s#sOOs#s#O", &sock_type, &socko, &name,
-                &namelen, &service_id_str, &service_classes, 
+                &namelen, &service_id_str, &service_classes,
                 &profiles, &provider, &provlen, &description, &desclen,
                 &protocols)) {
         return 0;
@@ -2656,15 +2697,14 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
 
     // service_classes must be a list / sequence
     if (! PySequence_Check(service_classes)) {
-        PyErr_SetString(PyExc_ValueError, 
-                "service_classes must be a sequence");
+        PyErr_SetString(PyExc_ValueError, "service_classes must be a sequence");
         return 0;
     }
     // make sure each item in the list is a valid UUID
     for(i = 0; i < PySequence_Length(service_classes); ++i) {
         PyObject *item = PySequence_GetItem(service_classes, i);
         if( ! pyunicode2uuid( item, NULL ) ) {
-            PyErr_SetString(PyExc_ValueError, 
+            PyErr_SetString(PyExc_ValueError,
                     "service_classes must be a list of "
                     "strings, each either of the form XXXX or "
                     "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX");
@@ -2682,28 +2722,27 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         char *profile_uuid_str = NULL;
         uint16_t version;
         PyObject *tuple = PySequence_GetItem(profiles, i);
-        if ( ( ! PySequence_Check(tuple) ) || 
-             ( ! PyArg_ParseTuple(tuple, "sH", 
-                 &profile_uuid_str, &version)) || 
-             ( ! str2uuid( profile_uuid_str, NULL ) ) 
-             ) {
-            PyErr_SetString(PyExc_ValueError, 
+        if ( ( ! PySequence_Check(tuple) ) ||
+             ( ! PyArg_ParseTuple(tuple, "sH",
+                 &profile_uuid_str, &version)) ||
+             ( ! str2uuid( profile_uuid_str, NULL ) )
+           ) {
+            PyErr_SetString(PyExc_ValueError,
                     "Each profile must be a ('uuid', version) tuple");
             return 0;
         }
     }
-    
+
     // protocols must be a list / sequence
     if (! PySequence_Check(protocols)) {
-        PyErr_SetString(PyExc_ValueError, 
-                "protocols must be a sequence");
+        PyErr_SetString(PyExc_ValueError, "protocols must be a sequence");
         return 0;
     }
     // make sure each item in the list is a valid UUID
     for(i = 0; i < PySequence_Length(protocols); ++i) {
         PyObject *item = PySequence_GetItem(protocols, i);
         if( ! pyunicode2uuid( item, NULL ) ) {
-            PyErr_SetString(PyExc_ValueError, 
+            PyErr_SetString(PyExc_ValueError,
                     "protocols must be a list of "
                     "strings, each either of the form XXXX or "
                     "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX");
@@ -2713,15 +2752,14 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
 
     // verify that the socket is bound and listening
     if( ! socko->is_listening_socket ) {
-        PyErr_SetString(bluetooth_error, 
+        PyErr_SetString(bluetooth_error,
                 "must have already called socket.listen()");
         return 0;
     }
 
-    // verify whether device can be advertiable
+    // verify whether device can be advertisable
     if(adv_available(socko) < 0) {
-        PyErr_SetString(bluetooth_error, 
-                "error no advertisable device.");
+        PyErr_SetString(bluetooth_error, "no advertisable device");
         return 0;
     }
 
@@ -2740,9 +2778,9 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     sockaddr = (struct sockaddr *)addrbuf;
 
     // can only deal with L2CAP and RFCOMM sockets
-    if( socko->sock_proto != BTPROTO_L2CAP && 
+    if( socko->sock_proto != BTPROTO_L2CAP &&
             socko->sock_proto != BTPROTO_RFCOMM ) {
-        PyErr_SetString(bluetooth_error, 
+        PyErr_SetString(bluetooth_error,
                 "Sorry, can only advertise L2CAP and RFCOMM sockets for now");
         return 0;
     }
@@ -2751,13 +2789,13 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     if( socko->sdp_record_handle != 0 && socko->sdp_session != NULL ) {
         PyErr_SetString(bluetooth_error,
                 "This socket is already being used to advertise a service!\n"
-                "Use  stop_advertising first!\n");
+                "Use stop_advertising first!\n");
         return 0;
     }
 
     // okay, now construct the SDP service record.
     memset( &record, 0, sizeof(sdp_record_t) );
-    
+
     record.handle = 0xffffffff;
 
     // make the service record publicly browsable
@@ -2787,7 +2825,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         psm = sdp_data_alloc(SDP_UINT16, &l2cap_psm);
         sdp_list_append(l2cap_list, psm);
     }
-    
+
     // add additional protocols, if any
     sdp_list_t *extra_protos_array[PySequence_Length(protocols)];
     if (PySequence_Length(protocols) > 0) {
@@ -2795,16 +2833,16 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
             uuid_t *proto_uuid = (uuid_t*) malloc( sizeof( uuid_t ) );
             PyObject *item = PySequence_GetItem(protocols, i);
             pyunicode2uuid( item, proto_uuid );
-            
+
             sdp_list_t *new_list;
             new_list = sdp_list_append( 0, proto_uuid );
             proto_list = sdp_list_append( proto_list, new_list );
-            
+
             // keep track, to free the list later
             extra_protos_array[i] = new_list;
         }
     }
-    
+
     access_proto_list = sdp_list_append( 0, proto_list );
     sdp_set_access_protos( &record, access_proto_list );
 
@@ -2813,18 +2851,17 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
         uuid_t *svc_class_uuid = (uuid_t*) malloc( sizeof( uuid_t ) );
         PyObject *item = PySequence_GetItem(service_classes, i);
         pyunicode2uuid( item, svc_class_uuid );
-        svc_class_list = sdp_list_append(svc_class_list, 
-                svc_class_uuid);
+        svc_class_list = sdp_list_append(svc_class_list, svc_class_uuid);
     }
     sdp_set_service_classes(&record, svc_class_list);
 
     // add profiles, if any
     for(i = 0; i < PySequence_Length(profiles); i++) {
         char *profile_uuid_str;
-        sdp_profile_desc_t *profile_desc = 
+        sdp_profile_desc_t *profile_desc =
             (sdp_profile_desc_t*)malloc(sizeof(sdp_profile_desc_t));
         PyObject *tuple = PySequence_GetItem(profiles, i);
-        PyArg_ParseTuple(tuple, "sH", &profile_uuid_str, 
+        PyArg_ParseTuple(tuple, "sH", &profile_uuid_str,
                 &profile_desc->version);
         str2uuid( profile_uuid_str, &profile_desc->uuid );
         profile_list = sdp_list_append( profile_list, profile_desc );
@@ -2837,7 +2874,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     // set the general service ID, if needed
     if( strlen(service_id_str) ) sdp_set_service_id( &record, svc_uuid );
 
-    // connect to the local SDP server, register the service record, and 
+    // connect to the local SDP server, register the service record, and
     // disconnect
     Py_BEGIN_ALLOW_THREADS
     session = sdp_connect( BDADDR_ANY, BDADDR_LOCAL, 0 );
@@ -2870,10 +2907,9 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     }
     socko->sdp_record_handle = record.handle;
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
-PyDoc_STRVAR( bt_sdp_advertise_service_doc, 
+PyDoc_STRVAR( bt_sdp_advertise_service_doc,
 "sdp_advertise_service( socket, name )\n\
 \n\
 Registers a service with the local SDP server.\n\
@@ -2884,8 +2920,7 @@ called socket.listen().  Only L2CAP and RFCOMM sockets are supported.\n\
 name is the name that you want to appear in the SDP record\n\
 \n\
 Registered services will be automatically unregistered when the socket is\n\
-closed.\
-");
+closed.");
 
 
 PyObject *
@@ -2900,7 +2935,7 @@ bt_sdp_stop_advertising( PyObject *self, PyObject *args )
     // verify that we got a real socket object
     if( ! socko || (Py_TYPE(socko) != &sock_type) ) {
         // TODO change this to a more accurate exception type
-        PyErr_SetString(bluetooth_error, 
+        PyErr_SetString(bluetooth_error,
                 "must pass in _bluetooth.socket object");
         return 0;
     }
@@ -2915,20 +2950,16 @@ bt_sdp_stop_advertising( PyObject *self, PyObject *args )
         PyErr_SetString( bluetooth_error, "not currently advertising!");
     }
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR( bt_sdp_stop_advertising_doc,
 "sdp_stop_advertising( socket )\n\
 \n\
-stop advertising services associated with this socket\n\
-");
-
+Stop advertising services associated with this socket");
 
 /* List of functions exported by this module. */
 
-#define DECL_BT_METHOD(name, argtype) \
-{ #name, (PyCFunction)bt_ ##name, argtype, bt_ ## name ## _doc }
+#define DECL_BT_METHOD(name, argtype){ #name, (PyCFunction)bt_ ##name, argtype, bt_ ## name ## _doc }
 
 static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( hci_devid, METH_VARARGS ),
@@ -2973,6 +3004,9 @@ static PyMethodDef bt_methods[] = {
     DECL_BT_METHOD( setdefaulttimeout, METH_O ),
     DECL_BT_METHOD( sdp_advertise_service, METH_VARARGS ),
     DECL_BT_METHOD( sdp_stop_advertising, METH_VARARGS ),
+    DECL_BT_METHOD( hci_le_add_white_list, METH_VARARGS ),
+    DECL_BT_METHOD( hci_le_read_white_list_size, METH_VARARGS ),
+    DECL_BT_METHOD( hci_le_clear_white_list, METH_VARARGS ),
 //    DECL_BT_METHOD( advertise_service, METH_VARARGS | METH_KEYWORDS ),
 	{NULL,			NULL}		 /* Sentinel */
 };
@@ -2987,97 +3021,59 @@ PyDoc_STRVAR(socket_doc,
 \n\
 See the bluetooth module for documentation.");
 
-#if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC
-init_bluetooth(void)
-{
-	Py_TYPE(&sock_type) = &PyType_Type;
-	Py_TYPE(&sdp_session_type) = &PyType_Type;
+#define INITERROR return NULL
 
-// Initialization steps for _bluetooth.
-	PyObject *m = Py_InitModule3("_bluetooth",
-               bt_methods,
-               socket_doc);
-    bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
-	if (bluetooth_error == NULL)
-		return;
-	Py_INCREF(bluetooth_error);
-	PyModule_AddObject(m, "error", bluetooth_error);
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_bluetooth",
+    socket_doc,
+    -1,
+    bt_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 
-    socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
-            NULL);
-	if (socket_timeout == NULL)
-		return;
-	Py_INCREF(socket_timeout);
-	PyModule_AddObject(m, "timeout", socket_timeout);
-
-	Py_INCREF((PyObject *)&sock_type);
-	if (PyModule_AddObject(m, "btsocket",
-			       (PyObject *)&sock_type) != 0)
-		return;
-
-    Py_INCREF((PyObject *)&sdp_session_type);
-    if (PyModule_AddObject(m, "SDPSession",
-                (PyObject *)&sdp_session_type) != 0)
-        return;
-
-#else
 PyMODINIT_FUNC
 PyInit__bluetooth(void)
 {
-	Py_TYPE(&sock_type) = &PyType_Type;
-	Py_TYPE(&sdp_session_type) = &PyType_Type;
-
-// Initialization steps for _bluetooth.
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "_bluetooth",
-        socket_doc,
-        -1,
-        bt_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
+    Py_TYPE(&sock_type) = &PyType_Type;
+    Py_TYPE(&sdp_session_type) = &PyType_Type;
     PyObject *m = PyModule_Create(&moduledef);
-	bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
-	if (bluetooth_error == NULL)
-		return NULL;
-	Py_INCREF(bluetooth_error);
-	PyModule_AddObject(m, "error", bluetooth_error);
+    if (m == NULL)
+        INITERROR;
 
-	socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
-			NULL);
-	if (socket_timeout == NULL)
-		return NULL;
-	Py_INCREF(socket_timeout);
-	PyModule_AddObject(m, "timeout", socket_timeout);
+    bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
+    if (bluetooth_error == NULL)
+        INITERROR;
+    Py_INCREF(bluetooth_error);
+    PyModule_AddObject(m, "error", bluetooth_error);
 
-	Py_INCREF((PyObject *)&sock_type);
-	if (PyModule_AddObject(m, "btsocket",
-				   (PyObject *)&sock_type) != 0)
-		return NULL;
+    socket_timeout = PyErr_NewException("_bluetooth.timeout", bluetooth_error,
+                                        NULL);
+    if (socket_timeout == NULL)
+        INITERROR;
+    Py_INCREF(socket_timeout);
+    PyModule_AddObject(m, "timeout", socket_timeout);
 
-	Py_INCREF((PyObject *)&sdp_session_type);
-	if (PyModule_AddObject(m, "SDPSession",
-				(PyObject *)&sdp_session_type) != 0)
-		return NULL;
-#endif
+    Py_INCREF((PyObject *)&sock_type);
+    if (PyModule_AddObject(m, "btsocket", (PyObject *)&sock_type) != 0)
+        INITERROR;
 
-    // because we're lazy...
-#define ADD_INT_CONST(m, a) PyModule_AddIntConstant(m, #a, a)
-
+    Py_INCREF((PyObject *)&sdp_session_type);
+    if (PyModule_AddObject(m, "SDPSession", (PyObject *)&sdp_session_type) != 0)
+        INITERROR;
 
     // Global variables that can be accessible from Python.
-//    ADD_INT_CONST(m, PF_BLUETOOTH);
-//    ADD_INT_CONST(m, AF_BLUETOOTH);
-    ADD_INT_CONST(m, SOL_HCI);
-    ADD_INT_CONST(m, HCI_DATA_DIR);
-    ADD_INT_CONST(m, HCI_TIME_STAMP);
-    ADD_INT_CONST(m, HCI_FILTER);
-    ADD_INT_CONST(m, HCI_MAX_EVENT_SIZE);
-    ADD_INT_CONST(m, HCI_EVENT_HDR_SIZE);
+//    PyModule_AddIntMacro(m, PF_BLUETOOTH);
+//    PyModule_AddIntMacro(m, AF_BLUETOOTH);
+    PyModule_AddIntMacro(m, SOL_HCI);
+    PyModule_AddIntMacro(m, HCI_DATA_DIR);
+    PyModule_AddIntMacro(m, HCI_TIME_STAMP);
+    PyModule_AddIntMacro(m, HCI_FILTER);
+    PyModule_AddIntMacro(m, HCI_MAX_EVENT_SIZE);
+    PyModule_AddIntMacro(m, HCI_EVENT_HDR_SIZE);
 
     PyModule_AddIntConstant(m, "HCI", BTPROTO_HCI);
     PyModule_AddIntConstant(m, "L2CAP", BTPROTO_L2CAP);
@@ -3085,697 +3081,694 @@ PyInit__bluetooth(void)
     PyModule_AddIntConstant(m, "SCO", BTPROTO_SCO);
 
 //	/* Socket types */
-//	ADD_INT_CONST(m, SOCK_STREAM);
-//	ADD_INT_CONST(m, SOCK_DGRAM);
-//	ADD_INT_CONST(m, SOCK_RAW);
-//	ADD_INT_CONST(m, SOCK_SEQPACKET);
-    
+//    PyModule_AddIntMacro(m, SOCK_STREAM);
+//    PyModule_AddIntMacro(m, SOCK_DGRAM);
+//    PyModule_AddIntMacro(m, SOCK_RAW);
+//    PyModule_AddIntMacro(m, SOCK_SEQPACKET);
+
 /* HCI Constants */
 
     /* HCI OGF values */
 #ifdef OGF_LINK_CTL
-    ADD_INT_CONST(m, OGF_LINK_CTL);
+    PyModule_AddIntMacro(m, OGF_LINK_CTL);
 #endif
 #ifdef OGF_LINK_POLICY
-    ADD_INT_CONST(m, OGF_LINK_POLICY);
+    PyModule_AddIntMacro(m, OGF_LINK_POLICY);
 #endif
 #ifdef OGF_HOST_CTL
-    ADD_INT_CONST(m, OGF_HOST_CTL);
+    PyModule_AddIntMacro(m, OGF_HOST_CTL);
 #endif
 #ifdef OGF_INFO_PARAM
-    ADD_INT_CONST(m, OGF_INFO_PARAM);
+    PyModule_AddIntMacro(m, OGF_INFO_PARAM);
 #endif
 #ifdef OGF_STATUS_PARAM
-    ADD_INT_CONST(m, OGF_STATUS_PARAM);
+    PyModule_AddIntMacro(m, OGF_STATUS_PARAM);
 #endif
 #ifdef OGF_TESTING_CMD
-    ADD_INT_CONST(m, OGF_TESTING_CMD);
+    PyModule_AddIntMacro(m, OGF_TESTING_CMD);
 #endif
 #ifdef OGF_VENDOR_CMD
-    ADD_INT_CONST(m, OGF_VENDOR_CMD);
+    PyModule_AddIntMacro(m, OGF_VENDOR_CMD);
 #endif
 
     /* HCI OCF values */
 #ifdef OCF_INQUIRY
-    ADD_INT_CONST(m, OCF_INQUIRY);
+    PyModule_AddIntMacro(m, OCF_INQUIRY);
 #endif
 #ifdef OCF_INQUIRY_CANCEL
-    ADD_INT_CONST(m, OCF_INQUIRY_CANCEL);
+    PyModule_AddIntMacro(m, OCF_INQUIRY_CANCEL);
 #endif
 #ifdef OCF_PERIODIC_INQUIRY
-    ADD_INT_CONST(m, OCF_PERIODIC_INQUIRY);
+    PyModule_AddIntMacro(m, OCF_PERIODIC_INQUIRY);
 #endif
 #ifdef OCF_EXIT_PERIODIC_INQUIRY
-    ADD_INT_CONST(m, OCF_EXIT_PERIODIC_INQUIRY);
+    PyModule_AddIntMacro(m, OCF_EXIT_PERIODIC_INQUIRY);
 #endif
 #ifdef OCF_CREATE_CONN
-    ADD_INT_CONST(m, OCF_CREATE_CONN);
+    PyModule_AddIntMacro(m, OCF_CREATE_CONN);
 #endif
 #ifdef CREATE_CONN_CP_SIZE
-    ADD_INT_CONST(m, CREATE_CONN_CP_SIZE);
+    PyModule_AddIntMacro(m, CREATE_CONN_CP_SIZE);
 #endif
 
 #ifdef ACL_PTYPE_MASK
-    ADD_INT_CONST(m, ACL_PTYPE_MASK);
+    PyModule_AddIntMacro(m, ACL_PTYPE_MASK);
 #endif
 
 #ifdef OCF_DISCONNECT
-    ADD_INT_CONST(m, OCF_DISCONNECT);
+    PyModule_AddIntMacro(m, OCF_DISCONNECT);
 #endif
 #ifdef OCF_ADD_SCO
-    ADD_INT_CONST(m, OCF_ADD_SCO);
+    PyModule_AddIntMacro(m, OCF_ADD_SCO);
 #endif
 #ifdef OCF_ACCEPT_CONN_REQ
-    ADD_INT_CONST(m, OCF_ACCEPT_CONN_REQ);
+    PyModule_AddIntMacro(m, OCF_ACCEPT_CONN_REQ);
 #endif
 #ifdef OCF_REJECT_CONN_REQ
-    ADD_INT_CONST(m, OCF_REJECT_CONN_REQ);
+    PyModule_AddIntMacro(m, OCF_REJECT_CONN_REQ);
 #endif
 #ifdef OCF_LINK_KEY_REPLY
-    ADD_INT_CONST(m, OCF_LINK_KEY_REPLY);
+    PyModule_AddIntMacro(m, OCF_LINK_KEY_REPLY);
 #endif
 #ifdef OCF_LINK_KEY_NEG_REPLY
-    ADD_INT_CONST(m, OCF_LINK_KEY_NEG_REPLY);
+    PyModule_AddIntMacro(m, OCF_LINK_KEY_NEG_REPLY);
 #endif
 #ifdef OCF_PIN_CODE_REPLY
-    ADD_INT_CONST(m, OCF_PIN_CODE_REPLY);
+    PyModule_AddIntMacro(m, OCF_PIN_CODE_REPLY);
 #endif
 #ifdef OCF_PIN_CODE_NEG_REPLY
-    ADD_INT_CONST(m, OCF_PIN_CODE_NEG_REPLY);
+    PyModule_AddIntMacro(m, OCF_PIN_CODE_NEG_REPLY);
 #endif
 #ifdef OCF_SET_CONN_PTYPE
-    ADD_INT_CONST(m, OCF_SET_CONN_PTYPE);
+    PyModule_AddIntMacro(m, OCF_SET_CONN_PTYPE);
 #endif
 #ifdef OCF_AUTH_REQUESTED
-    ADD_INT_CONST(m, OCF_AUTH_REQUESTED);
+    PyModule_AddIntMacro(m, OCF_AUTH_REQUESTED);
 #endif
 #ifdef OCF_SET_CONN_ENCRYPT
-    ADD_INT_CONST(m, OCF_SET_CONN_ENCRYPT);
+    PyModule_AddIntMacro(m, OCF_SET_CONN_ENCRYPT);
 #endif
 #ifdef OCF_REMOTE_NAME_REQ
-    ADD_INT_CONST(m, OCF_REMOTE_NAME_REQ);
+    PyModule_AddIntMacro(m, OCF_REMOTE_NAME_REQ);
 #endif
 #ifdef OCF_READ_REMOTE_FEATURES
-    ADD_INT_CONST(m, OCF_READ_REMOTE_FEATURES);
+    PyModule_AddIntMacro(m, OCF_READ_REMOTE_FEATURES);
 #endif
 #ifdef OCF_READ_REMOTE_EXT_FEATURES
-    ADD_INT_CONST(m, OCF_READ_REMOTE_EXT_FEATURES);
+    PyModule_AddIntMacro(m, OCF_READ_REMOTE_EXT_FEATURES);
 #endif
 #ifdef OCF_READ_REMOTE_VERSION
-    ADD_INT_CONST(m, OCF_READ_REMOTE_VERSION);
+    PyModule_AddIntMacro(m, OCF_READ_REMOTE_VERSION);
 #endif
 #ifdef OCF_READ_CLOCK_OFFSET
-    ADD_INT_CONST(m, OCF_READ_CLOCK_OFFSET);
+    PyModule_AddIntMacro(m, OCF_READ_CLOCK_OFFSET);
 #endif
 #ifdef OCF_READ_CLOCK_OFFSET
-    ADD_INT_CONST(m, OCF_READ_CLOCK);
+    PyModule_AddIntMacro(m, OCF_READ_CLOCK);
 #endif
 #ifdef OCF_IO_CAPABILITY_REPLY
-    ADD_INT_CONST(m, OCF_IO_CAPABILITY_REPLY);
+    PyModule_AddIntMacro(m, OCF_IO_CAPABILITY_REPLY);
 #endif
 #ifdef OCF_USER_CONFIRM_REPLY
-    ADD_INT_CONST(m, OCF_USER_CONFIRM_REPLY);
+    PyModule_AddIntMacro(m, OCF_USER_CONFIRM_REPLY);
 #endif
 #ifdef OCF_HOLD_MODE
-    ADD_INT_CONST(m, OCF_HOLD_MODE);
+    PyModule_AddIntMacro(m, OCF_HOLD_MODE);
 #endif
 #ifdef OCF_SNIFF_MODE
-    ADD_INT_CONST(m, OCF_SNIFF_MODE);
+    PyModule_AddIntMacro(m, OCF_SNIFF_MODE);
 #endif
 #ifdef OCF_EXIT_SNIFF_MODE
-    ADD_INT_CONST(m, OCF_EXIT_SNIFF_MODE);
+    PyModule_AddIntMacro(m, OCF_EXIT_SNIFF_MODE);
 #endif
 #ifdef OCF_PARK_MODE
-    ADD_INT_CONST(m, OCF_PARK_MODE);
+    PyModule_AddIntMacro(m, OCF_PARK_MODE);
 #endif
 #ifdef OCF_EXIT_PARK_MODE
-    ADD_INT_CONST(m, OCF_EXIT_PARK_MODE);
+    PyModule_AddIntMacro(m, OCF_EXIT_PARK_MODE);
 #endif
 #ifdef OCF_QOS_SETUP
-    ADD_INT_CONST(m, OCF_QOS_SETUP);
+    PyModule_AddIntMacro(m, OCF_QOS_SETUP);
 #endif
 #ifdef OCF_ROLE_DISCOVERY
-    ADD_INT_CONST(m, OCF_ROLE_DISCOVERY);
+    PyModule_AddIntMacro(m, OCF_ROLE_DISCOVERY);
 #endif
 #ifdef OCF_SWITCH_ROLE
-    ADD_INT_CONST(m, OCF_SWITCH_ROLE);
+    PyModule_AddIntMacro(m, OCF_SWITCH_ROLE);
 #endif
 #ifdef OCF_READ_LINK_POLICY
-    ADD_INT_CONST(m, OCF_READ_LINK_POLICY);
+    PyModule_AddIntMacro(m, OCF_READ_LINK_POLICY);
 #endif
 #ifdef OCF_WRITE_LINK_POLICY
-    ADD_INT_CONST(m, OCF_WRITE_LINK_POLICY);
+    PyModule_AddIntMacro(m, OCF_WRITE_LINK_POLICY);
 #endif
 #ifdef OCF_RESET
-    ADD_INT_CONST(m, OCF_RESET);
+    PyModule_AddIntMacro(m, OCF_RESET);
 #endif
 #ifdef OCF_SET_EVENT_MASK
-    ADD_INT_CONST(m, OCF_SET_EVENT_MASK);
+    PyModule_AddIntMacro(m, OCF_SET_EVENT_MASK);
 #endif
 #ifdef OCF_SET_EVENT_FLT
-    ADD_INT_CONST(m, OCF_SET_EVENT_FLT);
+    PyModule_AddIntMacro(m, OCF_SET_EVENT_FLT);
 #endif
 #ifdef OCF_CHANGE_LOCAL_NAME
-    ADD_INT_CONST(m, OCF_CHANGE_LOCAL_NAME);
+    PyModule_AddIntMacro(m, OCF_CHANGE_LOCAL_NAME);
 #endif
 #ifdef OCF_READ_LOCAL_NAME
-    ADD_INT_CONST(m, OCF_READ_LOCAL_NAME);
+    PyModule_AddIntMacro(m, OCF_READ_LOCAL_NAME);
 #endif
 #ifdef OCF_WRITE_CA_TIMEOUT
-    ADD_INT_CONST(m, OCF_WRITE_CA_TIMEOUT);
+    PyModule_AddIntMacro(m, OCF_WRITE_CA_TIMEOUT);
 #endif
 #ifdef OCF_WRITE_PG_TIMEOUT
-    ADD_INT_CONST(m, OCF_WRITE_PG_TIMEOUT);
+    PyModule_AddIntMacro(m, OCF_WRITE_PG_TIMEOUT);
 #endif
 #ifdef OCF_READ_PAGE_TIMEOUT
-    ADD_INT_CONST(m, OCF_READ_PAGE_TIMEOUT);
+    PyModule_AddIntMacro(m, OCF_READ_PAGE_TIMEOUT);
 #endif
 #ifdef OCF_WRITE_PAGE_TIMEOUT
-    ADD_INT_CONST(m, OCF_WRITE_PAGE_TIMEOUT);
+    PyModule_AddIntMacro(m, OCF_WRITE_PAGE_TIMEOUT);
 #endif
 #ifdef OCF_READ_SCAN_ENABLE
-    ADD_INT_CONST(m, OCF_READ_SCAN_ENABLE);
+    PyModule_AddIntMacro(m, OCF_READ_SCAN_ENABLE);
 #endif
 #ifdef OCF_WRITE_SCAN_ENABLE
-    ADD_INT_CONST(m, OCF_WRITE_SCAN_ENABLE);
+    PyModule_AddIntMacro(m, OCF_WRITE_SCAN_ENABLE);
 #endif
 #ifdef OCF_READ_PAGE_ACTIVITY
-    ADD_INT_CONST(m, OCF_READ_PAGE_ACTIVITY);
+    PyModule_AddIntMacro(m, OCF_READ_PAGE_ACTIVITY);
 #endif
 #ifdef OCF_WRITE_PAGE_ACTIVITY
-    ADD_INT_CONST(m, OCF_WRITE_PAGE_ACTIVITY);
+    PyModule_AddIntMacro(m, OCF_WRITE_PAGE_ACTIVITY);
 #endif
 #ifdef OCF_READ_INQ_ACTIVITY
-    ADD_INT_CONST(m, OCF_READ_INQ_ACTIVITY);
+    PyModule_AddIntMacro(m, OCF_READ_INQ_ACTIVITY);
 #endif
 #ifdef OCF_WRITE_INQ_ACTIVITY
-    ADD_INT_CONST(m, OCF_WRITE_INQ_ACTIVITY);
+    PyModule_AddIntMacro(m, OCF_WRITE_INQ_ACTIVITY);
 #endif
 #ifdef OCF_READ_AUTH_ENABLE
-    ADD_INT_CONST(m, OCF_READ_AUTH_ENABLE);
+    PyModule_AddIntMacro(m, OCF_READ_AUTH_ENABLE);
 #endif
 #ifdef OCF_WRITE_AUTH_ENABLE
-    ADD_INT_CONST(m, OCF_WRITE_AUTH_ENABLE);
+    PyModule_AddIntMacro(m, OCF_WRITE_AUTH_ENABLE);
 #endif
 #ifdef OCF_READ_ENCRYPT_MODE
-    ADD_INT_CONST(m, OCF_READ_ENCRYPT_MODE);
+    PyModule_AddIntMacro(m, OCF_READ_ENCRYPT_MODE);
 #endif
 #ifdef OCF_WRITE_ENCRYPT_MODE
-    ADD_INT_CONST(m, OCF_WRITE_ENCRYPT_MODE);
+    PyModule_AddIntMacro(m, OCF_WRITE_ENCRYPT_MODE);
 #endif
 #ifdef OCF_READ_CLASS_OF_DEV
-    ADD_INT_CONST(m, OCF_READ_CLASS_OF_DEV);
+    PyModule_AddIntMacro(m, OCF_READ_CLASS_OF_DEV);
 #endif
 #ifdef OCF_WRITE_CLASS_OF_DEV
-    ADD_INT_CONST(m, OCF_WRITE_CLASS_OF_DEV);
+    PyModule_AddIntMacro(m, OCF_WRITE_CLASS_OF_DEV);
 #endif
 #ifdef OCF_READ_VOICE_SETTING
-    ADD_INT_CONST(m, OCF_READ_VOICE_SETTING);
+    PyModule_AddIntMacro(m, OCF_READ_VOICE_SETTING);
 #endif
 #ifdef OCF_WRITE_VOICE_SETTING
-    ADD_INT_CONST(m, OCF_WRITE_VOICE_SETTING);
+    PyModule_AddIntMacro(m, OCF_WRITE_VOICE_SETTING);
 #endif
 #ifdef OCF_READ_TRANSMIT_POWER_LEVEL
-    ADD_INT_CONST(m, OCF_READ_TRANSMIT_POWER_LEVEL);
+    PyModule_AddIntMacro(m, OCF_READ_TRANSMIT_POWER_LEVEL);
 #endif
 #ifdef OCF_HOST_BUFFER_SIZE
-    ADD_INT_CONST(m, OCF_HOST_BUFFER_SIZE);
+    PyModule_AddIntMacro(m, OCF_HOST_BUFFER_SIZE);
 #endif
 #ifdef OCF_READ_LINK_SUPERVISION_TIMEOUT
-    ADD_INT_CONST(m, OCF_READ_LINK_SUPERVISION_TIMEOUT);
+    PyModule_AddIntMacro(m, OCF_READ_LINK_SUPERVISION_TIMEOUT);
 #endif
 #ifdef OCF_WRITE_LINK_SUPERVISION_TIMEOUT
-    ADD_INT_CONST(m, OCF_WRITE_LINK_SUPERVISION_TIMEOUT);
+    PyModule_AddIntMacro(m, OCF_WRITE_LINK_SUPERVISION_TIMEOUT);
 #endif
 #ifdef OCF_READ_CURRENT_IAC_LAP
-    ADD_INT_CONST(m, OCF_READ_CURRENT_IAC_LAP);
+    PyModule_AddIntMacro(m, OCF_READ_CURRENT_IAC_LAP);
 #endif
 #ifdef OCF_WRITE_CURRENT_IAC_LAP
-    ADD_INT_CONST(m, OCF_WRITE_CURRENT_IAC_LAP);
+    PyModule_AddIntMacro(m, OCF_WRITE_CURRENT_IAC_LAP);
 #endif
 #ifdef OCF_READ_INQUIRY_MODE
-    ADD_INT_CONST(m, OCF_READ_INQUIRY_MODE);
+    PyModule_AddIntMacro(m, OCF_READ_INQUIRY_MODE);
 #endif
 #ifdef OCF_WRITE_INQUIRY_MODE
-    ADD_INT_CONST(m, OCF_WRITE_INQUIRY_MODE);
+    PyModule_AddIntMacro(m, OCF_WRITE_INQUIRY_MODE);
 #endif
 #ifdef OCF_READ_AFH_MODE
-    ADD_INT_CONST(m, OCF_READ_AFH_MODE);
+    PyModule_AddIntMacro(m, OCF_READ_AFH_MODE);
 #endif
 #ifdef OCF_WRITE_AFH_MODE
-    ADD_INT_CONST(m, OCF_WRITE_AFH_MODE);
+    PyModule_AddIntMacro(m, OCF_WRITE_AFH_MODE);
 #endif
 
 #ifdef OCF_WRITE_EXT_INQUIRY_RESPONSE
-    ADD_INT_CONST(m, OCF_WRITE_EXT_INQUIRY_RESPONSE);
+    PyModule_AddIntMacro(m, OCF_WRITE_EXT_INQUIRY_RESPONSE);
 #endif
 
 #ifdef OCF_WRITE_SIMPLE_PAIRING_MODE
-    ADD_INT_CONST(m, OCF_WRITE_SIMPLE_PAIRING_MODE);
+    PyModule_AddIntMacro(m, OCF_WRITE_SIMPLE_PAIRING_MODE);
 #endif
 
 #ifdef OCF_READ_LOCAL_VERSION
-    ADD_INT_CONST(m, OCF_READ_LOCAL_VERSION);
+    PyModule_AddIntMacro(m, OCF_READ_LOCAL_VERSION);
 #endif
 #ifdef OCF_READ_LOCAL_FEATURES
-    ADD_INT_CONST(m, OCF_READ_LOCAL_FEATURES);
+    PyModule_AddIntMacro(m, OCF_READ_LOCAL_FEATURES);
 #endif
 #ifdef OCF_READ_BUFFER_SIZE
-    ADD_INT_CONST(m, OCF_READ_BUFFER_SIZE);
+    PyModule_AddIntMacro(m, OCF_READ_BUFFER_SIZE);
 #endif
 #ifdef OCF_READ_BD_ADDR
-    ADD_INT_CONST(m, OCF_READ_BD_ADDR);
+    PyModule_AddIntMacro(m, OCF_READ_BD_ADDR);
 #endif
 #ifdef OCF_READ_FAILED_CONTACT_COUNTER
-    ADD_INT_CONST(m, OCF_READ_FAILED_CONTACT_COUNTER);
+    PyModule_AddIntMacro(m, OCF_READ_FAILED_CONTACT_COUNTER);
 #endif
 #ifdef OCF_RESET_FAILED_CONTACT_COUNTER
-    ADD_INT_CONST(m, OCF_RESET_FAILED_CONTACT_COUNTER);
+    PyModule_AddIntMacro(m, OCF_RESET_FAILED_CONTACT_COUNTER);
 #endif
 #ifdef OCF_GET_LINK_QUALITY
-    ADD_INT_CONST(m, OCF_GET_LINK_QUALITY);
+    PyModule_AddIntMacro(m, OCF_GET_LINK_QUALITY);
 #endif
 #ifdef OCF_READ_RSSI
-    ADD_INT_CONST(m, OCF_READ_RSSI);
+    PyModule_AddIntMacro(m, OCF_READ_RSSI);
 #endif
 #ifdef OCF_READ_AFH_MAP
-    ADD_INT_CONST(m, OCF_READ_AFH_MAP);
+    PyModule_AddIntMacro(m, OCF_READ_AFH_MAP);
 #endif
 
     /* HCI events */
 #ifdef EVT_INQUIRY_COMPLETE
-    ADD_INT_CONST(m, EVT_INQUIRY_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_INQUIRY_COMPLETE);
 #endif
 #ifdef EVT_INQUIRY_RESULT
-    ADD_INT_CONST(m, EVT_INQUIRY_RESULT);
+    PyModule_AddIntMacro(m, EVT_INQUIRY_RESULT);
 #endif
 #ifdef EVT_CONN_COMPLETE
-    ADD_INT_CONST(m, EVT_CONN_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_CONN_COMPLETE);
 #endif
 #ifdef EVT_CONN_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_CONN_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_CONN_COMPLETE_SIZE);
 #endif
 #ifdef EVT_CONN_REQUEST
-    ADD_INT_CONST(m, EVT_CONN_REQUEST);
+    PyModule_AddIntMacro(m, EVT_CONN_REQUEST);
 #endif
 #ifdef EVT_CONN_REQUEST_SIZE
-    ADD_INT_CONST(m, EVT_CONN_REQUEST_SIZE);
+    PyModule_AddIntMacro(m, EVT_CONN_REQUEST_SIZE);
 #endif
 #ifdef EVT_DISCONN_COMPLETE
-    ADD_INT_CONST(m, EVT_DISCONN_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_DISCONN_COMPLETE);
 #endif
 #ifdef EVT_DISCONN_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_DISCONN_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_DISCONN_COMPLETE_SIZE);
 #endif
 #ifdef EVT_AUTH_COMPLETE
-    ADD_INT_CONST(m, EVT_AUTH_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_AUTH_COMPLETE);
 #endif
 #ifdef EVT_AUTH_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_AUTH_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_AUTH_COMPLETE_SIZE);
 #endif
 #ifdef EVT_REMOTE_NAME_REQ_COMPLETE
-    ADD_INT_CONST(m, EVT_REMOTE_NAME_REQ_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_REMOTE_NAME_REQ_COMPLETE);
 #endif
 #ifdef EVT_REMOTE_NAME_REQ_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_REMOTE_NAME_REQ_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_REMOTE_NAME_REQ_COMPLETE_SIZE);
 #endif
 #ifdef EVT_ENCRYPT_CHANGE
-    ADD_INT_CONST(m, EVT_ENCRYPT_CHANGE);
+    PyModule_AddIntMacro(m, EVT_ENCRYPT_CHANGE);
 #endif
 #ifdef EVT_ENCRYPT_CHANGE_SIZE
-    ADD_INT_CONST(m, EVT_ENCRYPT_CHANGE_SIZE);
+    PyModule_AddIntMacro(m, EVT_ENCRYPT_CHANGE_SIZE);
 #endif
 #ifdef EVT_READ_REMOTE_FEATURES_COMPLETE
-    ADD_INT_CONST(m, EVT_READ_REMOTE_FEATURES_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_READ_REMOTE_FEATURES_COMPLETE);
 #endif
 #ifdef EVT_READ_REMOTE_FEATURES_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_READ_REMOTE_FEATURES_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_READ_REMOTE_FEATURES_COMPLETE_SIZE);
 #endif
 #ifdef EVT_READ_REMOTE_VERSION_COMPLETE
-    ADD_INT_CONST(m, EVT_READ_REMOTE_VERSION_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_READ_REMOTE_VERSION_COMPLETE);
 #endif
 #ifdef EVT_READ_REMOTE_VERSION_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_READ_REMOTE_VERSION_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_READ_REMOTE_VERSION_COMPLETE_SIZE);
 #endif
 #ifdef EVT_QOS_SETUP_COMPLETE
-    ADD_INT_CONST(m, EVT_QOS_SETUP_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_QOS_SETUP_COMPLETE);
 #endif
 #ifdef EVT_QOS_SETUP_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_QOS_SETUP_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_QOS_SETUP_COMPLETE_SIZE);
 #endif
 #ifdef EVT_CMD_COMPLETE
-    ADD_INT_CONST(m, EVT_CMD_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_CMD_COMPLETE);
 #endif
 #ifdef EVT_CMD_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_CMD_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_CMD_COMPLETE_SIZE);
 #endif
 #ifdef EVT_CMD_STATUS
-    ADD_INT_CONST(m, EVT_CMD_STATUS);
+    PyModule_AddIntMacro(m, EVT_CMD_STATUS);
 #endif
 #ifdef EVT_CMD_STATUS_SIZE
-    ADD_INT_CONST(m, EVT_CMD_STATUS_SIZE);
+    PyModule_AddIntMacro(m, EVT_CMD_STATUS_SIZE);
 #endif
 #ifdef EVT_ROLE_CHANGE
-    ADD_INT_CONST(m, EVT_ROLE_CHANGE);
+    PyModule_AddIntMacro(m, EVT_ROLE_CHANGE);
 #endif
 #ifdef EVT_ROLE_CHANGE_SIZE
-    ADD_INT_CONST(m, EVT_ROLE_CHANGE_SIZE);
+    PyModule_AddIntMacro(m, EVT_ROLE_CHANGE_SIZE);
 #endif
 #ifdef EVT_NUM_COMP_PKTS
-    ADD_INT_CONST(m, EVT_NUM_COMP_PKTS);
+    PyModule_AddIntMacro(m, EVT_NUM_COMP_PKTS);
 #endif
 #ifdef EVT_NUM_COMP_PKTS_SIZE
-    ADD_INT_CONST(m, EVT_NUM_COMP_PKTS_SIZE);
+    PyModule_AddIntMacro(m, EVT_NUM_COMP_PKTS_SIZE);
 #endif
 #ifdef EVT_MODE_CHANGE
-    ADD_INT_CONST(m, EVT_MODE_CHANGE);
+    PyModule_AddIntMacro(m, EVT_MODE_CHANGE);
 #endif
 #ifdef EVT_MODE_CHANGE_SIZE
-    ADD_INT_CONST(m, EVT_MODE_CHANGE_SIZE);
+    PyModule_AddIntMacro(m, EVT_MODE_CHANGE_SIZE);
 #endif
 #ifdef EVT_PIN_CODE_REQ
-    ADD_INT_CONST(m, EVT_PIN_CODE_REQ);
+    PyModule_AddIntMacro(m, EVT_PIN_CODE_REQ);
 #endif
 #ifdef EVT_PIN_CODE_REQ_SIZE
-    ADD_INT_CONST(m, EVT_PIN_CODE_REQ_SIZE);
+    PyModule_AddIntMacro(m, EVT_PIN_CODE_REQ_SIZE);
 #endif
 #ifdef EVT_LINK_KEY_REQ
-    ADD_INT_CONST(m, EVT_LINK_KEY_REQ);
+    PyModule_AddIntMacro(m, EVT_LINK_KEY_REQ);
 #endif
 #ifdef EVT_LINK_KEY_REQ_SIZE
-    ADD_INT_CONST(m, EVT_LINK_KEY_REQ_SIZE);
+    PyModule_AddIntMacro(m, EVT_LINK_KEY_REQ_SIZE);
 #endif
 #ifdef EVT_LINK_KEY_NOTIFY
-    ADD_INT_CONST(m, EVT_LINK_KEY_NOTIFY);
+    PyModule_AddIntMacro(m, EVT_LINK_KEY_NOTIFY);
 #endif
 #ifdef EVT_LINK_KEY_NOTIFY_SIZE
-    ADD_INT_CONST(m, EVT_LINK_KEY_NOTIFY_SIZE);
+    PyModule_AddIntMacro(m, EVT_LINK_KEY_NOTIFY_SIZE);
 #endif
 #ifdef EVT_MAX_SLOTS_CHANGE
-    ADD_INT_CONST(m, EVT_MAX_SLOTS_CHANGE);
+    PyModule_AddIntMacro(m, EVT_MAX_SLOTS_CHANGE);
 #endif
 #ifdef EVT_READ_CLOCK_OFFSET_COMPLETE
-    ADD_INT_CONST(m, EVT_READ_CLOCK_OFFSET_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_READ_CLOCK_OFFSET_COMPLETE);
 #endif
 #ifdef EVT_READ_CLOCK_OFFSET_COMPLETE_SIZE
-    ADD_INT_CONST(m, EVT_READ_CLOCK_OFFSET_COMPLETE_SIZE);
+    PyModule_AddIntMacro(m, EVT_READ_CLOCK_OFFSET_COMPLETE_SIZE);
 #endif
 #ifdef EVT_CONN_PTYPE_CHANGED
-    ADD_INT_CONST(m, EVT_CONN_PTYPE_CHANGED);
+    PyModule_AddIntMacro(m, EVT_CONN_PTYPE_CHANGED);
 #endif
 #ifdef EVT_CONN_PTYPE_CHANGED_SIZE
-    ADD_INT_CONST(m, EVT_CONN_PTYPE_CHANGED_SIZE);
+    PyModule_AddIntMacro(m, EVT_CONN_PTYPE_CHANGED_SIZE);
 #endif
 #ifdef EVT_QOS_VIOLATION
-    ADD_INT_CONST(m, EVT_QOS_VIOLATION);
+    PyModule_AddIntMacro(m, EVT_QOS_VIOLATION);
 #endif
 #ifdef EVT_QOS_VIOLATION_SIZE
-    ADD_INT_CONST(m, EVT_QOS_VIOLATION_SIZE);
+    PyModule_AddIntMacro(m, EVT_QOS_VIOLATION_SIZE);
 #endif
 #ifdef EVT_PSCAN_REP_MODE_CHANGE
-    ADD_INT_CONST(m,EVT_PSCAN_REP_MODE_CHANGE);
+    PyModule_AddIntMacro(m,EVT_PSCAN_REP_MODE_CHANGE);
 #endif
 #ifdef EVT_FLOW_SPEC_COMPLETE
-    ADD_INT_CONST(m,EVT_FLOW_SPEC_COMPLETE);
+    PyModule_AddIntMacro(m,EVT_FLOW_SPEC_COMPLETE);
 #endif
 #ifdef EVT_FLOW_SPEC_MODIFY_COMPLETE
-    ADD_INT_CONST(m,EVT_FLOW_SPEC_MODIFY_COMPLETE);
+    PyModule_AddIntMacro(m,EVT_FLOW_SPEC_MODIFY_COMPLETE);
 #endif
 #ifdef EVT_INQUIRY_RESULT_WITH_RSSI
-    ADD_INT_CONST(m, EVT_INQUIRY_RESULT_WITH_RSSI);
+    PyModule_AddIntMacro(m, EVT_INQUIRY_RESULT_WITH_RSSI);
 #endif
 #ifdef EVT_READ_REMOTE_EXT_FEATURES_COMPLETE
-    ADD_INT_CONST(m, EVT_READ_REMOTE_EXT_FEATURES_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_READ_REMOTE_EXT_FEATURES_COMPLETE);
 #endif
 #ifdef EVT_EXTENDED_INQUIRY_RESULT
-    ADD_INT_CONST(m, EVT_EXTENDED_INQUIRY_RESULT);
+    PyModule_AddIntMacro(m, EVT_EXTENDED_INQUIRY_RESULT);
     PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 1);
 #else
     PyModule_AddIntConstant(m, "HAVE_EVT_EXTENDED_INQUIRY_RESULT", 0);
 #endif
 #ifdef EVT_DISCONNECT_LOGICAL_LINK_COMPLETE
-    ADD_INT_CONST(m, EVT_DISCONNECT_LOGICAL_LINK_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_DISCONNECT_LOGICAL_LINK_COMPLETE);
 #endif
 #ifdef EVT_IO_CAPABILITY_REQUEST
-    ADD_INT_CONST(m, EVT_IO_CAPABILITY_REQUEST);
+    PyModule_AddIntMacro(m, EVT_IO_CAPABILITY_REQUEST);
 #endif
 
 #ifdef EVT_IO_CAPABILITY_RESPONSE
-    ADD_INT_CONST(m, EVT_IO_CAPABILITY_RESPONSE);
+    PyModule_AddIntMacro(m, EVT_IO_CAPABILITY_RESPONSE);
 #endif
 
 #ifdef EVT_USER_CONFIRM_REQUEST
-    ADD_INT_CONST(m, EVT_USER_CONFIRM_REQUEST);
+    PyModule_AddIntMacro(m, EVT_USER_CONFIRM_REQUEST);
 #endif
 
 #ifdef EVT_SIMPLE_PAIRING_COMPLETE
-    ADD_INT_CONST(m, EVT_SIMPLE_PAIRING_COMPLETE);
+    PyModule_AddIntMacro(m, EVT_SIMPLE_PAIRING_COMPLETE);
 #endif
 #ifdef EVT_TESTING
-    ADD_INT_CONST(m, EVT_TESTING);
+    PyModule_AddIntMacro(m, EVT_TESTING);
 #endif
 #ifdef EVT_VENDOR
-    ADD_INT_CONST(m, EVT_VENDOR);
+    PyModule_AddIntMacro(m, EVT_VENDOR);
 #endif
 #ifdef EVT_STACK_INTERNAL
-    ADD_INT_CONST(m, EVT_STACK_INTERNAL);
+    PyModule_AddIntMacro(m, EVT_STACK_INTERNAL);
 #endif
 #ifdef EVT_STACK_INTERNAL_SIZE
-    ADD_INT_CONST(m, EVT_STACK_INTERNAL_SIZE);
+    PyModule_AddIntMacro(m, EVT_STACK_INTERNAL_SIZE);
 #endif
 #ifdef EVT_SI_DEVICE
-    ADD_INT_CONST(m, EVT_SI_DEVICE);
+    PyModule_AddIntMacro(m, EVT_SI_DEVICE);
 #endif
 #ifdef EVT_SI_DEVICE_SIZE
-    ADD_INT_CONST(m, EVT_SI_DEVICE_SIZE);
+    PyModule_AddIntMacro(m, EVT_SI_DEVICE_SIZE);
 #endif
 #ifdef EVT_SI_SECURITY
-    ADD_INT_CONST(m, EVT_SI_SECURITY);
+    PyModule_AddIntMacro(m, EVT_SI_SECURITY);
 #endif
 #ifdef EVT_NUMBER_COMPLETED_BLOCKS
-    ADD_INT_CONST(m, EVT_NUMBER_COMPLETED_BLOCKS);
+    PyModule_AddIntMacro(m, EVT_NUMBER_COMPLETED_BLOCKS);
 #endif
     /* HCI packet types */
 #ifdef HCI_COMMAND_PKT
-    ADD_INT_CONST(m, HCI_COMMAND_PKT);
+    PyModule_AddIntMacro(m, HCI_COMMAND_PKT);
 #endif
 #ifdef HCI_ACLDATA_PKT
-    ADD_INT_CONST(m, HCI_ACLDATA_PKT);
+    PyModule_AddIntMacro(m, HCI_ACLDATA_PKT);
 #endif
 #ifdef HCI_SCODATA_PKT
-    ADD_INT_CONST(m, HCI_SCODATA_PKT);
+    PyModule_AddIntMacro(m, HCI_SCODATA_PKT);
 #endif
 #ifdef HCI_EVENT_PKT
-    ADD_INT_CONST(m, HCI_EVENT_PKT);
+    PyModule_AddIntMacro(m, HCI_EVENT_PKT);
 #endif
 #ifdef HCI_UNKNOWN_PKT
-    ADD_INT_CONST(m, HCI_UNKNOWN_PKT);
+    PyModule_AddIntMacro(m, HCI_UNKNOWN_PKT);
 #endif
 
     /* socket options */
 #ifdef	SO_DEBUG
-	ADD_INT_CONST(m, SO_DEBUG);
+    PyModule_AddIntMacro(m, SO_DEBUG);
 #endif
 #ifdef	SO_ACCEPTCONN
-	ADD_INT_CONST(m, SO_ACCEPTCONN);
+    PyModule_AddIntMacro(m, SO_ACCEPTCONN);
 #endif
 #ifdef	SO_REUSEADDR
-	ADD_INT_CONST(m, SO_REUSEADDR);
+    PyModule_AddIntMacro(m, SO_REUSEADDR);
 #endif
 #ifdef	SO_KEEPALIVE
-	ADD_INT_CONST(m, SO_KEEPALIVE);
+    PyModule_AddIntMacro(m, SO_KEEPALIVE);
 #endif
 #ifdef	SO_DONTROUTE
-	ADD_INT_CONST(m, SO_DONTROUTE);
+    PyModule_AddIntMacro(m, SO_DONTROUTE);
 #endif
 #ifdef	SO_BROADCAST
-	ADD_INT_CONST(m, SO_BROADCAST);
+    PyModule_AddIntMacro(m, SO_BROADCAST);
 #endif
 #ifdef	SO_USELOOPBACK
-	ADD_INT_CONST(m, SO_USELOOPBACK);
+    PyModule_AddIntMacro(m, SO_USELOOPBACK);
 #endif
 #ifdef	SO_LINGER
-	ADD_INT_CONST(m, SO_LINGER);
+    PyModule_AddIntMacro(m, SO_LINGER);
 #endif
 #ifdef	SO_OOBINLINE
-	ADD_INT_CONST(m, SO_OOBINLINE);
+    PyModule_AddIntMacro(m, SO_OOBINLINE);
 #endif
 #ifdef	SO_REUSEPORT
-	ADD_INT_CONST(m, SO_REUSEPORT);
+    PyModule_AddIntMacro(m, SO_REUSEPORT);
 #endif
 #ifdef	SO_SNDBUF
-	ADD_INT_CONST(m, SO_SNDBUF);
+    PyModule_AddIntMacro(m, SO_SNDBUF);
 #endif
 #ifdef	SO_RCVBUF
-	ADD_INT_CONST(m, SO_RCVBUF);
+    PyModule_AddIntMacro(m, SO_RCVBUF);
 #endif
 #ifdef	SO_SNDLOWAT
-	ADD_INT_CONST(m, SO_SNDLOWAT);
+    PyModule_AddIntMacro(m, SO_SNDLOWAT);
 #endif
 #ifdef	SO_RCVLOWAT
-	ADD_INT_CONST(m, SO_RCVLOWAT);
+    PyModule_AddIntMacro(m, SO_RCVLOWAT);
 #endif
 #ifdef	SO_SNDTIMEO
-	ADD_INT_CONST(m, SO_SNDTIMEO);
+    PyModule_AddIntMacro(m, SO_SNDTIMEO);
 #endif
 #ifdef	SO_RCVTIMEO
-	ADD_INT_CONST(m, SO_RCVTIMEO);
+    PyModule_AddIntMacro(m, SO_RCVTIMEO);
 #endif
 #ifdef	SO_ERROR
-	ADD_INT_CONST(m, SO_ERROR);
+    PyModule_AddIntMacro(m, SO_ERROR);
 #endif
 #ifdef	SO_TYPE
-	ADD_INT_CONST(m, SO_TYPE);
+    PyModule_AddIntMacro(m, SO_TYPE);
 #endif
 
 	/* Maximum number of connections for "listen" */
 #ifdef	SOMAXCONN
-	ADD_INT_CONST(m, SOMAXCONN);
+    PyModule_AddIntMacro(m, SOMAXCONN);
 #else
-	ADD_INT_CONST(m, SOMAXCONN);
+    PyModule_AddIntMacro(m, SOMAXCONN);
 #endif
 
 	/* Flags for send, recv */
 #ifdef	MSG_OOB
-	ADD_INT_CONST(m, MSG_OOB);
+    PyModule_AddIntMacro(m, MSG_OOB);
 #endif
 #ifdef	MSG_PEEK
-	ADD_INT_CONST(m, MSG_PEEK);
+    PyModule_AddIntMacro(m, MSG_PEEK);
 #endif
 #ifdef	MSG_DONTROUTE
-	ADD_INT_CONST(m, MSG_DONTROUTE);
+    PyModule_AddIntMacro(m, MSG_DONTROUTE);
 #endif
 #ifdef	MSG_DONTWAIT
-	ADD_INT_CONST(m, MSG_DONTWAIT);
+    PyModule_AddIntMacro(m, MSG_DONTWAIT);
 #endif
 #ifdef	MSG_EOR
-	ADD_INT_CONST(m, MSG_EOR);
+    PyModule_AddIntMacro(m, MSG_EOR);
 #endif
 #ifdef	MSG_TRUNC
-	ADD_INT_CONST(m, MSG_TRUNC);
+    PyModule_AddIntMacro(m, MSG_TRUNC);
 #endif
 #ifdef	MSG_CTRUNC
-	ADD_INT_CONST(m, MSG_CTRUNC);
+    PyModule_AddIntMacro(m, MSG_CTRUNC);
 #endif
 #ifdef	MSG_WAITALL
-	ADD_INT_CONST(m, MSG_WAITALL);
+    PyModule_AddIntMacro(m, MSG_WAITALL);
 #endif
 #ifdef	MSG_BTAG
-	ADD_INT_CONST(m, MSG_BTAG);
+    PyModule_AddIntMacro(m, MSG_BTAG);
 #endif
 #ifdef	MSG_ETAG
-	ADD_INT_CONST(m, MSG_ETAG);
+    PyModule_AddIntMacro(m, MSG_ETAG);
 #endif
 
         /* Size of inquiry info */
 #ifdef  INQUIRY_INFO_WITH_RSSI_SIZE
-        ADD_INT_CONST(m, INQUIRY_INFO_WITH_RSSI_SIZE);
+    PyModule_AddIntMacro(m, INQUIRY_INFO_WITH_RSSI_SIZE);
 #endif
 #ifdef  EXTENDED_INQUIRY_INFO_SIZE
-        ADD_INT_CONST(m, EXTENDED_INQUIRY_INFO_SIZE);
+    PyModule_AddIntMacro(m, EXTENDED_INQUIRY_INFO_SIZE);
 #endif
 
 	/* Protocol level and numbers, usable for [gs]etsockopt */
-	ADD_INT_CONST(m, SOL_SOCKET);
-	ADD_INT_CONST(m, SOL_L2CAP);
-	ADD_INT_CONST(m, SOL_RFCOMM);
-	ADD_INT_CONST(m, SOL_SCO);
-	ADD_INT_CONST(m, SCO_OPTIONS);
-	ADD_INT_CONST(m, L2CAP_OPTIONS);
+    PyModule_AddIntMacro(m, SOL_SOCKET);
+    PyModule_AddIntMacro(m, SOL_L2CAP);
+    PyModule_AddIntMacro(m, SOL_RFCOMM);
+    PyModule_AddIntMacro(m, SOL_SCO);
+    PyModule_AddIntMacro(m, SCO_OPTIONS);
+    PyModule_AddIntMacro(m, L2CAP_OPTIONS);
 
     /* special channels to bind() */
-    ADD_INT_CONST(m, HCI_CHANNEL_CONTROL);
-    ADD_INT_CONST(m, HCI_CHANNEL_USER);
-    ADD_INT_CONST(m, HCI_DEV_NONE);
+    PyModule_AddIntMacro(m, HCI_CHANNEL_CONTROL);
+    PyModule_AddIntMacro(m, HCI_CHANNEL_USER);
+    PyModule_AddIntMacro(m, HCI_DEV_NONE);
 
     /* ioctl */
-    ADD_INT_CONST(m, HCIDEVUP);
-    ADD_INT_CONST(m, HCIDEVDOWN);
-    ADD_INT_CONST(m, HCIDEVRESET);
-    ADD_INT_CONST(m, HCIDEVRESTAT);
-    ADD_INT_CONST(m, HCIGETDEVLIST);
-    ADD_INT_CONST(m, HCIGETDEVINFO);
-    ADD_INT_CONST(m, HCIGETCONNLIST);
-    ADD_INT_CONST(m, HCIGETCONNINFO);
-    ADD_INT_CONST(m, HCISETRAW);
-    ADD_INT_CONST(m, HCISETSCAN);
-    ADD_INT_CONST(m, HCISETAUTH);
-    ADD_INT_CONST(m, HCISETENCRYPT);
-    ADD_INT_CONST(m, HCISETPTYPE);
-    ADD_INT_CONST(m, HCISETLINKPOL);
-    ADD_INT_CONST(m, HCISETLINKMODE);
-    ADD_INT_CONST(m, HCISETACLMTU);
-    ADD_INT_CONST(m, HCISETSCOMTU);
-    ADD_INT_CONST(m, HCIINQUIRY);
+    PyModule_AddIntMacro(m, HCIDEVUP);
+    PyModule_AddIntMacro(m, HCIDEVDOWN);
+    PyModule_AddIntMacro(m, HCIDEVRESET);
+    PyModule_AddIntMacro(m, HCIDEVRESTAT);
+    PyModule_AddIntMacro(m, HCIGETDEVLIST);
+    PyModule_AddIntMacro(m, HCIGETDEVINFO);
+    PyModule_AddIntMacro(m, HCIGETCONNLIST);
+    PyModule_AddIntMacro(m, HCIGETCONNINFO);
+    PyModule_AddIntMacro(m, HCISETRAW);
+    PyModule_AddIntMacro(m, HCISETSCAN);
+    PyModule_AddIntMacro(m, HCISETAUTH);
+    PyModule_AddIntMacro(m, HCISETENCRYPT);
+    PyModule_AddIntMacro(m, HCISETPTYPE);
+    PyModule_AddIntMacro(m, HCISETLINKPOL);
+    PyModule_AddIntMacro(m, HCISETLINKMODE);
+    PyModule_AddIntMacro(m, HCISETACLMTU);
+    PyModule_AddIntMacro(m, HCISETSCOMTU);
+    PyModule_AddIntMacro(m, HCIINQUIRY);
 
-    ADD_INT_CONST(m, ACL_LINK);
-    ADD_INT_CONST(m, SCO_LINK);
+    PyModule_AddIntMacro(m, ACL_LINK);
+    PyModule_AddIntMacro(m, SCO_LINK);
 
     /* RFCOMM */
-    ADD_INT_CONST(m, RFCOMM_LM);
-    ADD_INT_CONST(m, RFCOMM_LM_MASTER);
-    ADD_INT_CONST(m, RFCOMM_LM_AUTH	);
-    ADD_INT_CONST(m, RFCOMM_LM_ENCRYPT);
-    ADD_INT_CONST(m, RFCOMM_LM_TRUSTED);
-    ADD_INT_CONST(m, RFCOMM_LM_RELIABLE);
-    ADD_INT_CONST(m, RFCOMM_LM_SECURE);
+    PyModule_AddIntMacro(m, RFCOMM_LM);
+    PyModule_AddIntMacro(m, RFCOMM_LM_MASTER);
+    PyModule_AddIntMacro(m, RFCOMM_LM_AUTH	);
+    PyModule_AddIntMacro(m, RFCOMM_LM_ENCRYPT);
+    PyModule_AddIntMacro(m, RFCOMM_LM_TRUSTED);
+    PyModule_AddIntMacro(m, RFCOMM_LM_RELIABLE);
+    PyModule_AddIntMacro(m, RFCOMM_LM_SECURE);
 
     /* L2CAP */
-    ADD_INT_CONST(m, L2CAP_LM);
-    ADD_INT_CONST(m, L2CAP_LM_MASTER);
-    ADD_INT_CONST(m, L2CAP_LM_AUTH);
-    ADD_INT_CONST(m, L2CAP_LM_ENCRYPT);
-    ADD_INT_CONST(m, L2CAP_LM_TRUSTED);
-    ADD_INT_CONST(m, L2CAP_LM_RELIABLE);
-    ADD_INT_CONST(m, L2CAP_LM_SECURE);
+    PyModule_AddIntMacro(m, L2CAP_LM);
+    PyModule_AddIntMacro(m, L2CAP_LM_MASTER);
+    PyModule_AddIntMacro(m, L2CAP_LM_AUTH);
+    PyModule_AddIntMacro(m, L2CAP_LM_ENCRYPT);
+    PyModule_AddIntMacro(m, L2CAP_LM_TRUSTED);
+    PyModule_AddIntMacro(m, L2CAP_LM_RELIABLE);
+    PyModule_AddIntMacro(m, L2CAP_LM_SECURE);
 
-    ADD_INT_CONST(m, L2CAP_COMMAND_REJ);
-    ADD_INT_CONST(m, L2CAP_CONN_REQ	);
-    ADD_INT_CONST(m, L2CAP_CONN_RSP	);
-    ADD_INT_CONST(m, L2CAP_CONF_REQ	);
-    ADD_INT_CONST(m, L2CAP_CONF_RSP	);
-    ADD_INT_CONST(m, L2CAP_DISCONN_REQ);
-    ADD_INT_CONST(m, L2CAP_DISCONN_RSP);
-    ADD_INT_CONST(m, L2CAP_ECHO_REQ	);
-    ADD_INT_CONST(m, L2CAP_ECHO_RSP	);
-    ADD_INT_CONST(m, L2CAP_INFO_REQ	);
-    ADD_INT_CONST(m, L2CAP_INFO_RSP	);
+    PyModule_AddIntMacro(m, L2CAP_COMMAND_REJ);
+    PyModule_AddIntMacro(m, L2CAP_CONN_REQ	);
+    PyModule_AddIntMacro(m, L2CAP_CONN_RSP	);
+    PyModule_AddIntMacro(m, L2CAP_CONF_REQ	);
+    PyModule_AddIntMacro(m, L2CAP_CONF_RSP	);
+    PyModule_AddIntMacro(m, L2CAP_DISCONN_REQ);
+    PyModule_AddIntMacro(m, L2CAP_DISCONN_RSP);
+    PyModule_AddIntMacro(m, L2CAP_ECHO_REQ	);
+    PyModule_AddIntMacro(m, L2CAP_ECHO_RSP	);
+    PyModule_AddIntMacro(m, L2CAP_INFO_REQ	);
+    PyModule_AddIntMacro(m, L2CAP_INFO_RSP	);
 
-    ADD_INT_CONST(m, L2CAP_MODE_BASIC);
-    ADD_INT_CONST(m, L2CAP_MODE_RETRANS);
-    ADD_INT_CONST(m, L2CAP_MODE_FLOWCTL);
-    ADD_INT_CONST(m, L2CAP_MODE_ERTM);
-    ADD_INT_CONST(m, L2CAP_MODE_STREAMING);
+    PyModule_AddIntMacro(m, L2CAP_MODE_BASIC);
+    PyModule_AddIntMacro(m, L2CAP_MODE_RETRANS);
+    PyModule_AddIntMacro(m, L2CAP_MODE_FLOWCTL);
+    PyModule_AddIntMacro(m, L2CAP_MODE_ERTM);
+    PyModule_AddIntMacro(m, L2CAP_MODE_STREAMING);
 
-    ADD_INT_CONST(m, BT_SECURITY);
-    ADD_INT_CONST(m, BT_SECURITY_SDP);
-    ADD_INT_CONST(m, BT_SECURITY_LOW);
-    ADD_INT_CONST(m, BT_SECURITY_MEDIUM);
-    ADD_INT_CONST(m, BT_SECURITY_HIGH);
+    PyModule_AddIntMacro(m, BT_SECURITY);
+    PyModule_AddIntMacro(m, BT_SECURITY_SDP);
+    PyModule_AddIntMacro(m, BT_SECURITY_LOW);
+    PyModule_AddIntMacro(m, BT_SECURITY_MEDIUM);
+    PyModule_AddIntMacro(m, BT_SECURITY_HIGH);
 
 #ifdef BT_DEFER_SETUP
-    ADD_INT_CONST(m, BT_DEFER_SETUP);
+    PyModule_AddIntMacro(m, BT_DEFER_SETUP);
 #endif
-    ADD_INT_CONST(m, SOL_BLUETOOTH);
+    PyModule_AddIntMacro(m, SOL_BLUETOOTH);
 
-#undef ADD_INT_CONST
-#if PY_MAJOR_VERSION >= 3
     return m;
-#endif
 }
 
 /*
- * Affix socket module 
+ * Affix socket module
  * Socket module for python based in the original socket module for python
  * This code is a copy from socket.c source code from python2.2 with
- * updates/modifications to support affix socket interface * 
- *   AAA     FFFFFFF FFFFFFF IIIIIII X     X    
+ * updates/modifications to support affix socket interface *
+ *   AAA     FFFFFFF FFFFFFF IIIIIII X     X
  * A     A   F       F          I     X   X
  * A     A   F       F      I      X X
  * AAAAAAA   FFFF    FFFF       I      X X
  * A     A   F       F      I     X   X
  * A     A   F       F       IIIIIII X     X
- * 
+ *
  * Any modifications of this sourcecode must keep this information !!!!!
  *
  * by Carlos Chinea
@@ -3880,7 +3873,6 @@ static char *cmd_linkctl_str[CMD_LINKCTL_NUM + 1] = {
 	"PIN Code Request Reply",
 	"PIN Code Request Negative Reply",
 	"Change Connection Packet Type",
-        //
 	"Unknown",
 	"Authentication Requested",
 	"Unknown",

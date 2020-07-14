@@ -92,7 +92,7 @@ class WCInquirer:
             raise ValueError ("invalid Bluetooth address")
         bd_addr = str_to_BD_ADDR (addr)
         if uuid is not None:
-            dbg ("read_discovery_records (%s, %s)" % (addr, uuid))
+            dbg ("read_discovery_records ({}, {})".format(addr, uuid))
             return self._wcinq.read_discovery_records (bd_addr,
                     to_full_uuid (uuid))
         else:
@@ -127,14 +127,14 @@ def discover_devices (duration=8, flush_cache=True, lookup_names=False, lookup_c
     if not lookup_names and lookup_class:
         result = []
         for bdaddr, devClass, bdName, bConnected in discovered:
-            hex = "%02X%02X%02X" % (ord(devClass[0]), ord(devClass[1]), ord(devClass[2]))
+            hex = "{:02X}{:02X}{:02X}".format(ord(devClass[0]), ord(devClass[1]), ord(devClass[2]))
             devClass = int(hex, 16)
             result.append ((bdAddr, devClass))
         return result
     if lookup_names and lookup_class:
         result = []
         for bdaddr, devClass, bdName, bConnected in discovered:
-            hex = "%02X%02X%02X" % (ord(devClass[0]), ord(devClass[1]), ord(devClass[2]))
+            hex = "{:02X}{:02X}{:02X}".format(ord(devClass[0]), ord(devClass[1]), ord(devClass[2]))
             devClass = int(hex, 16)
             if bdName:
                 result.append ((bdaddr, bdName, devClass))

@@ -64,6 +64,18 @@ class BluetoothSocket:
         self._blocking = True
         self._timeout = False
 
+    @property
+    def family (self):
+        return bt.AF_BTH
+
+    @property
+    def type (self):
+        return bt.SOCK_STREAM
+
+    @property
+    def proto (self):
+        return bt.BTHPROTO_RFCOMM
+
     def bind (self, addrport):
         if self._proto == RFCOMM:
             addr, port = addrport
@@ -145,7 +157,7 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
             raise ValueError ("invalid UUID specified in protocols")        
 
     if sock._raw_sdp_record is not None:
-        raise IOError ("service already advertised")
+        raise OSError("service already advertised")
 
     avpairs = []
 
@@ -208,7 +220,7 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
 
 def stop_advertising (sock):
     if sock._raw_sdp_record is None:
-        raise IOError ("service isn't advertised, " \
+        raise OSError("service isn't advertised, " \
                         "but trying to un-advertise")
     bt.set_service_raw (sock._raw_sdp_record, False, sock._sdp_handle)
     sock._raw_sdp_record = None

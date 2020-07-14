@@ -5,7 +5,6 @@
 #include <BtIfDefinitions.h>
 #include <BtIfClasses.h>
 #include <com_error.h>
-#include <port3.h>
 
 #include "util.h"
 
@@ -54,7 +53,7 @@ get_scn (PyObject *s)
 {
     WCRfCommIfPyObject *self = (WCRfCommIfPyObject*) s;
 
-    return PyInt_FromLong (self->rfcommif->GetScn ());
+    return PyLong_FromLong (self->rfcommif->GetScn ());
 }
 
 static PyObject *
@@ -89,7 +88,7 @@ static PyMethodDef wcrfcommif_methods[] = {
 static PyObject *
 wcrfcommif_repr(WCRfCommIfPyObject *s)
 {
-    return PyString_FromString("_WCRfCommIf object");
+    return PyUnicode_FromString("_WCRfCommIf object");
 }
 
 static PyObject *
@@ -125,12 +124,7 @@ wcrfcommif_initobj(PyObject *s, PyObject *args, PyObject *kwds)
 
 /* Type object for socket objects. */
 PyTypeObject wcrfcommif_type = {
-#if PY_MAJOR_VERSION < 3
-    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
-    0,                  /* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
     "_widcomm._WCRfCommIf",            /* tp_name */
     sizeof(WCRfCommIfPyObject),     /* tp_basicsize */
     0,                  /* tp_itemsize */

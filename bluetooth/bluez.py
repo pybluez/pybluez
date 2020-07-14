@@ -1,23 +1,15 @@
+import array
+import fcntl
 import sys
 import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
-if sys.version_info.major < 3:
-    from .btcommon import *
-    import _bluetooth as _bt
-    get_byte = ord
-else:
-    from bluetooth.btcommon import *
-    import bluetooth._bluetooth as _bt
-    get_byte = int
-import array
-import fcntl
-_constants = [ 'HCI', 'RFCOMM', 'L2CAP', 'SCO', 'SOL_L2CAP', 'SOL_RFCOMM',\
-    'L2CAP_OPTIONS' ]
-for _c in _constants:
-    command_ = "{C} = _bt.{C1}".format(C=_c, C1=_c)
-    exec(command_)
-del _constants
+from bluetooth.btcommon import *
+import bluetooth._bluetooth as _bt
+from bluetooth._bluetooth import HCI, RFCOMM, L2CAP, SCO, SOL_L2CAP, \
+                                    SOL_RFCOMM, L2CAP_OPTIONS
+
+get_byte = int
 
 # ============== SDP service registration and unregistration ============
 
@@ -111,7 +103,8 @@ def set_packet_timeout (address, timeout):
     superuser privileges.
 
     You must have an active connection to the specified device before invoking
-    this method
+    this method.
+
     """
     n = round (timeout / 0.625)
     write_flush_timeout (address, n)
@@ -121,6 +114,7 @@ def get_l2cap_options (sock):
 
     Gets L2CAP options for the specified L2CAP socket.
     Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+
     """
     # TODO this should be in the C module, because it depends
     # directly on struct l2cap_options layout.
@@ -134,6 +128,7 @@ def set_l2cap_options (sock, options):
     Sets L2CAP options for the specified L2CAP socket.
     The option list must be in the same format supplied by
     get_l2cap_options().
+
     """
     # TODO this should be in the C module, because it depends
     # directly on struct l2cap_options layout.
@@ -148,6 +143,7 @@ def set_l2cap_mtu (sock, mtu):
     that all L2CAP connections start with is 672 bytes.
 
     mtu must be between 48 and 65535, inclusive.
+
     """
     options = get_l2cap_options (sock)
     options[0] = options[1] = mtu
@@ -173,7 +169,9 @@ class BluetoothSocket:
     def dup (self):
         """dup () -> socket object
 
-        Return a new socket object connected to the same system resource."""
+        Return a new socket object connected to the same system resource.
+        
+        """
         return BluetoothSocket (proto=self._proto, _sock=self._sock)
 
     def accept (self):
@@ -206,6 +204,7 @@ class BluetoothSocket:
 
         Gets L2CAP options for the specified L2CAP socket.
         Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+
         """
         return get_l2cap_options(self)
 
@@ -215,6 +214,7 @@ class BluetoothSocket:
         Sets L2CAP options for the specified L2CAP socket.
         The option list must be in the same format supplied by
         get_l2cap_options().
+
         """
         return set_l2cap_options(self, options)
 
@@ -226,6 +226,7 @@ class BluetoothSocket:
         that all L2CAP connections start with is 672 bytes.
 
         mtu must be between 48 and 65535, inclusive.
+
         """
         return set_l2cap_mtu(self, mtu)
 
@@ -243,6 +244,14 @@ class BluetoothSocket:
         'shutdown', 'setl2capsecurity'):
         exec( _s % (_m, _m, _m, _m))
     del _m, _s
+
+    # import readonly attributes from the wrapped socket object
+    _s = ("@property\ndef %s (self): \
+    return self._sock.%s")
+    for _m in ('family', 'type', 'proto', 'timeout'):
+        exec( _s % (_m, _m))
+    del _m, _s
+
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \
         profiles = [], provider = "", description = "", protocols = []):
@@ -323,7 +332,7 @@ def get_acl_conn_handle (hci_sock, addr):
     request = array.array ("b", reqstr)
     try:
         fcntl.ioctl (hci_fd, _bt.HCIGETCONNINFO, request, 1)
-    except IOError as e:
+    except OSError as e:
         raise BluetoothError (e.args[0], "There is no ACL connection to %s" % addr)
 
     # XXX should this be "<8xH14x"?
@@ -621,7 +630,7 @@ class DeviceDiscoverer:
         device_class, rssi, psrm, pspm, clockoff = self.names_to_find[address]
         bdaddr = _bt.str2ba (address) #TODO not supported in python3
 
-        cmd_pkt = "%s%s\0%s" % (bdaddr, psrm, clockoff)
+        cmd_pkt = "{}{}\0{}".format(bdaddr, psrm, clockoff)
 
         try:
             _bt.hci_send_cmd (self.sock, _bt.OGF_LINK_CTL, \
@@ -660,12 +669,12 @@ class DeviceDiscoverer:
         [1] https://www.bluetooth.org/foundry/assignnumb/document/baseband
         """
         if name:
-            print(("found: %s - %s (class 0x%X, rssi %s)" % \
-                    (address, name, device_class, rssi)))
+            print("found: {} - {} (class 0x{:X}, rssi {})".format(
+                address, name, device_class, rssi))
         else:
-            print(("found: %s (class 0x%X)" % (address, device_class)))
-            print(("found: %s (class 0x%X, rssi %s)" % \
-                    (address, device_class, rssi)))
+            print("found: {} (class 0x{:X})".format(address, device_class))
+            print("found: {} (class 0x{:X}, rssi {})".format(
+                address, device_class, rssi))
 
     def _inquiry_complete (self):
         """

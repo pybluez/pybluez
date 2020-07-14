@@ -100,7 +100,7 @@ def _checkaddrpair(address, checkbtaddr=True):
 
 
 # from std lib socket module
-class _closedsocket(object):
+class _closedsocket:
     __slots__ = []
     def _dummy(*args):
         raise _socket.error(errno.EBADF, 'Bad file descriptor')
@@ -110,7 +110,7 @@ class _closedsocket(object):
 # TODO: replace with BytesIO if minimum supported version is python3?
 # or just get rid of wrapper class altogether & use bytearray directly if
 # multi-threaded usage isn't support (it's not currently).
-class _ByteQueue(object):
+class _ByteQueue:
     def __init__(self):
         self.buffered = bytearray()
         self.lock = threading.Lock()
@@ -136,7 +136,7 @@ class _ByteQueue(object):
 
 
 #class _SocketWrapper(_socket._socketobject):
-class _SocketWrapper(object):
+class _SocketWrapper:
     """
     A Bluetooth socket object has the same interface as a socket object from
     the Python standard library <socket> module. It also uses the same
@@ -205,7 +205,7 @@ class _SocketWrapper(object):
 
 
 # internal _sock object for RFCOMM and L2CAP sockets
-class _BluetoothSocket(object):
+class _BluetoothSocket:
 
     _boundports = { _lightbluecommon.L2CAP: set(),
                     _lightbluecommon.RFCOMM: set() }
@@ -684,7 +684,7 @@ class _BluetoothSocket(object):
             pass
 
 
-class _RFCOMMConnection(object):
+class _RFCOMMConnection:
 
     proto = _lightbluecommon.RFCOMM
 
@@ -722,7 +722,7 @@ class _RFCOMMConnection(object):
         return self.channel.getChannelID()
 
 
-class _L2CAPConnection(object):
+class _L2CAPConnection:
 
     proto = _lightbluecommon.L2CAP
 
@@ -748,7 +748,7 @@ class _L2CAPConnection(object):
             raise _socket.error("socket not connected")
         return \
             BBBluetoothChannelDelegate.synchronouslyWriteData_toL2CAPChannel_(
-                buffer(data), self.channel)
+                bytes(data), self.channel)
 
     def getwritemtu(self):
         return self.channel.getOutgoingMTU()
@@ -784,7 +784,7 @@ class _ChannelEventListener(Foundation.NSObject):
         delegate as the argument to allow this listener to start receiving
         channel events. (This is the only option for server-spawned sockets.)
         """
-        self = super(_ChannelEventListener, self).init()
+        self = super().init()
         if cb_obj is None:
             raise TypeError("callback object is None")
         self.__cb_obj = cb_obj
@@ -849,7 +849,7 @@ class _ChannelServerEventListener(Foundation.NSObject):
         - port: the channel or PSM that the server is listening on
         - proto: L2CAP or RFCOMM.
         """
-        self = super(_ChannelServerEventListener, self).init()
+        self = super().init()
         if cb_obj is None:
             raise TypeError("callback object is None")
         self.__cb_obj = cb_obj

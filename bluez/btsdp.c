@@ -17,7 +17,6 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 
-#include <port3.h>
 #include "btmodule.h"
 #include "btsdp.h"
 
@@ -30,33 +29,20 @@ extern void uuid2str( const uuid_t *uuid, char *dest );
 // =================== utility functions =====================
 
 static void 
-dict_set_str_pyobj(PyObject *dict, const char *key, PyObject *valobj)
-{
-    PyObject *keyobj;
-    keyobj = PyString_FromString( key );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
-}
-
-static void 
 dict_set_strings(PyObject *dict, const char *key, const char *val)
 {
-    PyObject *keyobj, *valobj;
-    keyobj = PyString_FromString( key );
-    valobj = PyString_FromString( val );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
+    PyObject *valobj;
+    valobj = PyUnicode_FromString( val );
+    PyDict_SetItemString( dict, key, valobj );
     Py_DECREF( valobj );
 }
 
 static void 
 dict_set_str_long(PyObject *dict, const char *key, long val)
 {
-    PyObject *keyobj, *valobj;
-    keyobj = PyString_FromString( key );
-    valobj = PyInt_FromLong(val);
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
+    PyObject *valobj;
+    valobj = PyLong_FromLong(val);
+    PyDict_SetItemString( dict, key, valobj );
     Py_DECREF( valobj );
 }
 
@@ -113,13 +99,13 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
         // initialize service class list
         py_class_list = PyList_New(0);
         if( ! py_class_list ) return 0;
-        dict_set_str_pyobj( dict, "service-classes", py_class_list );
+        PyDict_SetItemString( dict, "service-classes", py_class_list );
         Py_DECREF( py_class_list );
 
         // initialize profile list
         py_profile_list = PyList_New(0);
         if( ! py_profile_list ) return 0;
-        dict_set_str_pyobj( dict, "profiles", py_profile_list );
+        PyDict_SetItemString( dict, "profiles", py_profile_list );
         Py_DECREF( py_profile_list );
 
         // set service name
@@ -127,7 +113,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "name", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "name", Py_None );
+            PyDict_SetItemString( dict, "name", Py_None );
         }
 
         // set service description
@@ -135,7 +121,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "description", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "description", Py_None );
+            PyDict_SetItemString( dict, "description", Py_None );
         }
 
         // set service provider name
@@ -143,7 +129,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "provider", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "provider", Py_None );
+            PyDict_SetItemString( dict, "provider", Py_None );
         }
 
         // set service id
@@ -152,7 +138,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             dict_set_strings( dict, "service-id", buf );
             memset(buf, 0, sizeof( buf ) );
         } else {
-            dict_set_str_pyobj( dict, "service-id", Py_None );
+            PyDict_SetItemString( dict, "service-id", Py_None );
         }
         
         // get a list of the protocol sequences
@@ -168,7 +154,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
                 dict_set_str_long( dict, "port", port );
             } else {
                 dict_set_strings( dict, "protocol", "UNKNOWN" );
-                dict_set_str_pyobj( dict, "port", Py_None );
+                PyDict_SetItemString( dict, "port", Py_None );
             }
 
             // sdp_get_access_protos allocates data on the heap for the
@@ -178,8 +164,8 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
             }
             sdp_list_free( proto_list, 0 );
         } else {
-            dict_set_str_pyobj( dict, "protocol", Py_None );
-            dict_set_str_pyobj( dict, "port", Py_None );
+            PyDict_SetItemString( dict, "protocol", Py_None );
+            PyDict_SetItemString( dict, "port", Py_None );
         }
 
         // get a list of the service classes
@@ -190,7 +176,7 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
                 char uuid_str[40] = { 0 };
 
                 uuid2str( (uuid_t*)iter->data, uuid_str );
-                pystr = PyString_FromString( uuid_str );
+                pystr = PyUnicode_FromString( uuid_str );
                 PyList_Append( py_class_list, pystr );
                 Py_DECREF( pystr );
             }
@@ -207,8 +193,8 @@ do_search( sdp_session_t *sess, uuid_t *uuid )
                 char uuid_str[40] = { 0 };
 
                 uuid2str( &desc->uuid, uuid_str );
-                py_uuid = PyString_FromString( uuid_str );
-                py_version = PyInt_FromLong( desc->version );
+                py_uuid = PyUnicode_FromString( uuid_str );
+                py_version = PyLong_FromLong( desc->version );
 
                 tuple = PyTuple_New( 2 );
                 PyList_Append( py_profile_list, tuple );
@@ -257,10 +243,8 @@ sess_connect(PySDPSessionObject *s, PyObject *args, PyObject *kwds)
         sdp_close( s->session );
     }
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds,
-					 "|s", keywords,
-					 &dst_buf))
-		return NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|s", keywords, &dst_buf))
+        return NULL;
 
     if( strncmp( dst_buf, "localhost", 18 ) != 0 ) {
         str2ba( dst_buf, &dst );
@@ -274,8 +258,7 @@ sess_connect(PySDPSessionObject *s, PyObject *args, PyObject *kwds)
     if( s->session == NULL ) 
         return PyErr_SetFromErrno( bluetooth_error );
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(sess_connect_doc,
 "connect( dest = \"localhost\" )\n\
@@ -286,8 +269,7 @@ session was already connected, it's closed first.\n\
 dest specifies the bluetooth address of the server to connect to.  Special\n\
 case is \"localhost\"\n\
 \n\
-raises _bluetooth.error if something goes wrong\n\
-");
+Raises _bluetooth.error if something goes wrong");
 
 // close
 static PyObject *
@@ -299,27 +281,24 @@ sess_close(PySDPSessionObject *s)
         Py_END_ALLOW_THREADS
         s->session = NULL;
     }
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 PyDoc_STRVAR(sess_close_doc,
 "close()\n\
 \n\
-closes the connection with the SDP server.  No effect if a session is not open.\n\
-");
+Closes the connection with the SDP server.  No effect if a session is not open.");
 
 // fileno
 static PyObject *
 sess_fileno(PySDPSessionObject *s)
 {
-	return PyInt_FromLong((long) s->session->sock);
+	return PyLong_FromLong((long) s->session->sock);
 }
 PyDoc_STRVAR(sess_fileno_doc,
 "fileno() -> integer\n\
 \n\
 Return the integer file descriptor of the socket.\n\
-You can use this for direct communication with the SDP server.\n\
-");
+You can use this for direct communication with the SDP server.");
 
 // search
 static PyObject *
@@ -355,8 +334,7 @@ Searches for a service record with the specified UUID.  If no match is found,\n\
 returns None.  Otherwise, returns a dictionary\n\
 \n\
 UUID must be in the form \"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\", \n\
-where each X is a hexadecimal digit.\n\
-");
+where each X is a hexadecimal digit.");
 
 // browse
 static PyObject *
@@ -382,8 +360,7 @@ sess_browse(PySDPSessionObject *s)
 PyDoc_STRVAR(sess_browse_doc,
 "browse()\n\
 \n\
-Browses all services advertised by connected SDP session\n\
-");
+Browses all services advertised by connected SDP session");
 
 static PyMethodDef sess_methods[] = {
     { "search", (PyCFunction) sess_search, METH_VARARGS, 
@@ -418,15 +395,13 @@ sess_dealloc(PySDPSessionObject *s)
 static PyObject *
 sess_repr(PySDPSessionObject *s)
 {
-	char buf[512];
+    char buf[512];
     if (s->session != NULL) {
-        PyOS_snprintf( buf, sizeof(buf), 
-                "<SDP Session object - connected>");
+        PyOS_snprintf( buf, sizeof(buf), "<SDP Session object - connected>");
     } else { 
-        PyOS_snprintf( buf, sizeof(buf), 
-                "<SDP Session object - unconnected>");
+        PyOS_snprintf( buf, sizeof(buf), "<SDP Session object - unconnected>");
     }
-	return PyString_FromString(buf);
+    return PyUnicode_FromString(buf);
 }
 
 
@@ -461,19 +436,13 @@ sess_initobj(PyObject *self, PyObject *args, PyObject *kwds)
 #endif
 
 	return 0;
-
 }
 
 
 /* Type object for socket objects. */
 
 PyTypeObject sdp_session_type = {
-#if PY_MAJOR_VERSION < 3
-    PyObject_HEAD_INIT(0)   /* Must fill in type value later */
-    0,                  /* ob_size */
-#else
     PyVarObject_HEAD_INIT(NULL, 0)   /* Must fill in type value later */
-#endif
 	"_bluetooth.SDPSession",			/* tp_name */
 	sizeof(PySDPSessionObject),		/* tp_basicsize */
 	0,					/* tp_itemsize */

@@ -1,0 +1,60 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8]
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Windows 10 SDK for Python 3.5
+      if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
+      run: choco install windows-sdk-10.0
+    - name: Install Linux dependencies
+      if: startsWith(matrix.os, 'ubuntu-')
+      run: |
+        sudo apt update
+        sudo apt install bluez libbluetooth-dev
+    - name: Lint
+      run: |
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=./.*,./contrib/bluez/test/sap_client.py
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Build
+      run: |
+        pip install wheel
+        python setup.py bdist_wheel
+    - name: Upload wheel
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist
+        path: dist
+
+  package_source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Make source distribution
+        run: python setup.py sdist
+      - name: Upload source distribution
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist

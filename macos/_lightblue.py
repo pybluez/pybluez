@@ -322,10 +322,10 @@ class _SDPQueryRunner(Foundation.NSObject):
         return "Error getting services for %s" % device.getNameOrAddress()
 
 
-class _SyncDeviceInquiry(object):
+class _SyncDeviceInquiry:
 
     def __init__(self):
-        super(_SyncDeviceInquiry, self).__init__()
+        super().__init__()
 
         self._inquiry = _AsyncDeviceInquiry.alloc().init()
         self._inquiry.cb_completed = self._inquirycomplete
@@ -372,7 +372,7 @@ class _SyncDeviceInquiry(object):
 
     def __del__(self):
         self._inquiry.__del__()
-        super(_SyncDeviceInquiry, self).__del__()
+        super().__del__()
 
 
 
@@ -399,7 +399,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
                 "to perform device discovery. This class was introduced in " +\
                 "Mac OS X 10.4, are you running an earlier version?")
 
-        self = super(_AsyncDeviceInquiry, self).init()
+        self = super().init()
         self._inquiry = \
             _IOBluetooth.IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
 
@@ -439,7 +439,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
         return self._inquiry.foundDevices()
 
     def __del__(self):
-        super(_AsyncDeviceInquiry, self).dealloc()
+        super().dealloc()
 
 
     #

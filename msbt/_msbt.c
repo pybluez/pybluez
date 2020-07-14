@@ -1,3 +1,7 @@
+#ifndef UNICODE
+#define UNICODE
+#endif
+
 #include <winsock2.h>
 #include <ws2bth.h>
 #include <BluetoothAPIs.h>
@@ -5,7 +9,6 @@
 #include <Python.h>
 
 #include <initguid.h>
-#include <port3.h>
 #include <wchar.h>
 
 #if 1
@@ -28,8 +31,12 @@ static void Err_SetFromWSALastError(PyObject *exc)
 	LPVOID lpMsgBuf;
 	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL, WSAGetLastError(), 0, (LPTSTR) &lpMsgBuf, 0, NULL );
-    PyErr_SetString( exc, lpMsgBuf );
+	PyObject *msg = PyUnicode_FromWideChar((LPTSTR) lpMsgBuf, -1);
 	LocalFree(lpMsgBuf);
+	if (msg != NULL) {
+		PyErr_SetObject( exc, msg );
+		Py_DECREF(msg);
+	}
 }
 
 
@@ -69,7 +76,7 @@ static void
 dict_set_str_pyobj(PyObject *dict, const char *key, PyObject *valobj)
 {
     PyObject *keyobj;
-    keyobj = PyString_FromString( key );
+    keyobj = PyUnicode_FromString( key );
     PyDict_SetItem( dict, keyobj, valobj );
     Py_DECREF( keyobj );
 }
@@ -78,8 +85,8 @@ static void
 dict_set_strings(PyObject *dict, const char *key, const char *val)
 {
     PyObject *keyobj, *valobj;
-    keyobj = PyString_FromString( key );
-    valobj = PyString_FromString( val );
+    keyobj = PyUnicode_FromString( key );
+    valobj = PyUnicode_FromString( val );
     PyDict_SetItem( dict, keyobj, valobj );
     Py_DECREF( keyobj );
     Py_DECREF( valobj );
@@ -89,8 +96,8 @@ static void
 dict_set_str_long(PyObject *dict, const char *key, long val)
 {
     PyObject *keyobj, *valobj;
-    keyobj = PyString_FromString( key );
-    valobj = PyInt_FromLong(val);
+    keyobj = PyUnicode_FromString( key );
+    valobj = PyLong_FromLong(val);
     PyDict_SetItem( dict, keyobj, valobj );
     Py_DECREF( keyobj );
     Py_DECREF( valobj );
@@ -143,14 +150,14 @@ msbt_socket(PyObject *self, PyObject *args)
 
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sockfd );
 
-    return PyInt_FromLong( sockfd );
+    return PyLong_FromLong( sockfd );
 };
 PyDoc_STRVAR(msbt_socket_doc, "TODO");
 
 static PyObject *
 msbt_bind(PyObject *self, PyObject *args)
 {
-    char *addrstr = NULL;
+    wchar_t *addrstr = NULL;
     int addrstrlen = -1;
     int sockfd = -1;
     int port = -1;
@@ -161,7 +168,7 @@ msbt_bind(PyObject *self, PyObject *args)
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
 
-    if(!PyArg_ParseTuple(args, "is#i", &sockfd, &addrstr, &addrstrlen, &port))
+    if(!PyArg_ParseTuple(args, "iu#i", &sockfd, &addrstr, &addrstrlen, &port))
         return 0;
 
     if( addrstrlen == 0 ) {
@@ -230,13 +237,13 @@ static PyObject *
 msbt_connect(PyObject *self, PyObject *args)
 {
     int sockfd = -1;
-    char *addrstr = NULL;
+    wchar_t *addrstr = NULL;
     int port = -1;
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
     DWORD status;
 
-    if(!PyArg_ParseTuple(args, "isi", &sockfd, &addrstr, &port)) return 0;
+    if(!PyArg_ParseTuple(args, "iui", &sockfd, &addrstr, &port)) return 0;
 
     if( SOCKET_ERROR == WSAStringToAddress( addrstr, AF_BTH, NULL, 
                 (LPSOCKADDR)&sa, &sa_len ) ) {
@@ -260,21 +267,21 @@ static PyObject *
 msbt_send(PyObject *self, PyObject *args)
 {
     int sockfd = -1;
-    char *data = NULL;
-    int datalen = -1;
+    Py_buffer data;
     int flags = 0;
     int sent = 0;
 
-    if(!PyArg_ParseTuple(args, "is#|i", &sockfd, &data, &datalen, &flags)) 
+    if(!PyArg_ParseTuple(args, "is*|i", &sockfd, &data, &flags)) 
         return 0;
 
     Py_BEGIN_ALLOW_THREADS;
-    sent = send(sockfd, data, datalen, flags);
+    sent = send(sockfd, data.buf, data.len, flags);
     Py_END_ALLOW_THREADS;
+    PyBuffer_Release(&data);
 
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sent );
     
-    return PyInt_FromLong( sent );
+    return PyLong_FromLong( sent );
 };
 PyDoc_STRVAR(msbt_send_doc, "TODO");
 
@@ -290,16 +297,16 @@ msbt_recv(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "ii|i", &sockfd, &datalen, &flags))
         return 0;
 
-    buf = PyString_FromStringAndSize((char*)0, datalen);
+    buf = PyBytes_FromStringAndSize((char*)0, datalen);
     Py_BEGIN_ALLOW_THREADS;
-    received = recv(sockfd, PyString_AS_STRING(buf), datalen, flags);
+    received = recv(sockfd, PyBytes_AS_STRING(buf), datalen, flags);
     Py_END_ALLOW_THREADS;
 
     if( SOCKET_ERROR == received ){
         Py_DECREF(buf);
     }
     _CHECK_OR_RAISE_WSA( SOCKET_ERROR != received );
-    if( received != datalen ) _PyString_Resize(&buf, received);
+    if( received != datalen ) _PyBytes_Resize(&buf, received);
 
     return buf;
 };
@@ -398,7 +405,7 @@ msbt_dup(PyObject *self, PyObject *args)
             &pi, 0, 0 );
     _CHECK_OR_RAISE_WSA( INVALID_SOCKET != newsockfd );
     
-    return PyInt_FromLong( newsockfd );
+    return PyLong_FromLong( newsockfd );
 }
 PyDoc_STRVAR(msbt_dup_doc, "TODO");
 
@@ -471,13 +478,11 @@ msbt_discover_devices(PyObject *self, PyObject *args, PyObject *kwds)
         ba2str( result, buf, _countof(buf) );
 
         tup = PyTuple_New(3);
-        item_tuple = PyString_FromString(buf);
+        item_tuple = PyUnicode_FromString(buf);
         PyTuple_SetItem( tup, 0, item_tuple );
-        item_tuple = PyUnicode_FromUnicode(
-                (const Py_UNICODE*)device_info.szName,
-                wcslen(device_info.szName));
+        item_tuple = PyUnicode_FromWideChar(device_info.szName, -1);
         PyTuple_SetItem( tup, 1, item_tuple );
-        item_tuple = PyInt_FromLong(device_info.ulClassofDevice);
+        item_tuple = PyLong_FromLong(device_info.ulClassofDevice);
         PyTuple_SetItem( tup, 2, item_tuple );
         PyList_Append( toreturn, tup );
         Py_DECREF( tup );
@@ -520,7 +525,7 @@ msbt_list_local(PyObject *self)
         _CHECK_OR_RAISE_WSA(mbtinfo_ret == ERROR_SUCCESS);
 
         ba2str(m_bt_info.address.ullLong, buf, _countof(buf));
-        item = PyString_FromString(buf);
+        item = PyUnicode_FromString(buf);
         PyList_Append(toreturn, item);
         Py_DECREF(item);
 
@@ -543,12 +548,12 @@ msbt_lookup_name(PyObject *self, PyObject *args)
     BLUETOOTH_FIND_RADIO_PARAMS p = { sizeof(p) };
     HBLUETOOTH_RADIO_FIND fhandle = NULL;
     BLUETOOTH_DEVICE_INFO dinfo = { 0 };
-    char *addrstr = NULL;
+    wchar_t *addrstr = NULL;
     SOCKADDR_BTH sa = { 0 };
     int sa_len = sizeof(sa);
     DWORD status;
 
-    if(!PyArg_ParseTuple(args,"s",&addrstr)) return 0;
+    if(!PyArg_ParseTuple(args,"u",&addrstr)) return 0;
     
     _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddress( addrstr, \
                 AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len ) );
@@ -599,7 +604,7 @@ msbt_find_service(PyObject *self, PyObject *args)
 	qs->dwSize = sizeof(WSAQUERYSET);
 	qs->dwNameSpace = NS_BTH;
     qs->dwNumberOfCsAddrs = 0;
-    qs->lpszContext = (LPSTR) localAddressBuf;
+    qs->lpszContext = (LPWSTR) localAddressBuf;
 
     if( 0 == strcmp( addrstr, "localhost" ) ) {
         // find the Bluetooth address of the first local adapter. 
@@ -692,10 +697,10 @@ msbt_find_service(PyObject *self, PyObject *args)
             dict_set_strings( record, "host", localAddressBuf );
             
             // set service name
-            dict_set_strings( record, "name", qs->lpszServiceInstanceName );
+            dict_set_strings( record, "name", (const char*) qs->lpszServiceInstanceName );
 
             // set description
-            dict_set_strings( record, "description", qs->lpszComment );
+            dict_set_strings( record, "description", (const char*) qs->lpszComment );
 
             // set protocol and port
             csinfo = qs->lpcsaBuffer;
@@ -718,7 +723,7 @@ msbt_find_service(PyObject *self, PyObject *args)
             }
 
             // add the raw service record to be parsed in python
-            rawrecord = PyString_FromStringAndSize( qs->lpBlob->pBlobData, 
+            rawrecord = PyUnicode_FromStringAndSize( qs->lpBlob->pBlobData, 
                     qs->lpBlob->cbSize );
             dict_set_str_pyobj(record, "rawrecord", rawrecord);
             Py_DECREF(rawrecord);
@@ -800,7 +805,7 @@ msbt_set_service_raw(PyObject *self, PyObject *args)
         return 0;
     }
 
-    return PyInt_FromLong( (unsigned long) rh );
+    return PyLong_FromLong( (unsigned long) rh );
 }
 PyDoc_STRVAR(msbt_set_service_raw_doc, "");
 
@@ -815,14 +820,14 @@ msbt_set_service(PyObject *self, PyObject *args)
 
 	SOCKADDR_BTH sa = { 0 };
 	int sa_len = sizeof(sa);
-    char *service_name = NULL;
-    char *service_desc = NULL;
+    wchar_t *service_name = NULL;
+    wchar_t *service_desc = NULL;
     char *service_class_id_str = NULL;
 	CSADDR_INFO sockInfo = { 0 };
     GUID uuid = { 0 };
     int sockfd;
 
-    if(!PyArg_ParseTuple(args, "iisss", &sockfd, &advertise, &service_name, 
+    if(!PyArg_ParseTuple(args, "iiuus", &sockfd, &advertise, &service_name, 
                 &service_desc, &service_class_id_str))
         return 0;
 
@@ -977,7 +982,7 @@ msbt_getsockopt(PyObject *s, PyObject *args)
         Err_SetFromWSALastError(PyExc_IOError);
         return 0;
     }
-    return PyInt_FromLong(flag);
+    return PyLong_FromLong(flag);
 }
 
 PyDoc_STRVAR(msbt_getsockopt_doc,
@@ -1026,12 +1031,6 @@ PyDoc_STRVAR(msbt_doc, "TODO\n");
 
 #define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
 
-#if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC
-init_msbt(void)
-{
-    PyObject * m = Py_InitModule3("_msbt", msbt_methods, msbt_doc);
-#else
 PyMODINIT_FUNC
 PyInit__msbt(void)
 {
@@ -1049,8 +1048,8 @@ PyInit__msbt(void)
         NULL
     };
     m = PyModule_Create(&moduledef);
-#endif
 
+    ADD_INT_CONSTANT(m, AF_BTH);
     ADD_INT_CONSTANT(m, SOCK_STREAM);
     ADD_INT_CONSTANT(m, BTHPROTO_RFCOMM);
     ADD_INT_CONSTANT(m, BT_PORT_ANY);
@@ -1062,7 +1061,5 @@ PyInit__msbt(void)
     ADD_INT_CONSTANT(m, SO_BTH_MTU_MAX);
     ADD_INT_CONSTANT(m, SO_BTH_MTU_MIN);
 
-#if PY_MAJOR_VERSION >= 3
     return m;
-#endif
 }
