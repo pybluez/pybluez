@@ -113,7 +113,7 @@ static NSDictionary *fileTransferProfileDict;
 							  withName:(NSString *)serviceName
 								  UUID:(NSString *)uuid
 							 channelID:(BluetoothRFCOMMChannelID *)outChannelID
-				   serviceRecordHandle:(BluetoothSDPServiceRecordHandle *)outServiceRecordHandle
+				   		 serviceRecord:(IOBluetoothSDPServiceRecord *)serviceRecord
 {
 	if (dict == nil)
 		return kIOReturnError;
@@ -130,7 +130,7 @@ static NSDictionary *fileTransferProfileDict;
 										withUUID:uuidBlutooth];
 
 	// publish the service
-	IOBluetoothSDPServiceRecord *serviceRecord;
+	//IOBluetoothSDPServiceRecord *serviceRecord;
     serviceRecord = [IOBluetoothSDPServiceRecord publishedServiceRecordWithDictionary:sdpEntries];
 	[uuid_ autorelease];
 
@@ -138,9 +138,6 @@ static NSDictionary *fileTransferProfileDict;
 	if (serviceRecord != nil) {
 		// get service channel ID & service record handle
 		status = [serviceRecord getRFCOMMChannelID:outChannelID];
-		if (status == kIOReturnSuccess) {
-			status = [serviceRecord getServiceRecordHandle:outServiceRecordHandle];
-		}
 
 		// cleanup
         [serviceRecord release];
@@ -150,11 +147,12 @@ static NSDictionary *fileTransferProfileDict;
 }
 
 
-+ (IOReturn)removeService:(BluetoothSDPServiceRecordHandle)handle
++ (IOReturn)removeService:(IOBluetoothSDPServiceRecord *)serviceRecord
 {
-    // TODO: We should switch to using [IOBluetoothSDPServiceRecord removeServiceRecord]
-    // but we don't know how to get an IOBluetoothSDPServiceRecord instance from a handle.
-	return IOBluetoothRemoveServiceWithRecordHandle(handle);
+	IOReturn status = [serviceRecord removeServiceRecord];
+    serviceRecord = nil;
+	
+	return status;
 }
 
 @end

@@ -67,12 +67,12 @@
 							  withName:(NSString *)serviceName
 								  UUID:(NSString *)uuid
 							 channelID:(BluetoothRFCOMMChannelID *)outChannelID
-				   serviceRecordHandle:(BluetoothSDPServiceRecordHandle *)outServiceRecordHandle;
+				   		 serviceRecord:(IOBluetoothSDPServiceRecord *)serviceRecord;
 
 
 /*
  * Stop advertising a service.
  */
-+ (IOReturn)removeService:(BluetoothSDPServiceRecordHandle)handle;
++ (IOReturn)removeService:(IOBluetoothSDPServiceRecord *)serviceRecord;
 
 @end
