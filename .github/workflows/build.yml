@@ -59,7 +59,7 @@ jobs:
           name: dist
           path: dist
       - name: Publish distribution package to Test PyPI
-        if: ${{ github.repository == "pybluez/pybluez" }}
+        if: github.repository == 'pybluez/pybluez'
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.test_pypi_password }}
