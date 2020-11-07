@@ -45,7 +45,7 @@ __advertised = {}
 
 def finddevices(getnames=True, length=10):
     inquiry = _SyncDeviceInquiry()
-    inquiry.run(getnames, length)
+    inquiry.run(False, length)
     devices = inquiry.getfounddevices()
     return devices
 
