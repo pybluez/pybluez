@@ -28,13 +28,12 @@ jobs:
         sudo apt install bluez libbluetooth-dev
     - name: setup xcode version
       if: startsWith(matrix.os, 'macos')
-    - uses: maxim-lobanov/setup-xcode@v1
+      uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '11'
     - name: show sdks
       if: startsWith(matrix.os, 'macos')
       run: |
-        xcode-select 
         xcodebuild -showsdks
     - name: Lint
       run: |
