@@ -78,6 +78,7 @@ elif sys.platform.startswith("darwin"):
             'xcodebuild', 'install',
             '-project', 'macos/LightAquaBlue/LightAquaBlue.xcodeproj',
             '-scheme', 'LightAquaBlue',
+            '-mmacosx-version-min=10.4'
             'DSTROOT=' + os.path.join(os.getcwd(), 'macos'),
             'INSTALL_PATH=/',
             'DEPLOYMENT_LOCATION=YES',
