@@ -78,6 +78,7 @@ elif sys.platform.startswith("darwin"):
             'xcodebuild', 'install',
             '-project', 'macos/LightAquaBlue/LightAquaBlue.xcodeproj',
             '-scheme', 'LightAquaBlue',
+            '-mmacosx-version-min=10.10',
             'DSTROOT=' + os.path.join(os.getcwd(), 'macos'),
             'INSTALL_PATH=/',
             'DEPLOYMENT_LOCATION=YES',
@@ -85,8 +86,9 @@ elif sys.platform.startswith("darwin"):
         
         # We can't seem to list a directory as package_data, so we will
         # recursively add all all files we find
+        # unfortionately symlinks don't work in wheels so the hack is to copy those as files
         package_data['lightblue'] = []
-        for path, _, files in os.walk('macos/LightAquaBlue.framework'):
+        for path, _, files in os.walk('macos/LightAquaBlue.framework', followlinks=True):
             for f in files:
                 include = os.path.join(path, f)[6:]  # trim off macos/
                 package_data['lightblue'].append(include)

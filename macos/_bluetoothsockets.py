@@ -57,13 +57,13 @@ def _getavailableport(proto):
 
     if proto == _lightbluecommon.RFCOMM:
         try:
-            result, channelID, servicerecordhandle = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None, None, None)
+            result, channelID, servicerecord = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecord_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None, None, None)
         except:
-            result, channelID, servicerecordhandle = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecordHandle_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None)
+            result, channelID, servicerecord = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecord_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None)
         if result != _macutil.kIOReturnSuccess:
             raise _lightbluecommon.BluetoothError(result, \
                 "Could not retrieve an available service channel")
-        result = BBServiceAdvertiser.removeService_(servicerecordhandle)
+        result = BBServiceAdvertiser.removeService_(servicerecord)
         if result != _macutil.kIOReturnSuccess:
             raise _lightbluecommon.BluetoothError(result, \
                 "Could not retrieve an available service channel")

@@ -7,8 +7,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
-        os: [macOS-latest, ubuntu-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -26,6 +26,15 @@ jobs:
       run: |
         sudo apt update
         sudo apt install bluez libbluetooth-dev
+    - name: setup xcode version
+      if: startsWith(matrix.os, 'macos')
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '10'
+    - name: show sdks
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        xcodebuild -showsdks
     - name: Lint
       run: |
         pip install flake8

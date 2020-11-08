@@ -65,7 +65,7 @@ def formatdevaddr(addr):
     # addresses
     # can safely encode to ascii cos BT addresses are only in hex (pyobjc
     # returns all strings in unicode)
-    return addr.replace("-", ":").encode('ascii').upper()
+    return addr.replace("-", ":").upper()
 
 def createbtdevaddr(addr):
     # in mac 10.5, can use BluetoothDeviceAddress directly
