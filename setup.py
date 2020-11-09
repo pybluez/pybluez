@@ -64,11 +64,8 @@ elif sys.platform.startswith("darwin"):
     package_dir['lightblue'] = 'macos'
     zip_safe = False
 
-    if sys.version_info >= (3,6):
-        install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6']
-    else:
-        install_requires += ['pyobjc-core>=3.1,<6', 'pyobjc-framework-Cocoa>=3.1,<6']
-
+    install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6']
+    
     # FIXME: This is inelegant, how can we cover the cases?
     build_cmds = {'bdist', 'bdist_egg', 'bdist_wheel'}
     if build_cmds & set(sys.argv):
@@ -101,7 +98,7 @@ else:
                     % sys.platform)
 
 
-setup(name='PyBluez',
+setup(name='pybluez2',
       version='0.30',
       description='Bluetooth Python extension module',
       author="Albert Huang",
@@ -109,13 +106,12 @@ setup(name='PyBluez',
       url="http://pybluez.github.io/",
       ext_modules=ext_modules,
       packages=packages,
-      python_requires=">=3.5",
+      python_requires=">=3.6",
 # for the python cheese shop
       classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: GNU General Public License (GPL)',
                    'Programming Language :: Python',
                    'Programming Language :: Python :: 3',
-                   'Programming Language :: Python :: 3.5',
                    'Programming Language :: Python :: 3.6',
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
