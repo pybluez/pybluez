@@ -117,7 +117,7 @@ setup(name='pybluez2',
                    'Programming Language :: Python :: 3.8',
                    'Programming Language :: Python :: 3 :: Only',
                    'Topic :: Communications'],
-      download_url='https://github.com/pybluez/pybluez',
+      download_url='https://github.com/hiaselhans/pybluez',
       long_description='Bluetooth Python extension module to allow Python '\
                 'developers to use system Bluetooth resources. PyBluez works '\
                 'with GNU/Linux, macOS, and Windows.',
