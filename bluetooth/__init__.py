@@ -2,7 +2,7 @@ import sys
 import os
 from bluetooth.btcommon import *
 
-__version__ = 0.37
+__version__ = 0.38
 
 def _dbg(*args):
     return
