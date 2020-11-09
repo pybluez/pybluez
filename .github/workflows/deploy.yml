@@ -106,7 +106,7 @@ jobs:
           password: ${{ secrets.test_pypi_password }}
           repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution package to PyPI
-        if: env.branch == 'master'
+        #if: env.branch == 'master'
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: ${{ secrets.pypi_user }}
