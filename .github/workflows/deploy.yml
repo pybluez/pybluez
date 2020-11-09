@@ -1,6 +1,8 @@
 name: Deploy
 
 on:
+  create:
+    tags:
   push:
     branches:
       - 'master'
