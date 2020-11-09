@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  manylinux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: RalfG/python-wheels-manylinux-build@v0.3.1-manylinux2010_x86_64
+        with:
+          python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38m cp39-cp39m'
+          #build-requirements: 'cython numpy'
+          system-packages: 'libbluetooth-dev bluez'
+  build-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: [macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Windows 10 SDK for Python 3.5
+      if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
+      run: choco install windows-sdk-10.0
+
+    - name: setup xcode version
+      if: startsWith(matrix.os, 'macos')
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '10'
+    - name: show sdks
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        xcodebuild -showsdks
+
+    - name: Build
+      run: |
+        pip install wheel
+        python setup.py bdist_wheel
+
+    - name: Upload wheel
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist
+        path: dist
+
+  package_source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Make source distribution
+        run: python setup.py sdist
+      - name: Upload source distribution
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
