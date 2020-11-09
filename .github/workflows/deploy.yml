@@ -87,6 +87,8 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Remove linux_x86_64 wheels
+        run: rm dist/*-linux_x86_64.whl
       - name: Publish distribution package to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
