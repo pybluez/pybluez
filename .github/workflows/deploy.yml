@@ -79,6 +79,7 @@ jobs:
           path: dist
   
   deploy:
+    runs-on: ubuntu-latest
     needs: [build-wheel-linux, build-wheel-matrix, build-src-pkg]
     steps:
       - name: Publish distribution package to Test PyPI
