@@ -6,7 +6,7 @@ on:
       - 'master'
 
 jobs:
-  manylinux:
+  build-wheel-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -15,7 +15,12 @@ jobs:
           python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39'
           #build-requirements: 'cython numpy'
           system-packages: 'bluez bluez-libs bluez-libs-devel'
-  build-matrix:
+      - name: Upload wheel
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
+  build-wheel-matrix:
     strategy:
       fail-fast: false
       matrix:
@@ -25,39 +30,39 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install Windows 10 SDK for Python 3.5
-      if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
-      run: choco install windows-sdk-10.0
+      - name: Install Windows 10 SDK for Python 3.5
+        if: startsWith(matrix.os, 'windows-') && matrix.python-version == 3.5
+        run: choco install windows-sdk-10.0
 
-    - name: setup xcode version
-      if: startsWith(matrix.os, 'macos')
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '10'
-    - name: show sdks
-      if: startsWith(matrix.os, 'macos')
-      run: |
-        xcodebuild -showsdks
+      - name: setup xcode version
+        if: startsWith(matrix.os, 'macos')
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '10'
+      - name: show sdks
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          xcodebuild -showsdks
 
-    - name: Build
-      run: |
-        pip install wheel
-        python setup.py bdist_wheel
+      - name: Build
+        run: |
+          pip install wheel
+          python setup.py bdist_wheel
 
-    - name: Upload wheel
-      uses: actions/upload-artifact@v1
-      with:
-        name: dist
-        path: dist
+      - name: Upload wheel
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
 
-  package_source:
+  build-src-pkg:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -72,3 +77,19 @@ jobs:
         with:
           name: dist
           path: dist
+  
+  deploy:
+    needs: [build-wheel-linux, build-wheel-matrix, build-src-pkg]
+    steps:
+      - name: Publish distribution package to Test PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: ${{ secrets.pypi_user }}
+          password: ${{ secrets.test_pypi_password }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Publish distribution package to PyPI
+        if: startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: ${{ secrets.pypi_user }}
+          password: ${{ secrets.pypi_password }}
