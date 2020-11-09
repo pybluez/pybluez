@@ -149,13 +149,17 @@ def waituntil(conditionfunc, timeout=None):
         if currtime >= endtime:
             return False
         # use WAIT_MAX_TIMEOUT, don't wait forever in case of KeyboardInterrupt
-        e = app.nextEventMatchingMask_untilDate_inMode_dequeue_(NSAnyEventMask, NSDate.dateWithTimeIntervalSinceNow_(min(endtime - currtime, WAIT_MAX_TIMEOUT)), NSDefaultRunLoopMode, True)
-        if e is not None:
-            if (e.type() == NSApplicationDefined and e.subtype() == LIGHTBLUE_NOTIFY_ID):
-                if conditionfunc():
-                    return True
-            else:
-                app.postEvent_atStart_(e, True)
+        if conditionfunc():
+            return True
+        
+        time.sleep(0.01)
+        # e = app.nextEventMatchingMask_untilDate_inMode_dequeue_(NSAnyEventMask, NSDate.dateWithTimeIntervalSinceNow_(min(endtime - currtime, WAIT_MAX_TIMEOUT)), NSDefaultRunLoopMode, True)
+        # if e is not None:
+        #     if (e.type() == NSApplicationDefined and e.subtype() == LIGHTBLUE_NOTIFY_ID):
+        #         if conditionfunc():
+        #             return True
+        #     else:
+        #         app.postEvent_atStart_(e, True)
 
 def interruptwait():
     """
