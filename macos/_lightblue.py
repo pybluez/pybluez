@@ -388,20 +388,13 @@ class _SyncDeviceInquiry:
 #   - 'updatenames': whether to update device names during the inquiry
 #     (i.e. perform remote name requests, which will take a little longer)
 #
-class _AsyncDeviceInquiry(Foundation.NSObject):
+class DeviceInquiry(Foundation.NSObject):
 
-    # NSObject init, not python __init__
+    # NSObject init
     def init(self):
-        try:
-            attr = _IOBluetooth.IOBluetoothDeviceInquiry
-        except AttributeError:
-            raise ImportError("Cannot find IOBluetoothDeviceInquiry class " +\
-                "to perform device discovery. This class was introduced in " +\
-                "Mac OS X 10.4, are you running an earlier version?")
-
         self = super().init()
-        self._inquiry = \
-            _IOBluetooth.IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
+        self.event_loop = asyncio.get_event_loop()
+        self._inquiry = _IOBluetooth.IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
 
         # callbacks
         self.cb_started = None
@@ -414,6 +407,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
     @objc.python_method
     def _setlength(self, length):
         self._inquiry.setInquiryLength_(length)
+
     length = property(
             lambda self: self._inquiry.inquiryLength(),
             _setlength)
@@ -422,6 +416,7 @@ class _AsyncDeviceInquiry(Foundation.NSObject):
     @objc.python_method
     def _setupdatenames(self, update):
         self._inquiry.setUpdateNewDeviceNames_(update)
+
     updatenames = property(
             lambda self: self._inquiry.updateNewDeviceNames(),
             _setupdatenames)

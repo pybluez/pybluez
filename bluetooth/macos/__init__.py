@@ -1,34 +1,18 @@
+import bluetooth.macos.discovery as discovery
+
 import lightblue
 from .btcommon import *
 
 def discover_devices(duration=8, flush_cache=True, lookup_names=False,
         lookup_class=False, device_id=-1):
-    # This is order of discovered device attributes in C-code.
-    btAddresIndex = 0
-    namesIndex = 1
-    classIndex = 2
+    
+    inquiry = discovery.DeviceDiscovery(duration)
 
-    # Use lightblue to discover devices on OSX.
-    devices = lightblue.finddevices(getnames=lookup_names, length=duration)
-
-    ret = list()
-    for device in devices:
-        item = [device[btAddresIndex], ]
-        if lookup_names:
-            item.append(device[namesIndex])
-        if lookup_class:
-            item.append(device[classIndex])
-
-        # in case of address-only we return string not tuple
-        if len(item) == 1:
-            ret.append(item[0])
-        else:
-            ret.append(tuple(item))
-    return ret
+    return inquiry.get_devices_sync()
 
 
 def lookup_name(address, timeout=10):
-    print("TODO: implement")
+    raise Exception("not implemented")
 
 # TODO: After a little looking around, it seems that we can go into some of the 
 # lightblue internals and enhance the amount of SDP information that is returned 
@@ -147,9 +131,3 @@ class BluetoothSocket:
 
     def makefile(self, mode, bufsize):
         return self.makefile(mode, bufsize)
-
-# ============================= DeviceDiscoverer ============================= #
-
-class DeviceDiscoverer:
-    def __init__ (self):
-        raise NotImplementedError
