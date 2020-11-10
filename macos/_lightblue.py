@@ -50,18 +50,8 @@ def findservices(addr=None, name=None, servicetype=None):
         raise ValueError("servicetype must be RFCOMM, OBEX or None, was %s" % \
             servicetype)
 
-    if addr is None:
-        try:
-            founddevices = finddevices()
-        except _lightbluecommon.BluetoothError as e:
-            msg = "findservices() failed, " +\
-                    "error while finding devices: " + str(e)
-            raise _lightbluecommon.BluetoothError(msg)
 
-        #print founddevices
-        addresses = [dev[0] for dev in founddevices]
-    else:
-        addresses = [addr]
+    addresses = [addr]
 
     services = []
     for devaddr in addresses:
