@@ -33,7 +33,7 @@ from . import _bluetoothsockets
 
 
 # public attributes
-__all__ = ("finddevices", "findservices", "finddevicename",
+__all__ = ("findservices", "finddevicename",
            "selectdevice", "selectservice",
            "gethostaddr", "gethostclass",
            "socket",
