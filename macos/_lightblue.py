@@ -43,11 +43,6 @@ __all__ = ("finddevices", "findservices", "finddevicename",
 __advertised = {}
 
 
-def finddevices(getnames=True, length=10):
-    inquiry = _SyncDeviceInquiry()
-    inquiry.run(False, length)
-    devices = inquiry.getfounddevices()
-    return devices
 
 
 def findservices(addr=None, name=None, servicetype=None):
@@ -322,60 +317,6 @@ class _SDPQueryRunner(Foundation.NSObject):
         return "Error getting services for %s" % device.getNameOrAddress()
 
 
-class _SyncDeviceInquiry:
-
-    def __init__(self):
-        super().__init__()
-
-        self._inquiry = _AsyncDeviceInquiry.alloc().init()
-        self._inquiry.cb_completed = self._inquirycomplete
-
-        self._inquiring = False
-
-    def run(self, getnames, duration):
-        if self._inquiring:
-            raise _lightbluecommon.BluetoothError(
-                "Another inquiry in progress")
-
-        # set inquiry attributes
-        self._inquiry.updatenames = getnames
-        self._inquiry.length = duration
-
-        # start the inquiry
-        err = self._inquiry.start()
-        if err != _macutil.kIOReturnSuccess:
-            raise _lightbluecommon.BluetoothError(
-                err, "Error starting device inquiry")
-
-        # if error occurs during inquiry, set _inquiryerr to the error code
-        self._inquiryerr = _macutil.kIOReturnSuccess
-
-        # wait until the inquiry is complete
-        self._inquiring = True
-        _macutil.waituntil(lambda: not self._inquiring)
-
-        # if error occured during inquiry, raise exception
-        if self._inquiryerr != _macutil.kIOReturnSuccess:
-            raise _lightbluecommon.BluetoothError(self._inquiryerr,
-                "Error during device inquiry")
-
-    def getfounddevices(self):
-        # return as list of device-info tuples
-        return [_getdevicetuple(device) for device in \
-                    self._inquiry.getfounddevices()]
-
-    def _inquirycomplete(self, err, aborted):
-        if err != 188:      # no devices found
-            self._inquiryerr = err
-        self._inquiring = False
-        _macutil.interruptwait()
-
-    def __del__(self):
-        self._inquiry.__del__()
-        super().__del__()
-
-
-
 # Wrapper around IOBluetoothDeviceInquiry, with python callbacks that you can
 # set to receive callbacks when the inquiry is started or stopped, or when it
 # finds a device.
@@ -388,91 +329,6 @@ class _SyncDeviceInquiry:
 #   - 'updatenames': whether to update device names during the inquiry
 #     (i.e. perform remote name requests, which will take a little longer)
 #
-class DeviceInquiry(Foundation.NSObject):
-
-    # NSObject init
-    def init(self):
-        self = super().init()
-        self.event_loop = asyncio.get_event_loop()
-        self._inquiry = _IOBluetooth.IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
-
-        # callbacks
-        self.cb_started = None
-        self.cb_completed = None
-        self.cb_founddevice = None
-
-        return self
-
-    # length property
-    @objc.python_method
-    def _setlength(self, length):
-        self._inquiry.setInquiryLength_(length)
-
-    length = property(
-            lambda self: self._inquiry.inquiryLength(),
-            _setlength)
-
-    # updatenames property
-    @objc.python_method
-    def _setupdatenames(self, update):
-        self._inquiry.setUpdateNewDeviceNames_(update)
-
-    updatenames = property(
-            lambda self: self._inquiry.updateNewDeviceNames(),
-            _setupdatenames)
-
-    # returns error code
-    def start(self):
-        return self._inquiry.start()
-
-    # returns error code
-    def stop(self):
-        return self._inquiry.stop()
-
-    # returns list of IOBluetoothDevice objects
-    def getfounddevices(self):
-        return self._inquiry.foundDevices()
-
-    def __del__(self):
-        super().dealloc()
-
-
-    #
-    # delegate methods follow (these are called by the internal
-    # IOBluetoothDeviceInquiry object when inquiry events occur)
-    #
-
-    # - (void)deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender
-    #                           device:(IOBluetoothDevice*)device;
-    def deviceInquiryDeviceFound_device_(self, inquiry, device):
-        if self.cb_founddevice:
-            self.cb_founddevice(device)
-    deviceInquiryDeviceFound_device_ = objc.selector(
-        deviceInquiryDeviceFound_device_, signature=b"v@:@@")
-
-    # - (void)deviceInquiryComplete:error:aborted;
-    def deviceInquiryComplete_error_aborted_(self, inquiry, err, aborted):
-        if self.cb_completed:
-            self.cb_completed(err, aborted)
-    deviceInquiryComplete_error_aborted_ = objc.selector(
-        deviceInquiryComplete_error_aborted_, signature=b"v@:@iZ")
-
-    # - (void)deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender;
-    def deviceInquiryStarted_(self, inquiry):
-        if self.cb_started:
-            self.cb_started()
-
-    # - (void)deviceInquiryDeviceNameUpdated:device:devicesRemaining:
-    def deviceInquiryDeviceNameUpdated_device_devicesRemaining_(self, sender,
-                                                              device,
-                                                              devicesRemaining):
-        pass
-
-    # - (void)deviceInquiryUpdatingDeviceNamesStarted:devicesRemaining:
-    def deviceInquiryUpdatingDeviceNamesStarted_devicesRemaining_(self, sender,
-                                                                devicesRemaining):
-        pass
-
 
 ### utility methods ###
 
