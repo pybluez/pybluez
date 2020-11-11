@@ -45,7 +45,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '9.4.1'
+          xcode-version: '10'
       - name: show sdks
         if: startsWith(matrix.os, 'macos')
         run: |
