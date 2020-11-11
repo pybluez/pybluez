@@ -100,7 +100,7 @@ else:
 
 
 setup(name='pybluez2',
-      version='0.38',
+      version='0.39',
       description='Bluetooth Python extension module',
       author="Albert Huang",
       author_email="ashuang@alum.mit.edu",
@@ -115,6 +115,7 @@ setup(name='pybluez2',
                    'Programming Language :: Python :: 3.6',
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3.9',
                    'Programming Language :: Python :: 3 :: Only',
                    'Topic :: Communications'],
       download_url='https://github.com/hiaselhans/pybluez',
