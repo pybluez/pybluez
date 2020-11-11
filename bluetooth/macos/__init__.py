@@ -131,6 +131,8 @@ class BluetoothSocket:
 
     def makefile(self, mode, bufsize):
         return self.makefile(mode, bufsize)
-        
+
     def has_data(self):
+        if self._sock._isclosed():
+            raise Exception(f"polling closed connection")
         return not self._sock.__incomingdata.empty()
