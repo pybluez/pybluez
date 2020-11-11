@@ -1,12 +1,13 @@
 import bluetooth.macos.discovery as discovery
+#from bluetooth.macos.btsocket import BluetoothSocket
 
 import lightblue
-from .btcommon import *
+from bluetooth.btcommon import *
 
 def discover_devices(duration=8, flush_cache=True, lookup_names=False,
         lookup_class=False, device_id=-1):
     
-    inquiry = discovery.DeviceDiscovery(duration)
+    inquiry = discovery.DeviceDiscoverer(duration)
 
     return inquiry.get_devices_sync()
 
@@ -72,7 +73,6 @@ def stop_advertising(sock):
     lightblue.stop_advertising(sock)
 
 
-# ============================= BluetoothSocket ============================== #
 class BluetoothSocket:
 
     def __init__(self, proto=RFCOMM, _sock=None):
@@ -131,3 +131,6 @@ class BluetoothSocket:
 
     def makefile(self, mode, bufsize):
         return self.makefile(mode, bufsize)
+        
+    def has_data(self):
+        return not self._sock.__incomingdata.empty()

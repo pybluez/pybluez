@@ -61,6 +61,7 @@ elif sys.platform.startswith('linux'):
 
 elif sys.platform.startswith("darwin"):
     packages.append('lightblue')
+    packages.append("bluetooth.macos")
     package_dir['lightblue'] = 'macos'
     zip_safe = False
 
@@ -103,7 +104,6 @@ setup(name='pybluez2',
       description='Bluetooth Python extension module',
       author="Albert Huang",
       author_email="ashuang@alum.mit.edu",
-      url="http://pybluez.github.io/",
       ext_modules=ext_modules,
       packages=packages,
       python_requires=">=3.6",

@@ -1,39 +1,49 @@
 import asyncio
-
+import time
 import objc
-from Foundation import NSObject
-from IOBluetooth import IOBluetoothDeviceInquiry
+from Foundation import NSObject, IOBluetoothDeviceInquiry, NSRunLoop, NSDate
+
+from bluetooth.device import Device
+from bluetooth.macos.loop import Loop
+from libdispatch import dispatch_queue_create, DISPATCH_QUEUE_SERIAL
+
 
 class DeviceDiscoverer():
-    def __init__(self, duration=8) -> None:
-        self.delegate = DeviceInquiryDelegate.alloc().init()
+    delay = 0.05
+    def __init__(self, duration=8, create_loop=True) -> None:
+        self.delegate = DeviceInquiryDelegate.alloc().init(create_loop)
         self.delegate.set_duration(duration)
-        self.delegate.start()
+        self.t_start = None
+
+    async def start(self):
+        result = self.delegate._inquiry.start()
+        self.t_start  = time.time()
+        while not self.delegate.running:
+            await Loop().wait(self.delay)
+
+        return result
 
     async def stop(self):
         result = self.delegate._inquiry.stop()
         while self.delegate.running:
-            asyncio.sleep(0.1)
+            await Loop().wait(self.delay)
         
         return result
 
     async def get_devices(self):
-        while self.delegate.running:
-            asyncio.sleep(0.1)
-        
-        devices = self.delegate._inquiry.foundDevices()
+        if self.t_start is None:
+            await self.start()
 
-        device_tuples = [
-            (device.addressString, device.nameOrAddress, device.classOfDevice)
-            for device in devices
-        ]
-        return device_tuples
+        while self.delegate.running:
+            await Loop().wait(self.delay)
+
+        return self.delegate.devices
+
+        
     
     def get_devices_sync(self):
-        if not self.delegate.running:
-            self.delegate.start()
-        
         event_loop = asyncio.get_event_loop()
+        
         return event_loop.run_until_complete(self.get_devices())
 
 
@@ -41,11 +51,14 @@ class DeviceDiscoverer():
 class DeviceInquiryDelegate(NSObject):
 
     # NSObject init
-    def init(self):
+    def init(self, create_loop=True):
         self = super().init()
-        self._inquiry = IOBluetoothDeviceInquiry.alloc().initWithDelegate_(self)
+        self.queue = dispatch_queue_create(b"bleak.corebluetooth", DISPATCH_QUEUE_SERIAL)
+        self._inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
+        self.set_updatenames(False)
 
         self.running = False
+        self.t_start = None
 
         return self
 
@@ -55,7 +68,7 @@ class DeviceInquiryDelegate(NSObject):
         self._inquiry.setInquiryLength_(length)
 
     @objc.python_method
-    def get_duration(self, length):
+    def get_duration(self):
         return self._inquiry.inquiryLength()
 
     @objc.python_method
@@ -71,12 +84,8 @@ class DeviceInquiryDelegate(NSObject):
     def _getupdatenames(self):
         return self._inquiry.updateNewDeviceNames()
 
-    # returns error code
-    def start(self):
-        return self._inquiry.start()
-
-    def __del__(self):
-        super().dealloc()
+    #def __del__(self):
+    #    super().dealloc()
 
     # Delegate methods:
     # https://developer.apple.com/documentation/iobluetooth/iobluetoothdeviceinquiry
@@ -86,9 +95,18 @@ class DeviceInquiryDelegate(NSObject):
 
     def deviceInquiryComplete_error_aborted_(self, inquiry, err, aborted):
         # device enquiry is complete
+        print("complete", err, aborted)
+        devices = inquiry.foundDevices()
+
+        self.devices = [
+            Device(name=device.nameOrAddress(), address=device.addressString().replace("-", ":"))
+            for device in devices
+        ]
+
         self.running = False
 
     def deviceInquiryStarted_(self, inquiry):
+        print("started")
         self.running = True
 
     def deviceInquiryDeviceNameUpdated_device_devicesRemaining_(self, sender,
