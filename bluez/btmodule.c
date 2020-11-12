@@ -3038,8 +3038,13 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC
 PyInit__bluetooth(void)
 {
+    #if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 10
+    Py_SET_TYPE(&_librsync_SigMakerType, &PyType_Type);
+    Py_SET_TYPE(&_librsync_DeltaMakerType, &PyType_Type);
+    #else
     Py_TYPE(&sock_type) = &PyType_Type;
     Py_TYPE(&sdp_session_type) = &PyType_Type;
+    #endif
     PyObject *m = PyModule_Create(&moduledef);
     if (m == NULL)
         INITERROR;
