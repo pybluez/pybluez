@@ -4,20 +4,14 @@ import platform
 import sys
 
 from setuptools import setup, Extension
-
+from setuptools.dist import Distribution
 
 # This marks the wheel as always being platform-specific and not pure Python
-# See: https://stackoverflow.com/q/45150304/145504
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-    class impure_bdist_wheel(_bdist_wheel):
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            self.root_is_pure = False
-except ImportError:
-    # If the wheel module isn't available, no problem -- we're not doing a
-    # bdist_wheel in that case anyway.
-    impure_bdist_wheel = None
+# See: https://stackoverflow.com/a/62668026
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(self):
+        return True
 
 
 packages = ['bluetooth']
@@ -132,5 +126,5 @@ setup(name='PyBluez',
       package_data=package_data,
       eager_resources=eager_resources,
       zip_safe=zip_safe,
-      cmdclass={'bdist_wheel': impure_bdist_wheel},
+      distclass=BinaryDistribution,
 )
