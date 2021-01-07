@@ -38,7 +38,7 @@ or download the latest version using the links below.
 Extract the zip or tar and cd to the extracted file directory, then:
 ::
 
-	python setup.py install
+	pip install .
 
 for Bluetooth Low Energy support (GNU/Linux only):
 ::
