@@ -11,7 +11,15 @@ from setuptools.dist import Distribution
 class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
     def has_ext_modules(self):
+        """We always have external modules"""
         return True
+
+    def run_command(self, command):
+        """patched to disallow the install without having built lightblue on osx"""
+        if command == "install" and sys.platform.startswith("darwin"):
+            if not self.package_data.get("lightblue"):
+                raise RuntimeError("Build wheel first")
+        return super(BinaryDistribution, self).run_command(command)
 
 
 packages = ['bluetooth']
