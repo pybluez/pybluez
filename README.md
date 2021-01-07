@@ -14,6 +14,10 @@ Platform Support
 |:------:|:------------:|:-----:|:-------:|
 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 
+Note about macOS: if you do not have a suitable wheel available and your
+package manager wants to build this from source you will need Full XCode.
+See https://stackoverflow.com/a/17980786 for how to make sure you have the
+full installation.
 
 Python Version Support
 ----------------------

@@ -77,5 +77,5 @@ For Python 3.5 or higher
 macOS Dependencies
 """""""""""""""""" 
 
-- Xcode
+- Xcode (note that you need full XCode, not just command-line tools see: https://stackoverflow.com/a/17980786)
 - PyObjc 3.1b or later (https://pyobjc.readthedocs.io/en/latest/install.html)
