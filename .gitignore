@@ -1,3 +1,5 @@
+.idea
+macos/LightAquaBlue.framework/
 *.o
 *.so
 *.pyc
