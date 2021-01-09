@@ -36,7 +36,7 @@ jobs:
     - name: Build
       run: |
         pip install wheel
-        python3 setup.py bdist_wheel
+        python setup.py bdist_wheel
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
