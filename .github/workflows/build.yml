@@ -52,7 +52,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Make source distribution
-        run: python3 setup.py sdist
+        run: |
+          pip3 install setuptools
+          python3 setup.py sdist
       - name: Upload source distribution
         uses: actions/upload-artifact@v1
         with:
