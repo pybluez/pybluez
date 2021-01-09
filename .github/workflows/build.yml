@@ -36,7 +36,7 @@ jobs:
     - name: Build
       run: |
         pip install wheel
-        python setup.py bdist_wheel
+        python3 setup.py bdist_wheel
     - name: Upload wheel
       uses: actions/upload-artifact@v1
       with:
@@ -52,7 +52,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Make source distribution
-        run: python setup.py sdist
+        run: python3 setup.py sdist
       - name: Upload source distribution
         uses: actions/upload-artifact@v1
         with:
