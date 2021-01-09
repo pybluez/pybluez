@@ -8,7 +8,8 @@ from setuptools.dist import Distribution
 
 # This marks the wheel as always being platform-specific and not pure Python
 # See: https://stackoverflow.com/a/62668026
-class BinaryDistribution(Distribution):
+# Multiple inheritance to work around py27 problem with super(), see https://stackoverflow.com/a/18392639
+class BinaryDistribution(Distribution, object):
     """Distribution which always forces a binary package with platform name"""
     def has_ext_modules(self):
         """We always have external modules"""
