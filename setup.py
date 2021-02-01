@@ -52,6 +52,12 @@ if sys.platform == 'win32':
                          "widcomm\\sdpservice.cpp",
                          "widcomm\\util.cpp"]))
 
+elif sys.platform == 'cygwin':
+    ext_modules.append(Extension('bluetooth._msbt',
+                          include_dirs=["./port3"],
+                          libraries=["ws2_32", "bthprops"],
+                          sources=['msbt/_msbt.c']))
+
 elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
                      libraries = ['bluetooth'],

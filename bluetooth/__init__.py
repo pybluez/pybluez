@@ -32,6 +32,9 @@ if sys.platform == "win32":
         _dbg("Widcomm not ready. falling back to MS stack")
         from bluetooth.msbt import *
 
+elif sys.platform == "cygwin":
+    from bluetooth.msbt import *
+
 elif sys.platform.startswith("linux"):
     from bluetooth.bluez import *
 elif sys.platform == "darwin":

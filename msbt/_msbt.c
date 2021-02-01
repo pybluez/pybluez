@@ -11,6 +11,14 @@
 #include <initguid.h>
 #include <wchar.h>
 
+#ifdef __CYGWIN__
+#define _countof(x) (sizeof(x)/sizeof(x[0]))
+#define strncpy_s(dest, destsz, src, count) (strncpy(dest, src, count),0)
+#define strcpy_s(dest, destsz, src) (strcpy(dest, src),0)
+#define sprintf_s snprintf
+#define _close closesocket
+#endif // __CYGWIN__
+
 #if 1
 static void dbg(const char *fmt, ...)
 {
