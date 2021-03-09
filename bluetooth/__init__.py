@@ -265,57 +265,111 @@ BluetoothSocket.__doc__ = \
 
     """
 
-BluetoothSocket.dup.__doc__ =\
-    """Duplicate the socket
+if sys.version < '3':
+    BluetoothSocket.dup.__func__.__doc__ =\
+        """Duplicate the socket
 
-    Returns
-    -------
-    BluetoothSocket
-        A new :class:`BluetoothSocket` connected to the same system resource.
+        Returns
+        -------
+        BluetoothSocket
+            A new :class:`BluetoothSocket` connected to the same system resource.
         
-    """
+        """
 
-BluetoothSocket.accept.__doc__ = \
-    """Accept a connection.
+    BluetoothSocket.accept.__func__.__doc__ = \
+        """Accept a connection.
 
-    Returns
-    -------
-    tuple
-        A tuple containing a :class:`BluetoothSocket` and a Bluetooth address.
+        Returns
+        -------
+        tuple
+            A tuple containing a :class:`BluetoothSocket` and a Bluetooth address.
 
-    Raises
-    ------
-    BluetoothError
-        When an attempt to accept a connection fails.
+        Raises
+        ------
+        BluetoothError
+            When an attempt to accept a connection fails.
     
-    """
+        """
 
-BluetoothSocket.bind.__doc__ = \
-    """Bind the socket to a local address and port.
+    BluetoothSocket.bind.__func__.__doc__ = \
+        """Bind the socket to a local address and port.
 
-    Parameters
-    ----------
-    addrport : tuple
-        A tuple of the form (address str, port int)
+        Parameters
+        ----------
+        addrport : tuple
+            A tuple of the form (address str, port int)
 
-    Raises
-    ------
-    BluetoothError
-        When an attempt to bind the socket fails.
+        Raises
+        ------
+        BluetoothError
+            When an attempt to bind the socket fails.
 
-    """
+        """
 
-#BluetoothSocket.get_l2cap_options.__doc__ =\
-#    """Get the L2CAP options for the specified L2CAP socket.
+    #BluetoothSocket.get_l2cap_options.__doc__ =\
+    #    """Get the L2CAP options for the specified L2CAP socket.
 
-#    Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+    #    Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
 
-#    Returns
-#    -------
-#    list
-#        A list of L2CAP options available for the socket.
+    #    Returns
+    #    -------
+    #    list
+    #        A list of L2CAP options available for the socket.
 
-#    """
+    #    """
+
+else:
+    BluetoothSocket.dup.__doc__ =\
+        """Duplicate the socket
+
+        Returns
+        -------
+        BluetoothSocket
+            A new :class:`BluetoothSocket` connected to the same system resource.
+        
+        """
+
+    BluetoothSocket.accept.__doc__ = \
+        """Accept a connection.
+
+        Returns
+        -------
+        tuple
+            A tuple containing a :class:`BluetoothSocket` and a Bluetooth address.
+
+        Raises
+        ------
+        BluetoothError
+            When an attempt to accept a connection fails.
+    
+        """
+
+    BluetoothSocket.bind.__doc__ = \
+        """Bind the socket to a local address and port.
+
+        Parameters
+        ----------
+        addrport : tuple
+            A tuple of the form (address str, port int)
+
+        Raises
+        ------
+        BluetoothError
+            When an attempt to bind the socket fails.
+
+        """
+
+    #BluetoothSocket.get_l2cap_options.__doc__ =\
+    #    """Get the L2CAP options for the specified L2CAP socket.
+
+    #    Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
+
+    #    Returns
+    #    -------
+    #    list
+    #        A list of L2CAP options available for the socket.
+
+    #    """
 
 BluetoothError.__doc__ = \
     """Raised when a bluetooth function or method fails for a Bluetooth I/O
