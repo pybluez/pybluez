@@ -318,6 +318,12 @@ if sys.version < '3':
 
     #    """
 
+    BluetoothError().__doc__ = \
+        """Raised when a bluetooth function or method fails for a Bluetooth I/O
+        related reason.
+
+        """
+
 else:
     BluetoothSocket.dup.__doc__ =\
         """Duplicate the socket
@@ -371,11 +377,11 @@ else:
 
     #    """
 
-BluetoothError.__doc__ = \
-    """Raised when a bluetooth function or method fails for a Bluetooth I/O
-    related reason.
+    BluetoothError.__doc__ = \
+        """Raised when a bluetooth function or method fails for a Bluetooth I/O
+        related reason.
 
-    """
+        """
 
 """ Documentation for the remaining methods of the class can be found in the file bluez/btmodule.c in the function definitions. """
 
