@@ -55,6 +55,18 @@ ba2str( BTH_ADDR ba, char *addr, size_t len )
             bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5] );
 }
 
+static void
+ba2wstr( BTH_ADDR ba, wchar_t *addr, size_t len )
+{
+    int i;
+    unsigned char bytes[6];
+    for( i=0; i<6; i++ ) {
+        bytes[5-i] = (unsigned char) ((ba >> (i*8)) & 0xff);
+    }
+    swprintf_s( addr, len, L"%02X:%02X:%02X:%02X:%02X:%02X",
+            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5] );
+}
+
 static PyObject *
 msbt_initwinsock(PyObject *self)
 {
@@ -79,6 +91,17 @@ dict_set_str_pyobj(PyObject *dict, const char *key, PyObject *valobj)
     keyobj = PyUnicode_FromString( key );
     PyDict_SetItem( dict, keyobj, valobj );
     Py_DECREF( keyobj );
+}
+
+static void 
+dict_set_wstrings(PyObject *dict, const wchar_t *key, const wchar_t *val)
+{
+    PyObject *keyobj, *valobj;
+    keyobj = PyUnicode_FromWideChar( key, -1 );
+    valobj = PyUnicode_FromWideChar( val, -1 );
+    PyDict_SetItem( dict, keyobj, valobj );
+    Py_DECREF( keyobj );
+    Py_DECREF( valobj );
 }
 
 static void 
@@ -581,7 +604,8 @@ PyDoc_STRVAR(msbt_lookup_name_doc, "TODO");
 static PyObject *
 msbt_find_service(PyObject *self, PyObject *args)
 {
-    char *addrstr = NULL;
+    wchar_t *addrwstr = NULL;
+    PyObject *addrpystr = NULL;
     char *uuidstr = NULL;
 
 	// inquiry data structure
@@ -595,18 +619,21 @@ msbt_find_service(PyObject *self, PyObject *args)
     PyObject *record = NULL;
     PyObject *toreturn = NULL;
     GUID uuid = { 0 };
-    char localAddressBuf[20] = { 0 };
+    wchar_t localAddressBuf[20] = { 0 };
 
-    if(!PyArg_ParseTuple(args,"ss", &addrstr, &uuidstr))
+    // UUID is parsed on our side so it's fine to leave it as regular char *.
+    if(!PyArg_ParseTuple(args, "Us", &addrpystr, &uuidstr))
         return 0;
+
+    addrwstr = PyUnicode_AsWideCharString(addrpystr, NULL);
 
 	ZeroMemory( qs, qs_len );
 	qs->dwSize = sizeof(WSAQUERYSET);
 	qs->dwNameSpace = NS_BTH;
     qs->dwNumberOfCsAddrs = 0;
-    qs->lpszContext = (LPWSTR) localAddressBuf;
+    qs->lpszContext = localAddressBuf;
 
-    if( 0 == strcmp( addrstr, "localhost" ) ) {
+    if( 0 == wcscmp( localAddressBuf, L"localhost" ) ) {
         // find the Bluetooth address of the first local adapter. 
 #if 0
         HANDLE rhandle = NULL;
@@ -643,14 +670,16 @@ msbt_find_service(PyObject *self, PyObject *args)
         _CHECK_OR_RAISE_WSA(NO_ERROR == getsockname(tmpfd, (LPSOCKADDR)&sa,\
                     &sa_len ) );
 
-        ba2str(sa.btAddr, localAddressBuf, _countof(localAddressBuf) );
+        ba2wstr(sa.btAddr, localAddressBuf, _countof(localAddressBuf) );
         _close(tmpfd);
 #endif
 
         flags |= LUP_RES_SERVICE;
     } else {
-        strcpy_s(localAddressBuf, _countof(localAddressBuf), addrstr);
+        wcscpy_s(localAddressBuf, _countof(localAddressBuf), addrwstr);
     }
+
+    PyMem_Free(addrwstr);
 
     if( strlen(uuidstr) != 36 || uuidstr[8] != '-' || uuidstr[13] != '-' 
             || uuidstr[18] != '-' || uuidstr[23] != '-' ) {
@@ -694,13 +723,13 @@ msbt_find_service(PyObject *self, PyObject *args)
 
             record = PyDict_New();
             // set host name
-            dict_set_strings( record, "host", localAddressBuf );
-            
+            dict_set_wstrings( record, L"host", localAddressBuf );
+
             // set service name
-            dict_set_strings( record, "name", (const char*) qs->lpszServiceInstanceName );
+            dict_set_wstrings( record, L"name", qs->lpszServiceInstanceName );
 
             // set description
-            dict_set_strings( record, "description", (const char*) qs->lpszComment );
+            dict_set_wstrings( record, L"description", qs->lpszComment );
 
             // set protocol and port
             csinfo = qs->lpcsaBuffer;
@@ -723,7 +752,7 @@ msbt_find_service(PyObject *self, PyObject *args)
             }
 
             // add the raw service record to be parsed in python
-            rawrecord = PyUnicode_FromStringAndSize( qs->lpBlob->pBlobData, 
+            rawrecord = PyBytes_FromStringAndSize( qs->lpBlob->pBlobData, 
                     qs->lpBlob->cbSize );
             dict_set_str_pyobj(record, "rawrecord", rawrecord);
             Py_DECREF(rawrecord);
