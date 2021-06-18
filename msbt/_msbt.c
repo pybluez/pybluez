@@ -633,7 +633,7 @@ msbt_find_service(PyObject *self, PyObject *args)
     qs->dwNumberOfCsAddrs = 0;
     qs->lpszContext = localAddressBuf;
 
-    if( 0 == wcscmp( localAddressBuf, L"localhost" ) ) {
+    if( 0 == wcscmp( addrwstr, L"localhost" ) ) {
         // find the Bluetooth address of the first local adapter. 
 #if 0
         HANDLE rhandle = NULL;
@@ -660,7 +660,7 @@ msbt_find_service(PyObject *self, PyObject *args)
         // bind a temporary socket and get its Bluetooth address
         SOCKADDR_BTH sa = { 0 };
         int sa_len = sizeof(sa);
-        int tmpfd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+        SOCKET tmpfd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 
         _CHECK_OR_RAISE_WSA( tmpfd >= 0 );
         sa.addressFamily = AF_BTH;
@@ -671,7 +671,7 @@ msbt_find_service(PyObject *self, PyObject *args)
                     &sa_len ) );
 
         ba2wstr(sa.btAddr, localAddressBuf, _countof(localAddressBuf) );
-        _close(tmpfd);
+        _CHECK_OR_RAISE_WSA(NO_ERROR == closesocket(tmpfd));
 #endif
 
         flags |= LUP_RES_SERVICE;
