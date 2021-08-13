@@ -65,7 +65,7 @@ elif sys.platform.startswith("darwin"):
     package_dir['lightblue'] = 'macos'
     zip_safe = False
 
-    install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6']
+    install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6', 'pyobjc-framework-libdispatch']
     
     # FIXME: This is inelegant, how can we cover the cases?
     build_cmds = {'bdist', 'bdist_egg', 'bdist_wheel'}
@@ -100,7 +100,7 @@ else:
 
 
 setup(name='pybluez2',
-      version='0.41',
+      version='0.42',
       description='Bluetooth Python extension module',
       author="Albert Huang",
       author_email="ashuang@alum.mit.edu",
