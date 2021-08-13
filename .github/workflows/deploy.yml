@@ -1,9 +1,8 @@
 name: Deploy
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   build-wheel-linux:
@@ -84,14 +83,6 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v1
-      - name: Get Branch
-        run: |
-          raw=$(git branch -r --contains ${{ github.ref }})
-          branch=${raw/origin\/}
-          echo ::set-env name=branch::$branch
-      - name: Print branch name
-        run: |
-          echo ${{ env.branch }}
       - name: Load artifacts
         uses: actions/download-artifact@v2
         with:
@@ -99,12 +90,6 @@ jobs:
           path: dist
       - name: Remove linux_x86_64 wheels
         run: rm dist/*-linux_x86_64.whl
-      - name: Publish distribution package to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: ${{ secrets.pypi_user }}
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution package to PyPI
         #if: env.branch == 'master'
         uses: pypa/gh-action-pypi-publish@master
