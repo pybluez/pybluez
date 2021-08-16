@@ -1,6 +1,5 @@
 import array
 import fcntl
-import sys
 import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
@@ -157,100 +156,6 @@ def _get_available_ports(protocol):
     else:
         return [0]
 
-class BluetoothSocket:
-    __doc__ = _bt.btsocket.__doc__
-
-    def __init__ (self, proto = RFCOMM, _sock=None):
-        if _sock is None:
-            _sock = _bt.btsocket (proto)
-        self._sock = _sock
-        self._proto = proto
-
-    def dup (self):
-        """dup () -> socket object
-
-        Return a new socket object connected to the same system resource.
-        
-        """
-        return BluetoothSocket (proto=self._proto, _sock=self._sock)
-
-    def accept (self):
-        try:
-            client, addr = self._sock.accept ()
-        except _bt.error as e:
-            raise BluetoothError (*e.args)
-        newsock = BluetoothSocket (self._proto, client)
-        return (newsock, addr)
-    accept.__doc__ = _bt.btsocket.accept.__doc__
-
-    def bind (self, addrport):
-        if len (addrport) != 2 or addrport[1] != 0:
-            try:
-                return self._sock.bind (addrport)
-            except _bt.error as e:
-                raise BluetoothError (*e.args)
-        addr, _ = addrport
-        for port in _get_available_ports (self._proto):
-            try:
-                return self._sock.bind ((addr, port))
-            except _bt.error as e:
-                err = BluetoothError (*e.args)
-                if err.errno != EADDRINUSE:
-                    break
-        raise err
-
-    def get_l2cap_options(self):
-        """get_l2cap_options (sock, mtu)
-
-        Gets L2CAP options for the specified L2CAP socket.
-        Options are: omtu, imtu, flush_to, mode, fcs, max_tx, txwin_size.
-
-        """
-        return get_l2cap_options(self)
-
-    def set_l2cap_options(self, options):
-        """set_l2cap_options (sock, options)
-
-        Sets L2CAP options for the specified L2CAP socket.
-        The option list must be in the same format supplied by
-        get_l2cap_options().
-
-        """
-        return set_l2cap_options(self, options)
-
-    def set_l2cap_mtu(self, mtu):
-        """set_l2cap_mtu (sock, mtu)
-
-        Adjusts the MTU for the specified L2CAP socket.  This method needs to be
-        invoked on both sides of the connection for it to work!  The default mtu
-        that all L2CAP connections start with is 672 bytes.
-
-        mtu must be between 48 and 65535, inclusive.
-
-        """
-        return set_l2cap_mtu(self, mtu)
-
-    # import methods from the wraapped socket object
-    _s = ("""def %s (self, *args, **kwargs):
-    try:
-        return self._sock.%s (*args, **kwargs)
-    except _bt.error as e:
-        raise BluetoothError (*e.args)
-    %s.__doc__ = _bt.btsocket.%s.__doc__\n""")
-    for _m in ( 'connect', 'connect_ex', 'close',
-        'fileno', 'getpeername', 'getsockname', 'gettimeout',
-        'getsockopt', 'listen', 'makefile', 'recv', 'recvfrom', 'sendall',
-        'send', 'sendto', 'setblocking', 'setsockopt', 'settimeout',
-        'shutdown', 'setl2capsecurity'):
-        exec( _s % (_m, _m, _m, _m))
-    del _m, _s
-
-    # import readonly attributes from the wrapped socket object
-    _s = ("@property\ndef %s (self): \
-    return self._sock.%s")
-    for _m in ('family', 'type', 'proto', 'timeout'):
-        exec( _s % (_m, _m))
-    del _m, _s
 
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \

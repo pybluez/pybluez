@@ -10,35 +10,17 @@ def _dbg(*args):
     sys.stderr.write(*args)
     sys.stderr.write("\n")
 
-if sys.platform == "win32":
-    _dbg("trying widcomm")
-    have_widcomm = False
-    dll = "wbtapi.dll"
-    sysroot = os.getenv ("SystemRoot")
-    if os.path.exists (dll) or \
-       os.path.exists (os.path.join (sysroot, "system32", dll)) or \
-       os.path.exists (os.path.join (sysroot, dll)):
-        try:
-            from . import widcomm
-            if widcomm.inquirer.is_device_ready ():
-                # if the Widcomm stack is active and a Bluetooth device on that
-                # stack is detected, then use the Widcomm stack
-                from .widcomm import *
-                have_widcomm = True
-        except ImportError: 
-            pass
-
-    if not have_widcomm:
-        # otherwise, fall back to the Microsoft stack
-        _dbg("Widcomm not ready. falling back to MS stack")
-        from bluetooth.msbt import *
-
-elif sys.platform.startswith("linux"):
-    from bluetooth.bluez import *
-elif sys.platform == "darwin":
+if sys.platform == "darwin":
     from bluetooth.macos import *
 else:
-    raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
+    if sys.platform == "win32":    
+        from bluetooth.msbt import *
+    elif sys.platform.startswith("linux"):
+        from bluetooth.bluez import *
+    else:
+        raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
+
+    from bluetooth.native_socket import BluetoothSocket
 
 discover_devices.__doc__ = docstrings.discover_devices_doc
 lookup_name.__doc__ = docstrings.lookup_name_doc
