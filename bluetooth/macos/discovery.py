@@ -1,12 +1,15 @@
 import asyncio
 import time
+import logging
+
 import objc
-from Foundation import NSObject, IOBluetoothDeviceInquiry, NSRunLoop, NSDate
+from Foundation import NSObject, IOBluetoothDeviceInquiry
 
 from bluetooth.device import Device
 from bluetooth.macos.loop import Loop
 from libdispatch import dispatch_queue_create, DISPATCH_QUEUE_SERIAL
 
+logger = logging.getLogger(__name__)
 
 class DeviceDiscoverer():
     delay = 0.05
@@ -38,8 +41,6 @@ class DeviceDiscoverer():
             await Loop().wait(self.delay)
 
         return self.delegate.devices
-
-        
     
     def get_devices_sync(self):
         event_loop = asyncio.get_event_loop()
@@ -47,20 +48,17 @@ class DeviceDiscoverer():
         return event_loop.run_until_complete(self.get_devices())
 
 
-
 class DeviceInquiryDelegate(NSObject):
 
     # NSObject init
     def init(self, create_loop=True):
         self = super().init()
-        self.queue = dispatch_queue_create(b"bleak.corebluetooth", DISPATCH_QUEUE_SERIAL)
+        self.queue = dispatch_queue_create(b"pybluez.corebluetooth", DISPATCH_QUEUE_SERIAL)
         self._inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
         self.set_updatenames(False)
 
         self.running = False
         self.t_start = None
-
-        return self
 
     # length property
     @objc.python_method
@@ -95,8 +93,9 @@ class DeviceInquiryDelegate(NSObject):
 
     def deviceInquiryComplete_error_aborted_(self, inquiry, err, aborted):
         # device enquiry is complete
-        print("complete", err, aborted)
+
         devices = inquiry.foundDevices()
+        logger.info(f"found {len(devices)} devices")
 
         self.devices = [
             Device(name=device.nameOrAddress(), address=device.addressString().replace("-", ":"))
@@ -106,7 +105,7 @@ class DeviceInquiryDelegate(NSObject):
         self.running = False
 
     def deviceInquiryStarted_(self, inquiry):
-        print("started")
+        logger.info(f"start device scan")
         self.running = True
 
     def deviceInquiryDeviceNameUpdated_device_devicesRemaining_(self, sender,

@@ -5,7 +5,7 @@ import Foundation
 import AppKit
 
 
-class Loop():
+class Loop:
 	event_loop = None
 	def __init__(self):
 		self.has_event_loop = AppKit.NSRunningApplication.currentApplication().isActive()

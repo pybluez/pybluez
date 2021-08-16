@@ -82,7 +82,7 @@ class BluetoothSocket:
 
         if proto != RFCOMM:
             # name the protocol
-            raise NotImplementedError("Not supported protocol")
+            raise NotImplementedError(f"unsupported protocol: {proto}")
         self._proto = lightblue.RFCOMM
         self._addrport = None
 
