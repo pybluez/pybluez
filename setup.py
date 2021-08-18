@@ -19,8 +19,8 @@ except ImportError:
     # bdist_wheel in that case anyway.
     impure_bdist_wheel = None
 
-
 packages = ['bluetooth']
+
 package_dir = dict()
 ext_modules = list()
 install_requires = list()
@@ -28,29 +28,11 @@ package_data = dict()
 eager_resources = list()
 zip_safe = True
 
-
 if sys.platform == 'win32':
-    ext_modules.append(Extension('bluetooth._msbt',
+    ext_modules.append(Extension('bluetooth.windows.msbt',
                        libraries=["WS2_32", "Bthprops"],
-                       sources=['msbt\\_msbt.c']))
-
-    # widcomm
-    WC_BASE = os.path.join(os.getenv('ProgramFiles'), r"Widcomm\BTW DK\SDK")
-    if os.path.exists(WC_BASE):
-        ext_modules.append(Extension('bluetooth._widcomm',
-                include_dirs=["%s\\Inc" % WC_BASE],
-                define_macros=[('_BTWLIB', None)],
-                library_dirs=["%s\\Release" % WC_BASE],
-                libraries=["WidcommSdklib", "ws2_32", "version", "user32",
-                           "Advapi32", "Winspool", "ole32", "oleaut32"],
-                sources=["widcomm\\_widcomm.cpp",
-                         "widcomm\\inquirer.cpp",
-                         "widcomm\\rfcommport.cpp",
-                         "widcomm\\rfcommif.cpp",
-                         "widcomm\\l2capconn.cpp",
-                         "widcomm\\l2capif.cpp",
-                         "widcomm\\sdpservice.cpp",
-                         "widcomm\\util.cpp"]))
+                       sources=['bluetooth\\windows\\msbt.c']))
+    packages.append("bluetooth.windows")
 
 elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',

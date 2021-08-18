@@ -1032,7 +1032,7 @@ PyDoc_STRVAR(msbt_doc, "TODO\n");
 #define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
 
 PyMODINIT_FUNC
-PyInit__msbt(void)
+PyInit_msbt(void)
 {
     PyObject *m;
 

@@ -14,7 +14,7 @@ if sys.platform == "darwin":
     from bluetooth.macos import *
 else:
     if sys.platform == "win32":    
-        from bluetooth.msbt import *
+        from bluetooth.windows import *
     elif sys.platform.startswith("linux"):
         from bluetooth.bluez import *
     else:
@@ -27,8 +27,10 @@ lookup_name.__doc__ = docstrings.lookup_name_doc
 advertise_service.__doc__ = docstrings.advertise_service_doc
 stop_advertising.__doc__ = docstrings.stop_advertising_doc
 find_service.__doc__ = docstrings.find_service_doc
-BluetoothSocket.__doc__ = docstrings.BluetoothSocket_doc
-BluetoothSocket.dup.__doc__ = docstrings.BluetoothSocket_dup_doc
-BluetoothSocket.accept.__doc__ = docstrings.BluetoothSocket_accept_doc
-BluetoothSocket.bind.__doc__ =  docstrings.BluetoothSocket_bind_doc
-BluetoothError.__doc__ =  docstrings.BluetoothError_doc
+
+if sys.platform == "darwin":
+    BluetoothSocket.__doc__ = docstrings.BluetoothSocket_doc
+    BluetoothSocket.dup.__doc__ = docstrings.BluetoothSocket_dup_doc
+    BluetoothSocket.accept.__doc__ = docstrings.BluetoothSocket_accept_doc
+    BluetoothSocket.bind.__doc__ =  docstrings.BluetoothSocket_bind_doc
+    BluetoothError.__doc__ =  docstrings.BluetoothError_doc
