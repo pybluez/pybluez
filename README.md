@@ -19,9 +19,9 @@ Platform Support
 Python Version Support
 ----------------------
 
-Windows: >= 3.9
-Mac: >= 3.5
-Linux: >= 3.5
+- Windows: >= 3.9
+- Mac: >= 3.5
+- Linux: >= 3.5
 
 
 Examples
