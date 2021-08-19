@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-import platform
+import re
 import sys
 
 from setuptools import setup, Extension
@@ -38,7 +38,7 @@ elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
                      libraries = ['bluetooth'],
                      #extra_compile_args=['-O0'],
-                     sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
+                     sources = ['linux/bluez/btmodule.c', 'linux/bluez/btsdp.c'])
     ext_modules.append(mod1)
 
 elif sys.platform.startswith("darwin"):
@@ -80,9 +80,12 @@ else:
     raise Exception("This platform (%s) is currently not supported by pybluez."
                     % sys.platform)
 
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bluetooth/version.py")) as infile:
+    version = re.findall('"([0-9.]+)"', infile.read)
+
 
 setup(name='pybluez2',
-      version='0.42',
+      version=version,
       description='Bluetooth Python extension module',
       author="Albert Huang",
       author_email="ashuang@alum.mit.edu",

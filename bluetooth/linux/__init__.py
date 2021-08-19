@@ -4,6 +4,7 @@ import struct
 from errno import (EADDRINUSE, EBUSY, EINVAL)
 
 from bluetooth.btcommon import *
+import bluetooth.address
 import bluetooth._bluetooth as _bt
 from bluetooth._bluetooth import HCI, RFCOMM, L2CAP, SCO, SOL_L2CAP, \
                                     SOL_RFCOMM, L2CAP_OPTIONS
@@ -77,7 +78,7 @@ def read_local_bdaddr():
         raise BluetoothError(*e.args)
 
 def lookup_name (address, timeout=10):
-    if not is_valid_address (address):
+    if not bluetooth.address.validate(address):
         raise BluetoothError (EINVAL, "%s is not a valid Bluetooth address" % address)
 
     sock = _gethcisock ()

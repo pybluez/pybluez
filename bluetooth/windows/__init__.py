@@ -1,5 +1,8 @@
 from bluetooth import *
+import bluetooth.address
 import bluetooth.windows.msbt as bt
+from bluetooth.windows.sdp import *
+from bluetooth.address import to_full_uuid, is_valid_uuid
 
 bt.initwinsock ()
 
@@ -36,7 +39,7 @@ def read_local_bdaddr():
 
 
 def lookup_name (address, timeout=10):
-    if not is_valid_address (address): 
+    if not bluetooth.address.validate(address):
         raise ValueError ("Invalid Bluetooth address")
     try:
         return bt.lookup_name(address)

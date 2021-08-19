@@ -60,6 +60,8 @@ class DeviceInquiryDelegate(NSObject):
         self.running = False
         self.t_start = None
 
+        return self
+
     # length property
     @objc.python_method
     def set_duration(self, length):
