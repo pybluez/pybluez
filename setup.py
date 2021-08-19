@@ -80,8 +80,8 @@ else:
     raise Exception("This platform (%s) is currently not supported by pybluez."
                     % sys.platform)
 
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bluetooth/version.py")) as infile:
-    version = re.findall(r'"([0-9.]+)"', infile.read())
+with open("bluetooth/version.py") as infile:
+    version = re.findall(r'"([0-9.]+)"', infile.read())[0]
 
 
 setup(name='pybluez2',
