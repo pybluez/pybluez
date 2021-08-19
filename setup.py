@@ -38,7 +38,7 @@ elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
                      libraries = ['bluetooth'],
                      #extra_compile_args=['-O0'],
-                     sources = ['linux/bluez/btmodule.c', 'linux/bluez/btsdp.c'])
+                     sources = ['bluetooth/linux/bluez/btmodule.c', 'bluetooth/linux/bluez/btsdp.c'])
     ext_modules.append(mod1)
 
 elif sys.platform.startswith("darwin"):
