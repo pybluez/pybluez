@@ -44,6 +44,7 @@ elif sys.platform.startswith('linux'):
 elif sys.platform.startswith("darwin"):
     packages.append('lightblue')
     packages.append("bluetooth.macos")
+    packages.append("bluetooth.macos.btsocket")
     package_dir['lightblue'] = 'macos'
     zip_safe = False
 

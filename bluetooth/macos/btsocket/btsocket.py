@@ -12,8 +12,9 @@ from bluetooth.btcommon import BluetoothError, Protocols
 from bluetooth.macos.loop import Loop
 from bluetooth.macos import IOBluetooth
 from bluetooth.macos import util
+from bluetooth.macos.btsocket.connection import _L2CAPConnection, _RFCOMMConnection
 import bluetooth.address
-from lightblue._LightAquaBlue import BBServiceAdvertiser, BBBluetoothChannelDelegate
+from bluetooth.macos.btsocket.delegate import BluezBluetoothChannelDelegate
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ def _getavailableport(proto: Protocols):
     # stop advertising the service and return the channel.
     # It's a hacky way of doing it, but IOBluetooth doesn't seem to provide
     # functionality for just getting an available channel.
-
+    from lightblue._LightAquaBlue import BBServiceAdvertiser
     if proto == Protocols.RFCOMM:
         try:
             result, channelID, servicerecord = BBServiceAdvertiser.addRFCOMMServiceDictionary_withName_UUID_channelID_serviceRecord_(BBServiceAdvertiser.serialPortProfileDictionary(), "DummyService", None, None, None)
@@ -650,86 +651,17 @@ class _BluetoothSocket:
             raise socket.error(errno.ENOTCONN, os.strerror(errno.ENOTCONN))
 
 
-class _RFCOMMConnection:
-
-    proto = Protocols.RFCOMM
-
-    def __init__(self, channel=None):
-        # self.channel is accessed by _BluetoothSocket parent
-        self.channel = channel
-
-    def connect(self, device, port, listener):
-        # open RFCOMM channel (should timeout actually apply to opening of
-        # channel as well? if so need to do timeout with async callbacks)
-        logger.info(f"connecting RFCOMM: {device} {port} {listener}")
-        result, self.channel = device.openRFCOMMChannelSync_withChannelID_delegate_(None, port, listener.delegate())
-        logger.info(f"connecting result: {result}")
-        time.sleep(1)
-        if result == util.kIOReturnSuccess:
-            self.channel.setDelegate_(listener.delegate())
-            listener.registerclosenotif(self.channel)
-        else:
-            self.channel = None
-        return result
-
-    def write(self, data):
-        if self.channel is None:
-            raise socket.error("socket not connected")
-        return \
-            BBBluetoothChannelDelegate.synchronouslyWriteData_toRFCOMMChannel_(
-                Foundation.NSData.alloc().initWithBytes_length_(data, len(data)),
-                self.channel)
-
-    def getwritemtu(self):
-        return self.channel.getMTU()
-
-    def getport(self):
-        return self.channel.getChannelID()
-
-
-class _L2CAPConnection:
-
-    proto = Protocols.L2CAP
-
-    def __init__(self, channel=None):
-        # self.channel is accessed by _BluetoothSocket parent
-        self.channel = channel
-
-    def connect(self, device, port, listener):
-        try:
-            # pyobjc 2.0
-            result, self.channel = device.openL2CAPChannelSync_withPSM_delegate_(None, port, listener.delegate())
-        except TypeError:
-            result, self.channel = device.openL2CAPChannelSync_withPSM_delegate_(port, listener.delegate())
-        if result == util.kIOReturnSuccess:
-            self.channel.setDelegate_(listener.delegate())
-            listener.registerclosenotif(self.channel)
-        else:
-            self.channel = None
-        return result
-
-    def write(self, data):
-        if self.channel is None:
-            raise socket.error("socket not connected")
-        return \
-            BBBluetoothChannelDelegate.synchronouslyWriteData_toL2CAPChannel_(
-                bytes(data), self.channel)
-
-    def getwritemtu(self):
-        return self.channel.getOutgoingMTU()
-
-    def getport(self):
-        return self.channel.getPSM()
-
 
 class ChannelEventListener(Foundation.NSObject):
     """
-    Uses a BBBluetoothChannelDelegate to listen for events on an
+    Uses a BluezBluetoothChannelDelegate to listen for events on an
     IOBluetoothRFCOMMChannel or IOBluetoothL2CAPChannel, and makes callbacks to
     a specified object when events occur.
     """
 
     # note this is a NSObject "init", not a python object "__init__"
+
+    @objc.typedSelector(b"@@:@")
     def initWithDelegate_(self, cb_obj):
         """
         Arguments:
@@ -754,10 +686,8 @@ class ChannelEventListener(Foundation.NSObject):
             raise TypeError("callback object is None")
         self.__cb_obj = cb_obj
         self.__closenotif = None
-        self.__channelDelegate = \
-                BBBluetoothChannelDelegate.alloc().initWithDelegate_(self)
+        self.__channelDelegate = BluezBluetoothChannelDelegate.alloc().initWithDelegate_(self)
         return self
-    initWithDelegate_ = objc.selector(initWithDelegate_, signature=b"@@:@")
 
     def delegate(self):
         return self.__channelDelegate
@@ -775,25 +705,24 @@ class ChannelEventListener(Foundation.NSObject):
         if self.__closenotif is not None:
             self.__closenotif.unregister()
 
+    @objc.typedSelector(b"v@:@@")
     def channelClosedEvent_channel_(self, notif, channel):
         if hasattr(self.__cb_obj, '_handle_channelclosed'):
             self.__cb_obj._handle_channelclosed(channel)
-    channelClosedEvent_channel_ = objc.selector(
-            channelClosedEvent_channel_, signature=b"v@:@@")
 
-    # implement method from BBBluetoothChannelDelegateObserver protocol:
+    # implement method from BluezBluetoothChannelDelegateObserver protocol:
     # - (void)channelData:(id)channel data:(NSData *)data;
+    @objc.typedSelector(b"v@:@@")
     def channelData_data_(self, channel, data):
         if hasattr(self.__cb_obj, '_handle_channeldata'):
             self.__cb_obj._handle_channeldata(channel, data[:])
-    channelData_data_ = objc.selector(channelData_data_, signature=b"v@:@@")
 
-    # implement method from BBBluetoothChannelDelegateObserver protocol:
+    # implement method from BluezBluetoothChannelDelegateObserver protocol:
     # - (void)channelClosed:(id)channel;
+    @objc.typedSelector(b"v@:@")
     def channelClosed_(self, channel):
         if hasattr(self.__cb_obj, '_handle_channelclosed'):
             self.__cb_obj._handle_channelclosed(channel)
-    channelClosed_ = objc.selector(channelClosed_, signature=b"v@:@")
 
 
 class ChannelServerEventListener(Foundation.NSObject):
@@ -802,8 +731,7 @@ class ChannelServerEventListener(Foundation.NSObject):
     client connects) and makes callbacks to a specified object when events
     occur.
     """
-
-    # note this is a NSObject "init", not a python object "__init__"
+    @objc.typedSelector(b"@@:@ii")
     def initWithDelegate_port_protocol_(self, cb_obj, port, proto):
         """
         Arguments:
@@ -831,13 +759,12 @@ class ChannelServerEventListener(Foundation.NSObject):
                 port)
         self.__usernotif = usernotif
         return self
-    initWithDelegate_port_protocol_ = objc.selector(
-        initWithDelegate_port_protocol_, signature=b"@@:@ii")
 
     def close(self):
         if self.__usernotif is not None:
             self.__usernotif.unregister()
 
+    @objc.typedSelector(b"v@:@@")
     def newChannelOpened_channel_(self, notif, newChannel):
         """
         Handle when a client connects to the server channel.
@@ -849,9 +776,6 @@ class ChannelServerEventListener(Foundation.NSObject):
 
             if hasattr(self.__cb_obj, '_handle_channelopened'):
                 self.__cb_obj._handle_channelopened(newChannel)
-    # makes this method receive notif and channel as objects
-    newChannelOpened_channel_ = objc.selector(
-            newChannelOpened_channel_, signature=b"v@:@@")
 
 
 # -----------------------------------------------------------
@@ -864,66 +788,3 @@ def _getsocketobject(proto):
     if proto not in list(socket_CLASSES.keys()):
         raise ValueError("Unknown socket protocol, must be L2CAP or RFCOMM")
     return socketWrapper(_BluetoothSocket(socket_CLASSES[proto]()))
-
-
-class BluetoothSocket:
-
-    def __init__(self, proto: Protocols=Protocols.RFCOMM, _sock=None):
-        if proto != Protocols.RFCOMM:
-            raise NotImplementedError("Unsupported protocol")
-
-        if _sock is None:
-            _sock = _getsocketobject(proto)
-        self._sock = _sock
-
-        self._proto = proto
-        self._addrport = None
-
-    def _getport(self):
-        return self._addrport[1]
-
-    def bind(self, addrport):
-        self._addrport = addrport
-        return self._sock.bind(addrport)
-
-    def listen(self, backlog):
-        return self._sock.listen(backlog)
-
-    def accept(self):
-        return self._sock.accept()
-
-    def connect(self, addrport):
-        return self._sock.connect(addrport)
-
-    def send(self, data):
-        return self._sock.send(data)
-
-    def recv(self, numbytes):
-        return self._sock.recv(numbytes)
-
-    def close(self):
-        return self._sock.close()
-
-    def getsockname(self):
-        return self._sock.getsockname()
-
-    def setblocking(self, blocking):
-        return self._sock.setblocking(blocking)
-
-    def settimeout(self, timeout):
-        return self._sock.settimeout(timeout)
-
-    def gettimeout(self):
-        return self._sock.gettimeout()
-
-    def fileno(self):
-        return self._sock.fileno()
-
-    def dup(self):
-        return BluetoothSocket(self._proto, self._sock)
-
-    def makefile(self, mode, bufsize):
-        return self.makefile(mode, bufsize)
-
-    def has_data(self):
-        return not self._sock.__incomingdata.empty()
