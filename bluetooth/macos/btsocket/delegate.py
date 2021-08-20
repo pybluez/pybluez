@@ -12,6 +12,20 @@ objc.registerMetaDataForSelector(
     }
 )
 
+objc.registerMetaDataForSelector(
+    b"IOBluetoothRFCOMMChannel", 
+    b"writeSync:length:",   # Selector name
+    {
+       "arguments": {
+         2: { "type_modifier": objc._C_ID, "c_array_length_in_arg": 4 },
+         3: { "type_modifier": b"Q"},
+
+         
+       }
+     }
+)
+
+
 class BluezBluetoothChannelDelegate(NSObject):
     channeldataselector = "channelData:data:"
     channelClosedSelector = "channelClosed:"
@@ -50,21 +64,14 @@ class BluezBluetoothChannelDelegate(NSObject):
     @staticmethod
     def synchronouslyWriteData_toRFCOMMChannel_(data, channel):
         #     return [channel writeSync:(void *)[data bytes] length:[data length]];
-        pointer =  objc.context.register(data)
-        result = channel.writeSync_length_(pointer, len(data))
-
-        objc.context.unregister(data)
-
-        return result
+        #data = bytearray(data)
+        print("send", data, type(data))
+        return channel.writeSync_length_(data, len(data))
 
     @staticmethod
     def synchronouslyWriteData_toL2CAPChannel_(data, channel):
-        pointer =  objc.context.register(data)
-        result = channel.writeSync_length_(pointer, len(data))
-
-        objc.context.unregister(data)
-
-        return result
+        #data = bytes(data)
+        return channel.writeSync_length_(data, len(data))
         
 
 
