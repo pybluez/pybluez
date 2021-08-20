@@ -84,17 +84,19 @@ else:
 with open("bluetooth/version.py") as infile:
     version = re.findall(r'"([0-9.]+)"', infile.read())[0]
 
+with open("README.md") as infile:
+    long_description = infile.read()
+
 
 setup(name='pybluez2',
-      version=version,
-      description='Bluetooth Python extension module',
-      author="Albert Huang",
-      author_email="ashuang@alum.mit.edu",
-      ext_modules=ext_modules,
-      packages=packages,
-      python_requires=">=3.6",
-# for the python cheese shop
-      classifiers=['Development Status :: 4 - Beta',
+    version=version,
+    description='Bluetooth Python extension module',
+    author="airgproducts",
+    author_email="hello@airgproducts.com",
+    ext_modules=ext_modules,
+    packages=packages,
+    python_requires=">=3.6",
+    classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: GNU General Public License (GPL)',
                    'Programming Language :: Python',
                    'Programming Language :: Python :: 3',
@@ -104,18 +106,14 @@ setup(name='pybluez2',
                    'Programming Language :: Python :: 3.9',
                    'Programming Language :: Python :: 3 :: Only',
                    'Topic :: Communications'],
-      download_url='https://github.com/hiaselhans/pybluez',
-      long_description='Bluetooth Python extension module to allow Python '\
-                'developers to use system Bluetooth resources. PyBluez works '\
-                'with GNU/Linux, macOS, and Windows.',
-      maintainer='Piotr Karulis',
-      license='GPL',
-      extras_require={'ble': ['gattlib']},
-      package_dir=package_dir,
-      use_2to3=True,
-      install_requires=install_requires,
-      package_data=package_data,
-      eager_resources=eager_resources,
-      zip_safe=zip_safe,
-      cmdclass={'bdist_wheel': impure_bdist_wheel},
+    url="https://github.com/airgproducts/pybluez2",
+    long_description=long_description,
+    maintainer='airgproducts',
+    license='GPL',
+    package_dir=package_dir,
+    install_requires=install_requires,
+    package_data=package_data,
+    eager_resources=eager_resources,
+    zip_safe=zip_safe,
+    cmdclass={'bdist_wheel': impure_bdist_wheel},
 )
