@@ -8,12 +8,12 @@ import errno
 import objc
 import Foundation
 
+import bluetooth.address
 from bluetooth.btcommon import BluetoothError, Protocols
 from bluetooth.macos.loop import Loop
 from bluetooth.macos import IOBluetooth
 from bluetooth.macos import util
 from bluetooth.macos.btsocket.connection import _L2CAPConnection, _RFCOMMConnection
-import bluetooth.address
 from bluetooth.macos.btsocket.delegate import BluezBluetoothChannelDelegate
 
 logger = logging.getLogger(__name__)

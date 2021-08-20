@@ -7,7 +7,6 @@ from Foundation import NSObject, IOBluetoothDeviceInquiry
 
 from bluetooth.device import Device
 from bluetooth.macos.loop import Loop
-from libdispatch import dispatch_queue_create, DISPATCH_QUEUE_SERIAL
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,6 @@ class DeviceInquiryDelegate(NSObject):
     # NSObject init
     def init(self, create_loop=True):
         self = super().init()
-        self.queue = dispatch_queue_create(b"pybluez.corebluetooth", DISPATCH_QUEUE_SERIAL)
         self._inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(self)
         self.set_updatenames(False)
 
