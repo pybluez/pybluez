@@ -42,7 +42,6 @@ elif sys.platform.startswith('linux'):
     ext_modules.append(mod1)
 
 elif sys.platform.startswith("darwin"):
-    packages.append('lightblue')
     packages.append("bluetooth.macos")
     packages.append("bluetooth.macos.btsocket")
 
