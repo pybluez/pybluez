@@ -45,37 +45,8 @@ elif sys.platform.startswith("darwin"):
     packages.append('lightblue')
     packages.append("bluetooth.macos")
     packages.append("bluetooth.macos.btsocket")
-    package_dir['lightblue'] = 'macos'
-    zip_safe = False
 
     install_requires += ['pyobjc-core>=6', 'pyobjc-framework-Cocoa>=6', 'pyobjc-framework-libdispatch']
-    
-    # FIXME: This is inelegant, how can we cover the cases?
-    build_cmds = {'bdist', 'bdist_egg', 'bdist_wheel'}
-    if build_cmds & set(sys.argv):
-        # Build the framework into macos/
-        import subprocess
-        subprocess.check_call([
-            'xcodebuild', 'install',
-            '-project', 'macos/LightAquaBlue/LightAquaBlue.xcodeproj',
-            '-scheme', 'LightAquaBlue',
-            '-mmacosx-version-min=10.10',
-            'DSTROOT=' + os.path.join(os.getcwd(), 'macos'),
-            'INSTALL_PATH=/',
-            'DEPLOYMENT_LOCATION=YES',
-        ])
-        
-        # We can't seem to list a directory as package_data, so we will
-        # recursively add all all files we find
-        # unfortionately symlinks don't work in wheels so the hack is to copy those as files
-        package_data['lightblue'] = []
-        for path, _, files in os.walk('macos/LightAquaBlue.framework', followlinks=True):
-            for f in files:
-                include = os.path.join(path, f)[6:]  # trim off macos/
-                package_data['lightblue'].append(include)
-    
-        # This should allow us to use the framework from an egg [untested]
-        eager_resources.append('macos/LightAquaBlue.framework')
         
 else:
     raise Exception("This platform (%s) is currently not supported by pybluez."
