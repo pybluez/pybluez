@@ -264,7 +264,7 @@ def sdp_parse_size_desc (data):
         dsize = struct.unpack ("!H", data[1:3])[0]
         dstart += 2
     elif dsizedesc == 7:
-        dsize == struct.unpack ("!I", data[1:5])[0]
+        dsize = struct.unpack ("!I", data[1:5])[0]
         dstart += 4
 
     if dtype > 8:
