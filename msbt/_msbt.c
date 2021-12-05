@@ -2,6 +2,8 @@
 #define UNICODE
 #endif
 
+#define PY_SSIZE_T_CLEAN 1
+
 #include <winsock2.h>
 #include <ws2bth.h>
 #include <BluetoothAPIs.h>
@@ -181,7 +183,7 @@ static PyObject *
 msbt_bind(PyObject *self, PyObject *args)
 {
     wchar_t *addrstr = NULL;
-    int addrstrlen = -1;
+    Py_ssize_t addrstrlen = -1;
     int sockfd = -1;
     int port = -1;
     char buf[100] = { 0 };
@@ -795,7 +797,7 @@ msbt_set_service_raw(PyObject *self, PyObject *args)
     WSAESETSERVICEOP op;
 
     char *record = NULL;
-    int reclen = -1;
+    Py_ssize_t reclen = -1;
     BTH_SET_SERVICE *si = NULL;
     int silen = -1;
     ULONG sdpVersion = BTH_SDP_VERSION;
