@@ -26,7 +26,7 @@ data = client_sock.recv(1024)
 print("Data received:", str(data))
 
 while data:
-    client_sock.send("Echo =>", str(data))
+    client_sock.send("Echo => " + str(data))
     data = client_sock.recv(1024)
     print("Data received:", str(data))
 
