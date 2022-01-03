@@ -16,6 +16,7 @@ Local naming conventions:
 - names starting with bt_ are module-level functions
 
 */
+#define PY_SSIZE_T_CLEAN 1
 #include "Python.h"
 #include "btmodule.h"
 #include "structmember.h"
@@ -726,7 +727,7 @@ sock_setsockopt(PySocketSockObject *s, PyObject *args)
     int optname;
     int res;
     void *buf;
-    int buflen;
+    Py_ssize_t buflen;
     int flag;
 
     if (PyArg_ParseTuple(args, "iii:setsockopt", &level, &optname, &flag)) {
@@ -1991,7 +1992,8 @@ static PyObject *
 bt_hci_send_cmd(PyObject *self, PyObject *args)
 {
     PySocketSockObject *socko = NULL;
-    int err, plen = 0;
+    int err;
+    Py_ssize_t plen = 0;
     uint16_t ogf, ocf;
     char *param = NULL;
     int dd = 0;
@@ -2026,6 +2028,7 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
     int err;
     int to=0;
     char rparam[256];
+    Py_ssize_t req_clen;
     struct hci_request req = { 0 };
     int dd = 0;
 
@@ -2034,8 +2037,9 @@ bt_hci_send_req(PyObject *self, PyObject *args, PyObject *kwds)
 
     if( !PyArg_ParseTupleAndKeywords(args, kwds, "OHHii|s#i", keywords,
                 &socko, &req.ogf, &req.ocf, &req.event, &req.rlen,
-                &req.cparam, &req.clen, &to) )
+                &req.cparam, &req_clen, &to) )
         return 0;
+    req.clen = req_clen;
 
     req.rparam = rparam;
     dd = socko->sock_fd;
@@ -2264,7 +2268,8 @@ Returns the name of the device, or raises an error on failure");
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
 { \
     char *param; \
-    int len, arg; \
+    Py_ssize_t len; \
+    int arg; \
     if( !PyArg_ParseTuple(args,"s#i", &param, &len, &arg) ) \
         return 0; \
     if( len != sizeof(struct hci_filter) ) { \
@@ -2293,7 +2298,7 @@ DECL_HCI_FILTER_OP_1(test_opcode, "test opcode!")
 static PyObject * bt_hci_filter_ ## name (PyObject *self, PyObject *args )\
 { \
     char *param; \
-    int len; \
+    Py_ssize_t len; \
     if( !PyArg_ParseTuple(args,"s#", &param, &len) ) \
         return 0; \
     if( len != sizeof(struct hci_filter) ) { \
@@ -2354,7 +2359,7 @@ static PyObject *
 bt_ba2str(PyObject *self, PyObject *args)
 {
     char *data=NULL;
-    int len=0;
+    Py_ssize_t len=0;
     char ba_str[19] = {0};
     if (!PyArg_ParseTuple(args, "s#", &data, &len)) return 0;
     ba2str((bdaddr_t*)data, ba_str);
@@ -2648,7 +2653,7 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
          *provider = NULL,
          *description = NULL;
     PyObject *service_classes, *profiles, *protocols;
-    int namelen = 0, provlen = 0, desclen = 0;
+    Py_ssize_t namelen = 0, provlen = 0, desclen = 0;
     uuid_t svc_uuid = { 0 };
     int i;
     char addrbuf[256] = { 0 };
