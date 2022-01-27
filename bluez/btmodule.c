@@ -21,6 +21,8 @@ Local naming conventions:
 #include "btmodule.h"
 #include "structmember.h"
 
+#include "pythoncapi_compat.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -672,7 +674,7 @@ sock_settimeout(PySocketSockObject *s, PyObject *arg)
 {
 	double timeout;
 
-	if (arg == Py_None)
+	if (Py_IsNone(arg))
 		timeout = -1.0;
 	else {
 		timeout = PyFloat_AsDouble(arg);
@@ -1742,7 +1744,7 @@ bt_btohl(PyObject *self, PyObject *args)
 	else
 		return PyErr_Format(PyExc_TypeError,
 				    "expected int/long, %s found",
-				    arg->ob_type->tp_name);
+				    Py_TYPE(arg)->tp_name);
 	if (x == (unsigned long) -1 && PyErr_Occurred())
 		return NULL;
 	return PyLong_FromLong(btohl(x));
@@ -1806,7 +1808,7 @@ bt_htobl(PyObject *self, PyObject *args)
 	else
 		return PyErr_Format(PyExc_TypeError,
 				    "expected int/long, %s found",
-				    arg->ob_type->tp_name);
+				    Py_TYPE(arg)->tp_name);
 	return PyLong_FromLong(htobl(x));
 }
 
@@ -1879,7 +1881,7 @@ bt_setdefaulttimeout(PyObject *self, PyObject *arg)
 {
 	double timeout;
 
-	if (arg == Py_None)
+	if (Py_IsNone(arg))
 		timeout = -1.0;
 	else {
 		timeout = PyFloat_AsDouble(arg);
@@ -3043,8 +3045,8 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC
 PyInit__bluetooth(void)
 {
-    Py_TYPE(&sock_type) = &PyType_Type;
-    Py_TYPE(&sdp_session_type) = &PyType_Type;
+    Py_SET_TYPE(&sock_type, &PyType_Type);
+    Py_SET_TYPE(&sdp_session_type, &PyType_Type);
     PyObject *m = PyModule_Create(&moduledef);
     if (m == NULL)
         INITERROR;
