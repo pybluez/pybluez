@@ -34,24 +34,6 @@ if sys.platform == 'win32':
                        libraries=["WS2_32", "Bthprops"],
                        sources=['msbt\\_msbt.c']))
 
-    # widcomm
-    WC_BASE = os.path.join(os.getenv('ProgramFiles'), r"Widcomm\BTW DK\SDK")
-    if os.path.exists(WC_BASE):
-        ext_modules.append(Extension('bluetooth._widcomm',
-                include_dirs=["%s\\Inc" % WC_BASE],
-                define_macros=[('_BTWLIB', None)],
-                library_dirs=["%s\\Release" % WC_BASE],
-                libraries=["WidcommSdklib", "ws2_32", "version", "user32",
-                           "Advapi32", "Winspool", "ole32", "oleaut32"],
-                sources=["widcomm\\_widcomm.cpp",
-                         "widcomm\\inquirer.cpp",
-                         "widcomm\\rfcommport.cpp",
-                         "widcomm\\rfcommif.cpp",
-                         "widcomm\\l2capconn.cpp",
-                         "widcomm\\l2capif.cpp",
-                         "widcomm\\sdpservice.cpp",
-                         "widcomm\\util.cpp"]))
-
 elif sys.platform.startswith('linux'):
     mod1 = Extension('bluetooth._bluetooth',
                      libraries = ['bluetooth'],
@@ -107,16 +89,16 @@ setup(name='PyBluez',
       url="http://pybluez.github.io/",
       ext_modules=ext_modules,
       packages=packages,
-      python_requires=">=3.5",
+      python_requires=">=3.7",
 # for the python cheese shop
       classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: GNU General Public License (GPL)',
                    'Programming Language :: Python',
                    'Programming Language :: Python :: 3',
-                   'Programming Language :: Python :: 3.5',
-                   'Programming Language :: Python :: 3.6',
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3.9',
+                   'Programming Language :: Python :: 3.10',
                    'Programming Language :: Python :: 3 :: Only',
                    'Topic :: Communications'],
       download_url='https://github.com/pybluez/pybluez',

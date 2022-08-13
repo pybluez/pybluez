@@ -10,27 +10,7 @@ def _dbg(*args):
     sys.stderr.write("\n")
 
 if sys.platform == "win32":
-    _dbg("trying widcomm")
-    have_widcomm = False
-    dll = "wbtapi.dll"
-    sysroot = os.getenv ("SystemRoot")
-    if os.path.exists (dll) or \
-       os.path.exists (os.path.join (sysroot, "system32", dll)) or \
-       os.path.exists (os.path.join (sysroot, dll)):
-        try:
-            from . import widcomm
-            if widcomm.inquirer.is_device_ready ():
-                # if the Widcomm stack is active and a Bluetooth device on that
-                # stack is detected, then use the Widcomm stack
-                from .widcomm import *
-                have_widcomm = True
-        except ImportError: 
-            pass
-
-    if not have_widcomm:
-        # otherwise, fall back to the Microsoft stack
-        _dbg("Widcomm not ready. falling back to MS stack")
-        from bluetooth.msbt import *
+    from bluetooth.msbt import *
 
 elif sys.platform.startswith("linux"):
     from bluetooth.bluez import *
