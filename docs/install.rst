@@ -53,17 +53,17 @@ GNU/Linux Dependencies
 - BlueZ libraries and header files (libbluetooth-dev)
 
 For example, on Ubuntu 22.10 -
+::
 
-```bash
-# Prerequisites for Python library requirements.txt
-sudo apt install -y \
-	build-essential pkg-config python3-dev \
-	libglib2.0-dev libboost-dev \
-	libboost-python-dev libboost-thread-dev \
-	libbluetooth-dev
+	# Prerequisites for Python library requirements.txt
+	sudo apt install -y \
+		build-essential pkg-config python3-dev \
+		libglib2.0-dev libboost-dev \
+		libboost-python-dev libboost-thread-dev \
+		libbluetooth-dev
 
-pip install -r requirements.txt
-```
+	pip install -r requirements.txt
+	pip install .
 
 Windows Dependencies
 """"""""""""""""""""
