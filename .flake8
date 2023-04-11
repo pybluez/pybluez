@@ -1,0 +1,11 @@
+[flake8]
+
+# PEP585 (typing)
+pep585-activation = auto
+min-coverage-percents = 90
+
+# PEP563
+ignore = F403, F405, W503, W504
+extend-select = F401, F841, C901, TC, TC1
+
+max-line-length = 100
