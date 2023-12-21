@@ -1,3 +1,14 @@
+### ⛔️ This project is not under development ###
+
+Consider some alternatives:
+
+  - [Bleak](https://github.com/hbldh/bleak): Cross-platform Bluetooth Low Energy client library
+  - [Bless](https://github.com/kevincar/bless): Cross-platform Bluetooth Low Energy server library
+  - [PyQt](https://www.riverbankcomputing.com/software/pyqt/): Python bindings for cross-platform [QtBluetooth](https://www.riverbankcomputing.com/static/Docs/PyQt6/api/qtbluetooth/qtbluetooth-module.html) API
+
+---
+
+
 PyBluez
 =======
 
@@ -21,14 +32,6 @@ Python Version Support
 | Python 2 | Python 3 (min 3.5) |
 |:--------:|:------------------:|
 | Till Version 0.22 | Version 0.23 and newer |
-
-
-Contributors Wanted
--------------------
-
-**This project is not under active development.** Contributions are strongly
-desired to resolve compatibility problems on newer systems, address bugs, and
-improve platform support for various features.
 
 
 Examples
