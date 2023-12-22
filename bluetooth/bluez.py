@@ -336,7 +336,7 @@ def get_acl_conn_handle (hci_sock, addr):
         raise BluetoothError (e.args[0], "There is no ACL connection to %s" % addr)
 
     # XXX should this be "<8xH14x"?
-    handle = struct.unpack ("8xH14x", request.tostring ())[0]
+    handle = struct.unpack ("8xH14x", request.tobytes ())[0]
     return handle
 
 def write_flush_timeout (addr, timeout):
