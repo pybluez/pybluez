@@ -1,6 +1,6 @@
 import sys
 import os
-from bluetooth.btcommon import *
+from btcommon import *
 
 __version__ = 0.30
 
