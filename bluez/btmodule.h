@@ -6,6 +6,9 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <stdint.h>
+#ifdef Py_GIL_DISABLED
+#include <stdatomic.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,23 +19,27 @@ extern "C" {
    arguments properly. */
 
 typedef struct {
-	PyObject_HEAD
-	int sock_fd;	/* Socket file descriptor */
-	int sock_family;	/* Address family, always AF_BLUETOOTH */
-	int sock_type;		/* Socket type, e.g., SOCK_STREAM */
-	int sock_proto;		/* Protocol type, e.g., BTPROTO_L2CAP */
-	PyObject *(*errorhandler)(void); /* Error handler; checks
-					    errno, returns NULL and
-					    sets a Python exception */
-	double sock_timeout;		 /* Operation timeout in seconds;
-					    0.0 means non-blocking */
-
-    int is_listening_socket;    // XXX this is a hack to make 
-                                // sdp_advertise_service easier
-
-    uint32_t sdp_record_handle; // if it's a listening socket and advertised 
-                                // via SDP, this is the SDP handle
+        PyObject_HEAD
+#ifdef Py_GIL_DISABLED
+        _Atomic int sock_fd;
+#else
+        int sock_fd;
+#endif
+        int sock_family;
+        int sock_type;
+        int sock_proto;
+        PyObject *(*errorhandler)(void);
+#ifdef Py_GIL_DISABLED
+        _Atomic double sock_timeout;
+        _Atomic int is_listening_socket;
+        _Atomic uint32_t sdp_record_handle;
+        _Atomic(sdp_session_t *) sdp_session;
+#else
+        double sock_timeout;
+    int is_listening_socket;
+    uint32_t sdp_record_handle;
     sdp_session_t *sdp_session;
+#endif
 } PySocketSockObject;
 
 

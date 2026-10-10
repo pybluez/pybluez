@@ -162,7 +162,29 @@ internal_select(PySocketSockObject *s, int writing)
 
 /* Initialize a new socket object. */
 
+#ifdef Py_GIL_DISABLED
+static _Atomic double defaulttimeout = -1.0;
+static PyMutex sdp_state_mutex = {0};
+#define SDP_LOCK() PyMutex_Lock(&sdp_state_mutex)
+#define SDP_UNLOCK() PyMutex_Unlock(&sdp_state_mutex)
+#else
 static double defaulttimeout = -1.0; /* Default timeout for new sockets */
+#define SDP_LOCK()
+#define SDP_UNLOCK()
+#endif
+
+
+static int
+take_sock_fd(PySocketSockObject *s)
+{
+#ifdef Py_GIL_DISABLED
+    return atomic_exchange(&s->sock_fd, -1);
+#else
+    int fd = s->sock_fd;
+    s->sock_fd = -1;
+    return fd;
+#endif
+}
 
 static void
 init_sockobject(PySocketSockObject *s, int fd, int family, int type, int proto)
@@ -879,23 +901,31 @@ Bind the socket to a local address.  address must always be a tuple.\n\
 static PyObject *
 sock_close(PySocketSockObject *s)
 {
-	int fd;
+        int fd = take_sock_fd(s);
 
-	if ((fd = s->sock_fd) != -1) {
-		s->sock_fd = -1;
-		Py_BEGIN_ALLOW_THREADS
-		(void) close(fd);
-		Py_END_ALLOW_THREADS
-	}
 
-    if( s->sdp_session ) {
-        sdp_close( s->sdp_session );
+        if (fd != -1) {
+                Py_BEGIN_ALLOW_THREADS
+                (void) close(fd);
+                Py_END_ALLOW_THREADS
+        }
+
+
+    SDP_LOCK();
+    if (s->sdp_session != NULL) {
+        Py_BEGIN_ALLOW_THREADS
+        sdp_close(s->sdp_session);
+        Py_END_ALLOW_THREADS
         s->sdp_record_handle = 0;
         s->sdp_session = NULL;
     }
+    s->is_listening_socket = 0;
+    SDP_UNLOCK();
+
 
     Py_RETURN_NONE;
 }
+
 
 PyDoc_STRVAR(close_doc,
 "close()\n\
@@ -1504,21 +1534,31 @@ static PyGetSetDef sock_getsetlist[] = {
 static void
 sock_dealloc(PySocketSockObject *s)
 {
-    // close the OS file descriptor
-	if (s->sock_fd != -1) {
+    int fd = take_sock_fd(s);
+
+
+    if (fd != -1) {
         Py_BEGIN_ALLOW_THREADS
-		close(s->sock_fd);
+        close(fd);
         Py_END_ALLOW_THREADS
     }
 
-    if( s->sdp_session ) {
-        sdp_close( s->sdp_session );
+
+    SDP_LOCK();
+    if (s->sdp_session != NULL) {
+        Py_BEGIN_ALLOW_THREADS
+        sdp_close(s->sdp_session);
+        Py_END_ALLOW_THREADS
         s->sdp_record_handle = 0;
         s->sdp_session = NULL;
     }
+    SDP_UNLOCK();
 
-	Py_TYPE(s)->tp_free((PyObject *)s);
+
+        Py_TYPE(s)->tp_free((PyObject *)s);
 }
+
+
 
 
 static PyObject *
@@ -2881,19 +2921,31 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     // set the general service ID, if needed
     if( strlen(service_id_str) ) sdp_set_service_id( &record, svc_uuid );
 
-    // connect to the local SDP server, register the service record, and
-    // disconnect
-    Py_BEGIN_ALLOW_THREADS
-    session = sdp_connect( BDADDR_ANY, BDADDR_LOCAL, 0 );
-    Py_END_ALLOW_THREADS
-    if (!session) {
-        PyErr_SetFromErrno (bluetooth_error);
-        return 0;
+    // Serialize only the native SDP lifecycle transition. Python-object
+    // parsing and record construction above intentionally remain unlocked.
+    int state_error = 0;
+    int connect_error = 0;
+    SDP_LOCK();
+    if (socko->sock_fd < 0 || !socko->is_listening_socket ||
+            socko->sdp_session != NULL || socko->sdp_record_handle != 0) {
+        state_error = 1;
+    } else {
+        Py_BEGIN_ALLOW_THREADS
+        session = sdp_connect(BDADDR_ANY, BDADDR_LOCAL, 0);
+        if (session == NULL) {
+            connect_error = 1;
+        } else {
+            err = sdp_record_register(session, &record, 0);
+        }
+        Py_END_ALLOW_THREADS
+        if (!connect_error && !err) {
+            socko->sdp_session = session;
+            socko->sdp_record_handle = record.handle;
+            session = NULL;
+        }
     }
-    socko->sdp_session = session;
-    Py_BEGIN_ALLOW_THREADS
-    err = sdp_record_register(session, &record, 0);
-    Py_END_ALLOW_THREADS
+    SDP_UNLOCK();
+
 
     // cleanup
     if( psm ) sdp_data_free( psm );
@@ -2908,11 +2960,25 @@ bt_sdp_advertise_service( PyObject *self, PyObject *args )
     sdp_list_free( svc_class_list, free );
     sdp_list_free( profile_list, free );
 
-    if( err ) {
+    if (state_error) {
+        PyErr_SetString(bluetooth_error,
+                "socket state changed while registering SDP service");
+        return 0;
+    }
+    if (connect_error) {
         PyErr_SetFromErrno(bluetooth_error);
         return 0;
     }
-    socko->sdp_record_handle = record.handle;
+    if (err) {
+        if (session != NULL) {
+            Py_BEGIN_ALLOW_THREADS
+            sdp_close(session);
+            Py_END_ALLOW_THREADS
+        }
+        PyErr_SetFromErrno(bluetooth_error);
+        return 0;
+    }
+
 
     Py_RETURN_NONE;
 }
@@ -2934,28 +3000,36 @@ PyObject *
 bt_sdp_stop_advertising( PyObject *self, PyObject *args )
 {
     PySocketSockObject *socko = NULL;
+    int active = 0;
+
 
     if ( !PyArg_ParseTuple(args, "O!", &sock_type, &socko ) ) {
         return 0;
     }
-
-    // verify that we got a real socket object
     if( ! socko || (Py_TYPE(socko) != &sock_type) ) {
-        // TODO change this to a more accurate exception type
         PyErr_SetString(bluetooth_error,
                 "must pass in _bluetooth.socket object");
         return 0;
     }
 
-    if( socko->sdp_session != NULL ) {
+
+    SDP_LOCK();
+    if (socko->sdp_session != NULL) {
+        active = 1;
         Py_BEGIN_ALLOW_THREADS
-        sdp_close( socko->sdp_session );
+        sdp_close(socko->sdp_session);
         Py_END_ALLOW_THREADS
         socko->sdp_session = NULL;
         socko->sdp_record_handle = 0;
-    } else {
-        PyErr_SetString( bluetooth_error, "not currently advertising!");
     }
+    SDP_UNLOCK();
+
+
+    if (!active) {
+        PyErr_SetString(bluetooth_error, "not currently advertising!");
+        return NULL;
+    }
+
 
     Py_RETURN_NONE;
 }
@@ -3050,6 +3124,10 @@ PyInit__bluetooth(void)
     PyObject *m = PyModule_Create(&moduledef);
     if (m == NULL)
         INITERROR;
+#ifdef Py_GIL_DISABLED
+    PyUnstable_Module_SetGIL(m, Py_MOD_GIL_NOT_USED);
+#endif
+
 
     bluetooth_error = PyErr_NewException("_bluetooth.error", NULL, NULL);
     if (bluetooth_error == NULL)
