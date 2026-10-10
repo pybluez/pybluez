@@ -1,4 +1,5 @@
 from bluetooth import *
+import threading
 import bluetooth._msbt as bt
 
 bt.initwinsock ()
@@ -49,7 +50,8 @@ class BluetoothSocket:
         if proto not in [ RFCOMM ]:
             raise ValueError ("invalid protocol")
 
-        if sockfd:
+        self._state_lock = threading.RLock()
+        if sockfd is not None:
             self._sockfd = sockfd
         else:
             self._sockfd = bt.socket (bt.SOCK_STREAM, bt.BTHPROTO_RFCOMM)
@@ -64,6 +66,16 @@ class BluetoothSocket:
         self._blocking = True
         self._timeout = False
 
+    def _require_sockfd_locked (self):
+        sockfd = self._sockfd
+        if sockfd is None:
+            raise OSError ("Bluetooth socket is closed")
+        return sockfd
+
+    def _sockfd_snapshot (self):
+        with self._state_lock:
+            return self._require_sockfd_locked ()
+
     @property
     def family (self):
         return bt.AF_BTH
@@ -77,70 +89,87 @@ class BluetoothSocket:
         return bt.BTHPROTO_RFCOMM
 
     def bind (self, addrport):
+        sockfd = self._sockfd_snapshot ()
         if self._proto == RFCOMM:
             addr, port = addrport
 
             if port == 0: port = bt.BT_PORT_ANY
-            bt.bind (self._sockfd, addr, port)
+            bt.bind (sockfd, addr, port)
 
     def listen (self, backlog):
-        bt.listen (self._sockfd, backlog)
+        bt.listen (self._sockfd_snapshot (), backlog)
 
     def accept (self):
-        clientfd, addr, port = bt.accept (self._sockfd)
+        sockfd = self._sockfd_snapshot ()
+        clientfd, addr, port = bt.accept (sockfd)
         client = BluetoothSocket (self._proto, sockfd=clientfd)
         return client, (addr, port)
 
     def connect (self, addrport):
         addr, port = addrport
-        bt.connect (self._sockfd, addr, port)
+        bt.connect (self._sockfd_snapshot (), addr, port)
 
     def send (self, data):
-        return bt.send (self._sockfd, data)
+        return bt.send (self._sockfd_snapshot (), data)
 
     def recv (self, numbytes):
-        return bt.recv (self._sockfd, numbytes)
+        return bt.recv (self._sockfd_snapshot (), numbytes)
 
     def close (self):
-        return bt.close (self._sockfd)
+        with self._state_lock:
+            sockfd = self._sockfd
+            if sockfd is None:
+                return None
+            self._sockfd = None
+        return bt.close (sockfd)
 
     def getsockname (self):
-        return bt.getsockname (self._sockfd)
+        return bt.getsockname (self._sockfd_snapshot ())
 
     def getpeername (self):
-        return bt.getpeername (self._sockfd)
+        return bt.getpeername (self._sockfd_snapshot ())
 
     getpeername.__doc__ = bt.getpeername.__doc__
 
     def setblocking (self, blocking):
-        bt.setblocking (self._sockfd, blocking)
-        self._blocking = blocking
+        with self._state_lock:
+            sockfd = self._require_sockfd_locked ()
+            bt.setblocking (sockfd, blocking)
+            self._blocking = blocking
 
     def settimeout (self, timeout):
         if timeout < 0: raise ValueError ("invalid timeout")
 
-        if timeout == 0:
-            self.setblocking (False)
-        else:
-            self.setblocking (True)
+        with self._state_lock:
+            sockfd = self._require_sockfd_locked ()
+            blocking = timeout != 0
+            bt.setblocking (sockfd, blocking)
+            self._blocking = blocking
+            bt.settimeout (sockfd, timeout)
+            self._timeout = timeout
 
-        bt.settimeout (self._sockfd, timeout)
-        self._timeout = timeout
-
-    def gettimeout (self):    
-        if self._blocking and not self._timeout: return None
-        return bt.gettimeout (self._sockfd)
+    def gettimeout (self):
+        with self._state_lock:
+            sockfd = self._require_sockfd_locked ()
+            if self._blocking and not self._timeout:
+                return None
+            return bt.gettimeout (sockfd)
 
     def fileno (self):
-        return self._sockfd
+        with self._state_lock:
+            if self._sockfd is None:
+                return -1
+            return self._sockfd
 
     def dup (self):
-        return BluetoothSocket (self._proto, sockfd=bt.dup (self._sockfd))
+        with self._state_lock:
+            sockfd = self._require_sockfd_locked ()
+            dupfd = bt.dup (sockfd)
+        return BluetoothSocket (self._proto, sockfd=dupfd)
 
     def makefile (self):
         # TODO
         raise Exception("Not yet implemented")
-
 
 def advertise_service (sock, name, service_id = "", service_classes = [], \
         profiles = [], provider = "", description = "", protocols = []):
@@ -154,10 +183,12 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
             raise ValueError ("Invalid Profile Descriptor")
     for uuid in protocols:
         if not is_valid_uuid (uuid):
-            raise ValueError ("invalid UUID specified in protocols")        
+            raise ValueError ("invalid UUID specified in protocols")
 
-    if sock._raw_sdp_record is not None:
-        raise OSError("service already advertised")
+    with sock._state_lock:
+        sockfd = sock._require_sockfd_locked ()
+        if sock._raw_sdp_record is not None:
+            raise OSError("service already advertised")
 
     avpairs = []
 
@@ -174,7 +205,7 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
 
     # set protocol and port information
     assert sock._proto == RFCOMM
-    addr, port = sock.getsockname ()
+    addr, port = bt.getsockname (sockfd)
     avpairs.append (("UInt16", PROTOCOL_DESCRIPTOR_LIST_ATTRID))
     l2cap_pd = ("ElemSeq", (("UUID", L2CAP_UUID),))
     rfcomm_pd = ("ElemSeq", (("UUID", RFCOMM_UUID), ("UInt8", port)))
@@ -191,7 +222,7 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
     if len (profiles) > 0:
         seq = [ ("ElemSeq", (("UUID",uuid), ("UInt16",version))) \
                 for uuid, version in profiles ]
-        avpairs.append (("UInt16", 
+        avpairs.append (("UInt16",
             BLUETOOTH_PROFILE_DESCRIPTOR_LIST_ATTRID))
         avpairs.append (("ElemSeq", seq))
 
@@ -203,28 +234,35 @@ def advertise_service (sock, name, service_id = "", service_classes = [], \
     if len (description) > 0:
         avpairs.append (("UInt16", SERVICE_DESCRIPTION_ATTRID))
         avpairs.append (("String", description))
-    
+
     # service provider
     if len (provider) > 0:
         avpairs.append (("UInt16", PROVIDER_NAME_ATTRID))
         avpairs.append (("String", provider))
 
-    sock._raw_sdp_record = sdp_make_data_element ("ElemSeq", avpairs)
-#    pr = sdp_parse_raw_record (sock._raw_sdp_record)
+    raw_sdp_record = sdp_make_data_element ("ElemSeq", avpairs)
+#    pr = sdp_parse_raw_record (raw_sdp_record)
 #    for attrid, val in pr.items ():
 #        print "%5s: %s" % (attrid, val)
-#    print binascii.hexlify (sock._raw_sdp_record)
-#    print repr (sock._raw_sdp_record)
+#    print binascii.hexlify (raw_sdp_record)
+#    print repr (raw_sdp_record)
 
-    sock._sdp_handle = bt.set_service_raw (sock._raw_sdp_record, True)
+    with sock._state_lock:
+        sock._require_sockfd_locked ()
+        if sock._raw_sdp_record is not None:
+            raise OSError("service already advertised")
+        sdp_handle = bt.set_service_raw (raw_sdp_record, True)
+        sock._raw_sdp_record = raw_sdp_record
+        sock._sdp_handle = sdp_handle
 
 def stop_advertising (sock):
-    if sock._raw_sdp_record is None:
-        raise OSError("service isn't advertised, " \
-                        "but trying to un-advertise")
-    bt.set_service_raw (sock._raw_sdp_record, False, sock._sdp_handle)
-    sock._raw_sdp_record = None
-    sock._sdp_handle = None
+    with sock._state_lock:
+        if sock._raw_sdp_record is None:
+            raise OSError("service isn't advertised, " \
+                            "but trying to un-advertise")
+        bt.set_service_raw (sock._raw_sdp_record, False, sock._sdp_handle)
+        sock._raw_sdp_record = None
+        sock._sdp_handle = None
 
 def find_service (name = None, uuid = None, address = None):
     if address is not None:
