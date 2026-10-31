@@ -2,6 +2,7 @@
 import os
 import platform
 import sys
+import sysconfig
 
 from setuptools import setup, Extension
 
@@ -24,7 +25,7 @@ packages = ['bluetooth']
 package_dir = dict()
 ext_modules = list()
 install_requires = list()
-package_data = dict()
+package_data = {'bluetooth': ['*.pyi', 'py.typed']}
 eager_resources = list()
 zip_safe = True
 
@@ -32,6 +33,8 @@ zip_safe = True
 if sys.platform == 'win32':
     ext_modules.append(Extension('bluetooth._msbt',
                        libraries=["WS2_32", "Bthprops"],
+                       define_macros=([('Py_GIL_DISABLED', '1')]
+                                      if sysconfig.get_config_var('Py_GIL_DISABLED') else []),
                        sources=['msbt\\_msbt.c']))
 
 elif sys.platform.startswith('linux'):

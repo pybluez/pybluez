@@ -3,7 +3,7 @@ include COPYING
 include README
 include setup.py
 
-recursive-include bluetooth *.py
+recursive-include bluetooth *.py *.pyi py.typed
 
 recursive-include bluez *.c
 recursive-include bluez *.h

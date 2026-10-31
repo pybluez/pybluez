@@ -12,38 +12,112 @@
 
 #include <initguid.h>
 #include <wchar.h>
+#include <limits.h>
+#include <math.h>
+#include <stdint.h>
 
-#if 1
-static void dbg(const char *fmt, ...)
+
+static PyObject *
+msbt_error(int error)
 {
+    return PyErr_SetExcFromWindowsErr(PyExc_OSError,
+                                    error ? error : ERROR_GEN_FAILURE);
 }
-#else
-static void dbg(const char *fmt, ...)
+
+/* The one process-owned Winsock reference is shared by all interpreters.
+ * The lock never encloses Python C API calls or thread-state attachment. */
+static SRWLOCK winsock_init_lock = SRWLOCK_INIT;
+static int winsock_started = 0;
+
+static int
+ensure_winsock(void)
 {
-    va_list ap;
-    va_start (ap, fmt);
-    vprintf (fmt, ap);
-    va_end (ap);
+    int status = 0;
+    WSADATA data;
+    Py_BEGIN_ALLOW_THREADS
+    AcquireSRWLockExclusive(&winsock_init_lock);
+    if (!winsock_started) {
+        status = WSAStartup(MAKEWORD(2, 2), &data);
+        if (status == 0) {
+            winsock_started = 1;
+        }
+    }
+    ReleaseSRWLockExclusive(&winsock_init_lock);
+    Py_END_ALLOW_THREADS
+    if (status != 0) {
+        msbt_error(status);
+        return 0;
+    }
+    return 1;
 }
+
+static int
+socket_value(PyObject *value, SOCKET *socket_out)
+{
+    PyObject *index = PyNumber_Index(value);
+    unsigned long long number;
+    if (index == NULL) {
+        return 0;
+    }
+    number = PyLong_AsUnsignedLongLong(index);
+    Py_DECREF(index);
+    if (PyErr_Occurred()) {
+        return 0;
+    }
+    if (number > (unsigned long long)UINTPTR_MAX) {
+        PyErr_SetString(PyExc_OverflowError, "socket handle does not fit this platform");
+        return 0;
+    }
+    *socket_out = (SOCKET)(uintptr_t)number;
+    if (*socket_out == INVALID_SOCKET) {
+        msbt_error(WSAENOTSOCK);
+        return 0;
+    }
+    return 1;
+}
+
+static PyObject *
+socket_number(SOCKET value)
+{
+    return PyLong_FromUnsignedLongLong((unsigned long long)(uintptr_t)value);
+}
+
+/* Keep only immutable, owned storage while the thread state is detached.
+ * Exporting a mutable buffer prevents resize; its owner lock protects the copy. */
+static PyObject *
+owned_buffer(Py_buffer *view)
+{
+    PyObject *result;
+    PyObject *owner = view->obj;
+    if (owner == NULL) {
+        result = PyBytes_FromStringAndSize(view->buf, view->len);
+        PyBuffer_Release(view);
+        return result;
+    }
+    if (PyBytes_Check(owner)) {
+        Py_INCREF(owner);
+        result = owner;
+        if (view->buf != PyBytes_AS_STRING(owner) ||
+                view->len != PyBytes_GET_SIZE(owner)) {
+            Py_DECREF(result);
+            result = PyBytes_FromStringAndSize(view->buf, view->len);
+        }
+    } else {
+        while (PyMemoryView_Check(owner) && PyMemoryView_GET_BASE(owner)) {
+            owner = PyMemoryView_GET_BASE(owner);
+        }
+#ifdef Py_GIL_DISABLED
+        Py_BEGIN_CRITICAL_SECTION(owner);
 #endif
-
-
-static void Err_SetFromWSALastError(PyObject *exc)
-{
-	LPVOID lpMsgBuf;
-	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, WSAGetLastError(), 0, (LPTSTR) &lpMsgBuf, 0, NULL );
-	PyObject *msg = PyUnicode_FromWideChar((LPTSTR) lpMsgBuf, -1);
-	LocalFree(lpMsgBuf);
-	if (msg != NULL) {
-		PyErr_SetObject( exc, msg );
-		Py_DECREF(msg);
-	}
+        result = PyBytes_FromStringAndSize(view->buf, view->len);
+#ifdef Py_GIL_DISABLED
+        Py_END_CRITICAL_SECTION();
+#endif
+    }
+    PyBuffer_Release(view);
+    return result;
 }
 
-
-#define _CHECK_OR_RAISE_WSA(cond) \
-        if( !(cond) ) { Err_SetFromWSALastError( PyExc_IOError ); return 0; }
 
 static void
 ba2str( BTH_ADDR ba, char *addr, size_t len )
@@ -70,959 +144,945 @@ ba2wstr( BTH_ADDR ba, wchar_t *addr, size_t len )
 }
 
 static PyObject *
-msbt_initwinsock(PyObject *self)
+msbt_initwinsock(PyObject *self, PyObject *unused)
 {
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int status;
-    wVersionRequested = MAKEWORD( 2, 0 );
-    status = WSAStartup( wVersionRequested, &wsaData );
-    if( 0 != status ) {
-        Err_SetFromWSALastError( PyExc_RuntimeError );
-        return 0;
+    if (!ensure_winsock()) {
+        return NULL;
     }
-
     Py_RETURN_NONE;
 }
 PyDoc_STRVAR(msbt_initwinsock_doc, "TODO");
 
-static void 
-dict_set_str_pyobj(PyObject *dict, const char *key, PyObject *valobj)
+static int
+str2uuid(const char *text, GUID *uuid)
 {
-    PyObject *keyobj;
-    keyobj = PyUnicode_FromString( key );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
-}
-
-static void 
-dict_set_wstrings(PyObject *dict, const wchar_t *key, const wchar_t *val)
-{
-    PyObject *keyobj, *valobj;
-    keyobj = PyUnicode_FromWideChar( key, -1 );
-    valobj = PyUnicode_FromWideChar( val, -1 );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
-    Py_DECREF( valobj );
-}
-
-static void 
-dict_set_strings(PyObject *dict, const char *key, const char *val)
-{
-    PyObject *keyobj, *valobj;
-    keyobj = PyUnicode_FromString( key );
-    valobj = PyUnicode_FromString( val );
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
-    Py_DECREF( valobj );
-}
-
-static void 
-dict_set_str_long(PyObject *dict, const char *key, long val)
-{
-    PyObject *keyobj, *valobj;
-    keyobj = PyUnicode_FromString( key );
-    valobj = PyLong_FromLong(val);
-    PyDict_SetItem( dict, keyobj, valobj );
-    Py_DECREF( keyobj );
-    Py_DECREF( valobj );
-}
-
-static int 
-str2uuid( const char *uuid_str, GUID *uuid) 
-{
-    // Parse uuid128 standard format: 12345678-9012-3456-7890-123456789012
-    int i;
-    char buf[20] = { 0 };
-
-    strncpy_s(buf, _countof(buf), uuid_str, 8);
-    uuid->Data1 = strtoul( buf, NULL, 16 );
-    memset(buf, 0, sizeof(buf));
-
-    strncpy_s(buf, _countof(buf), uuid_str+9, 4);
-    uuid->Data2 = (unsigned short) strtoul( buf, NULL, 16 );
-    memset(buf, 0, sizeof(buf));
-    
-    strncpy_s(buf, _countof(buf), uuid_str+14, 4);
-    uuid->Data3 = (unsigned short) strtoul( buf, NULL, 16 );
-    memset(buf, 0, sizeof(buf));
-
-    strncpy_s(buf, _countof(buf), uuid_str+19, 4);
-    strncpy_s(buf+4, _countof(buf)-4, uuid_str+24, 12);
-    for( i=0; i<8; i++ ) {
-        char buf2[3] = { buf[2*i], buf[2*i+1], 0 };
-        uuid->Data4[i] = (unsigned char)strtoul( buf2, NULL, 16 );
+    unsigned char bytes[16];
+    int i, count = 0, nibble = -1, value;
+    if (strlen(text) != 36 || text[8] != '-' || text[13] != '-' ||
+            text[18] != '-' || text[23] != '-') goto invalid;
+    for (i = 0; i < 36; ++i) {
+        unsigned char c = (unsigned char)text[i];
+        if (i == 8 || i == 13 || i == 18 || i == 23) continue;
+        if (c >= '0' && c <= '9') value = c - '0';
+        else if (c >= 'a' && c <= 'f') value = c - 'a' + 10;
+        else if (c >= 'A' && c <= 'F') value = c - 'A' + 10;
+        else goto invalid;
+        if (nibble < 0) nibble = value;
+        else { bytes[count++] = (unsigned char)((nibble << 4) | value); nibble = -1; }
     }
-
+    uuid->Data1 = ((DWORD)bytes[0] << 24) | ((DWORD)bytes[1] << 16) |
+                  ((DWORD)bytes[2] << 8) | bytes[3];
+    uuid->Data2 = (WORD)((bytes[4] << 8) | bytes[5]);
+    uuid->Data3 = (WORD)((bytes[6] << 8) | bytes[7]);
+    memcpy(uuid->Data4, bytes + 8, 8);
+    return 1;
+invalid:
+    PyErr_SetString(PyExc_ValueError, "UUID must contain 32 hexadecimal digits in canonical 128-bit form");
     return 0;
 }
 
 // ====================== SOCKET FUNCTIONS ========================
 
+/* Each descriptor is caller-owned. Public BluetoothSocket methods hold a
+ * separate native descriptor lease for the entire operation. */
+#define MSBT_SOCKET_CALL(result, expression, saved_error) do { \
+    Py_BEGIN_ALLOW_THREADS \
+    (result) = (expression); \
+    (saved_error) = WSAGetLastError(); \
+    Py_END_ALLOW_THREADS \
+} while (0)
+
+static int
+address_value(PyObject *value, SOCKADDR_BTH *address, int allow_any)
+{
+    wchar_t *text;
+    Py_ssize_t length;
+    int size = sizeof(*address);
+    int result, error;
+    ZeroMemory(address, sizeof(*address));
+    address->addressFamily = AF_BTH;
+    if (value == Py_None && allow_any) {
+        return 1;
+    }
+    text = PyUnicode_AsWideCharString(value, &length);
+    if (text == NULL) {
+        return 0;
+    }
+    if (allow_any && length == 0) {
+        PyMem_Free(text);
+        return 1;
+    }
+    if ((Py_ssize_t)wcslen(text) != length) {
+        PyMem_Free(text);
+        PyErr_SetString(PyExc_ValueError, "embedded null in Bluetooth address");
+        return 0;
+    }
+    result = WSAStringToAddressW(text, AF_BTH, NULL,
+                               (LPSOCKADDR)address, &size);
+    error = result == SOCKET_ERROR ? WSAGetLastError() : 0;
+    PyMem_Free(text);
+    if (result == SOCKET_ERROR) {
+        msbt_error(error);
+        return 0;
+    }
+    return 1;
+}
+
 static PyObject *
 msbt_socket(PyObject *self, PyObject *args)
 {
-    int family = AF_BTH;
-    int type;
-    int proto;
-    int sockfd = -1;
-
-    if(!PyArg_ParseTuple(args, "ii", &type, &proto)) return 0;
-
-    Py_BEGIN_ALLOW_THREADS;
-    sockfd = socket( AF_BTH, type, proto );
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sockfd );
-
-    return PyLong_FromLong( sockfd );
-};
-PyDoc_STRVAR(msbt_socket_doc, "TODO");
+    int type, protocol, error;
+    SOCKET descriptor;
+    PyObject *result;
+    if (!PyArg_ParseTuple(args, "ii:socket", &type, &protocol)) return NULL;
+    if (!ensure_winsock()) return NULL;
+    MSBT_SOCKET_CALL(descriptor, socket(AF_BTH, type, protocol), error);
+    if (descriptor == INVALID_SOCKET) return msbt_error(error);
+    result = socket_number(descriptor);
+    if (result == NULL) closesocket(descriptor);
+    return result;
+}
+PyDoc_STRVAR(msbt_socket_doc, "Create a native Windows Bluetooth socket.");
 
 static PyObject *
 msbt_bind(PyObject *self, PyObject *args)
 {
-    wchar_t *addrstr = NULL;
-    Py_ssize_t addrstrlen = -1;
-    int sockfd = -1;
-    int port = -1;
-    char buf[100] = { 0 };
-    int buf_len = sizeof( buf );
-    int status;
-
-    SOCKADDR_BTH sa = { 0 };
-    int sa_len = sizeof(sa);
-
-    if(!PyArg_ParseTuple(args, "iu#i", &sockfd, &addrstr, &addrstrlen, &port))
-        return 0;
-
-    if( addrstrlen == 0 ) {
-        sa.btAddr = 0;
-    } else {
-        _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddress( addrstr, \
-                    AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len ) );
-    }
-    sa.addressFamily = AF_BTH;
-    sa.port = port;
-
-    Py_BEGIN_ALLOW_THREADS;
-    status = bind( sockfd, (LPSOCKADDR)&sa, sa_len );
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
-
+    PyObject *descriptor_object, *text;
+    SOCKET descriptor;
+    SOCKADDR_BTH address;
+    int port, status, error;
+    if (!PyArg_ParseTuple(args, "OOi:bind", &descriptor_object, &text, &port)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    if (!address_value(text, &address, 1)) return NULL;
+    address.port = (ULONG)port;
+    MSBT_SOCKET_CALL(status, bind(descriptor, (SOCKADDR *)&address, sizeof(address)), error);
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_bind_doc, "TODO");
+PyDoc_STRVAR(msbt_bind_doc, "Bind a native Bluetooth socket to an address and port.");
 
 static PyObject *
 msbt_listen(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int backlog = -1;
-    DWORD status;
-    if(!PyArg_ParseTuple(args, "ii", &sockfd, &backlog)) return 0;
-
-    Py_BEGIN_ALLOW_THREADS;
-    status = listen(sockfd, backlog);
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
-    
+    PyObject *descriptor_object;
+    SOCKET descriptor;
+    int backlog, status, error;
+    if (!PyArg_ParseTuple(args, "Oi:listen", &descriptor_object, &backlog)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    MSBT_SOCKET_CALL(status, listen(descriptor, backlog), error);
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_listen_doc, "TODO");
+PyDoc_STRVAR(msbt_listen_doc, "Listen on a bound Bluetooth socket.");
 
 static PyObject *
 msbt_accept(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int clientfd = -1;
-    SOCKADDR_BTH ca = { 0 };
-    int ca_len = sizeof(ca);
-    PyObject *result = NULL;
-    char buf[100] = { 0 };
-    int buf_len = sizeof(buf);
-
-    if(!PyArg_ParseTuple(args, "i", &sockfd)) return 0;
-    
-    Py_BEGIN_ALLOW_THREADS;
-    clientfd = accept(sockfd, (LPSOCKADDR)&ca, &ca_len);
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( SOCKET_ERROR != clientfd );
-
-    ba2str(ca.btAddr, buf, _countof(buf));
-    result = Py_BuildValue( "isi", clientfd, buf, ca.port );
+    PyObject *descriptor_object, *number, *result;
+    SOCKET descriptor, client;
+    SOCKADDR_BTH address = {0};
+    int size = sizeof(address), error;
+    char text[18];
+    if (!PyArg_ParseTuple(args, "O:accept", &descriptor_object)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    MSBT_SOCKET_CALL(client, accept(descriptor, (SOCKADDR *)&address, &size), error);
+    if (client == INVALID_SOCKET) return msbt_error(error);
+    if (address.addressFamily != AF_BTH || size < sizeof(address)) {
+        closesocket(client);
+        return msbt_error(WSAEAFNOSUPPORT);
+    }
+    ba2str(address.btAddr, text, sizeof(text));
+    number = socket_number(client);
+    if (number == NULL) {
+        closesocket(client);
+        return NULL;
+    }
+    result = Py_BuildValue("Nsk", number, text, address.port);
+    if (result == NULL) closesocket(client);
     return result;
-};
-PyDoc_STRVAR(msbt_accept_doc, "TODO");
+}
+PyDoc_STRVAR(msbt_accept_doc, "Accept a Bluetooth socket, returning its full-width handle and peer.");
 
 static PyObject *
 msbt_connect(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    wchar_t *addrstr = NULL;
-    int port = -1;
-    SOCKADDR_BTH sa = { 0 };
-    int sa_len = sizeof(sa);
-    DWORD status;
-
-    if(!PyArg_ParseTuple(args, "iui", &sockfd, &addrstr, &port)) return 0;
-
-    if( SOCKET_ERROR == WSAStringToAddress( addrstr, AF_BTH, NULL, 
-                (LPSOCKADDR)&sa, &sa_len ) ) {
-        Err_SetFromWSALastError(PyExc_IOError);
-        return 0;
-    }
-    sa.addressFamily = AF_BTH;
-    sa.port = port;
-    
-    Py_BEGIN_ALLOW_THREADS;
-    status = connect(sockfd, (LPSOCKADDR)&sa, sizeof(sa));
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
-
+    PyObject *descriptor_object, *text;
+    SOCKET descriptor;
+    SOCKADDR_BTH address;
+    int port, status, error;
+    if (!PyArg_ParseTuple(args, "OOi:connect", &descriptor_object, &text, &port)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    if (!address_value(text, &address, 0)) return NULL;
+    address.port = (ULONG)port;
+    MSBT_SOCKET_CALL(status, connect(descriptor, (SOCKADDR *)&address, sizeof(address)), error);
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_connect_doc, "TODO");
+PyDoc_STRVAR(msbt_connect_doc, "Connect a Bluetooth socket to an address and port.");
 
 static PyObject *
 msbt_send(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    Py_buffer data;
-    int flags = 0;
-    int sent = 0;
-
-    if(!PyArg_ParseTuple(args, "is*|i", &sockfd, &data, &flags)) 
-        return 0;
-
-    Py_BEGIN_ALLOW_THREADS;
-    sent = send(sockfd, data.buf, data.len, flags);
-    Py_END_ALLOW_THREADS;
-    PyBuffer_Release(&data);
-
-    _CHECK_OR_RAISE_WSA( SOCKET_ERROR != sent );
-    
-    return PyLong_FromLong( sent );
-};
-PyDoc_STRVAR(msbt_send_doc, "TODO");
+    PyObject *descriptor_object, *owned;
+    SOCKET descriptor;
+    Py_buffer view;
+    const char *data;
+    int flags = 0, length, sent, error;
+    if (!PyArg_ParseTuple(args, "Os*|i:send", &descriptor_object, &view, &flags)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) {
+        PyBuffer_Release(&view);
+        return NULL;
+    }
+    if (view.len > INT_MAX) {
+        PyBuffer_Release(&view);
+        PyErr_SetString(PyExc_OverflowError, "send buffer exceeds Winsock length range");
+        return NULL;
+    }
+    length = (int)view.len;
+    owned = owned_buffer(&view);
+    if (owned == NULL) return NULL;
+    data = PyBytes_AS_STRING(owned);
+    MSBT_SOCKET_CALL(sent, send(descriptor, data, length, flags), error);
+    Py_DECREF(owned);
+    if (sent == SOCKET_ERROR) return msbt_error(error);
+    return PyLong_FromLong(sent);
+}
+PyDoc_STRVAR(msbt_send_doc, "Send immutable or snapshotted buffer data through Winsock.");
 
 static PyObject *
 msbt_recv(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    PyObject *buf = NULL;
-    int datalen = -1;
-    int flags = 0;
-    int received = 0;
-
-    if(!PyArg_ParseTuple(args, "ii|i", &sockfd, &datalen, &flags))
-        return 0;
-
-    buf = PyBytes_FromStringAndSize((char*)0, datalen);
-    Py_BEGIN_ALLOW_THREADS;
-    received = recv(sockfd, PyBytes_AS_STRING(buf), datalen, flags);
-    Py_END_ALLOW_THREADS;
-
-    if( SOCKET_ERROR == received ){
-        Py_DECREF(buf);
+    PyObject *descriptor_object, *result;
+    SOCKET descriptor;
+    Py_ssize_t requested;
+    char *data;
+    int flags = 0, received, error;
+    if (!PyArg_ParseTuple(args, "On|i:recv", &descriptor_object, &requested, &flags)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    if (requested < 0 || requested > INT_MAX) {
+        PyErr_SetString(PyExc_ValueError, "receive size must be between zero and INT_MAX");
+        return NULL;
     }
-    _CHECK_OR_RAISE_WSA( SOCKET_ERROR != received );
-    if( received != datalen ) _PyBytes_Resize(&buf, received);
-
-    return buf;
-};
-PyDoc_STRVAR(msbt_recv_doc, "TODO");
+    result = PyBytes_FromStringAndSize(NULL, requested);
+    if (result == NULL || requested == 0) return result;
+    data = PyBytes_AS_STRING(result);
+    MSBT_SOCKET_CALL(received, recv(descriptor, data, (int)requested, flags), error);
+    if (received == SOCKET_ERROR) {
+        Py_DECREF(result);
+        return msbt_error(error);
+    }
+    if (received != requested && _PyBytes_Resize(&result, received) < 0) return NULL;
+    return result;
+}
+PyDoc_STRVAR(msbt_recv_doc, "Receive into owned, unpublished bytes storage.");
 
 static PyObject *
 msbt_close(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int status;
-    if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
-    
-    Py_BEGIN_ALLOW_THREADS;
-    status = closesocket(sockfd);
-    Py_END_ALLOW_THREADS;
-
+    PyObject *descriptor_object;
+    SOCKET descriptor;
+    int status, error;
+    if (!PyArg_ParseTuple(args, "O:close", &descriptor_object)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    MSBT_SOCKET_CALL(status, closesocket(descriptor), error);
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_close_doc, "TODO");
+PyDoc_STRVAR(msbt_close_doc, "Close one caller-owned native socket descriptor.");
 
 static PyObject *
-msbt_getpeername(PyObject *self, PyObject *args)
+socket_address(PyObject *args, int peer)
 {
-    int sockfd = -1;
-    SOCKADDR_BTH sa = { 0 };
-    int sa_len = sizeof(sa);
-    char buf[18] = { 0 };
-    int buf_len = sizeof(buf);
-    int status;
-    if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
+    PyObject *descriptor_object;
+    SOCKET descriptor;
+    SOCKADDR_BTH address = {0};
+    int size = sizeof(address), status, error;
+    char text[18];
+    if (!PyArg_ParseTuple(args, "O", &descriptor_object)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    Py_BEGIN_ALLOW_THREADS
+    status = peer ? getpeername(descriptor, (SOCKADDR *)&address, &size)
+                  : getsockname(descriptor, (SOCKADDR *)&address, &size);
+    error = WSAGetLastError();
+    Py_END_ALLOW_THREADS
+    if (status == SOCKET_ERROR) return msbt_error(error);
+    if (address.addressFamily != AF_BTH || size < sizeof(address)) {
+        PyErr_SetString(PyExc_OSError, "the socket address is not a Bluetooth address");
+        return NULL;
+    }
+    ba2str(address.btAddr, text, sizeof(text));
+    return Py_BuildValue("sk", text, address.port);
+}
 
-    sa.addressFamily = AF_BTH;
-    Py_BEGIN_ALLOW_THREADS;
-    status = getpeername( sockfd, (LPSOCKADDR)&sa, &sa_len );
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
-
-    ba2str( sa.btAddr, buf, buf_len );
-    return Py_BuildValue( "si", buf, sa.port );
-};
-PyDoc_STRVAR(msbt_getpeername_doc,
-"getpeername() -> address info\n\
-\n\
-Return the address of the peer to which a socket is connected.\n\
-This function works with any address family and it simply returns the \n\
-address to which the socket is connected. The getpeername function can be \n\
-used only on a connected socket.\n\
-For datagram sockets, only the address of a peer specified in a previous \n\
-connect call will be returned. Any address specified by a previous sendto \n\
-call will not be returned by getpeername.");
-
-static PyObject *
-msbt_getsockname(PyObject *self, PyObject *args)
-{
-    int sockfd = -1;
-    SOCKADDR_BTH sa = { 0 };
-    int sa_len = sizeof(sa);
-    char buf[18] = { 0 };
-    int buf_len = sizeof(buf);
-    int status;
-    if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
-
-    sa.addressFamily = AF_BTH;
-    Py_BEGIN_ALLOW_THREADS;
-    status = getsockname( sockfd, (LPSOCKADDR)&sa, &sa_len );
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
-
-    ba2str( sa.btAddr, buf, buf_len );
-    return Py_BuildValue( "si", buf, sa.port );
-};
-PyDoc_STRVAR(msbt_getsockname_doc, "TODO");
+static PyObject *msbt_getpeername(PyObject *self, PyObject *args) { return socket_address(args, 1); }
+static PyObject *msbt_getsockname(PyObject *self, PyObject *args) { return socket_address(args, 0); }
+PyDoc_STRVAR(msbt_getpeername_doc, "Return the connected Bluetooth peer address and port.");
+PyDoc_STRVAR(msbt_getsockname_doc, "Return the local Bluetooth address and port.");
 
 static PyObject *
 msbt_dup(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int newsockfd = -1;
-    int status;
-    DWORD pid;
-    WSAPROTOCOL_INFO pi = { 0 };
-
-    if(!PyArg_ParseTuple( args, "i", &sockfd )) return 0;
-
-    // prepare to duplicate
-    pid = GetCurrentProcessId();
-    status = WSADuplicateSocket( sockfd, pid, &pi );
-    _CHECK_OR_RAISE_WSA( NO_ERROR == status );
-
-    // duplicate!
-    newsockfd = WSASocket( FROM_PROTOCOL_INFO, 
-            FROM_PROTOCOL_INFO, 
-            FROM_PROTOCOL_INFO,
-            &pi, 0, 0 );
-    _CHECK_OR_RAISE_WSA( INVALID_SOCKET != newsockfd );
-    
-    return PyLong_FromLong( newsockfd );
+    PyObject *descriptor_object, *result;
+    SOCKET descriptor, duplicate = INVALID_SOCKET;
+    WSAPROTOCOL_INFOW protocol;
+    int status, error = 0;
+    if (!PyArg_ParseTuple(args, "O:dup", &descriptor_object)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    ZeroMemory(&protocol, sizeof(protocol));
+    Py_BEGIN_ALLOW_THREADS
+    status = WSADuplicateSocketW(descriptor, GetCurrentProcessId(), &protocol);
+    if (status == SOCKET_ERROR) {
+        error = WSAGetLastError();
+    } else {
+        duplicate = WSASocketW(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO,
+                               FROM_PROTOCOL_INFO, &protocol, 0, WSA_FLAG_OVERLAPPED);
+        if (duplicate == INVALID_SOCKET) error = WSAGetLastError();
+    }
+    Py_END_ALLOW_THREADS
+    if (duplicate == INVALID_SOCKET) return msbt_error(error);
+    result = socket_number(duplicate);
+    if (result == NULL) closesocket(duplicate);
+    return result;
 }
-PyDoc_STRVAR(msbt_dup_doc, "TODO");
+PyDoc_STRVAR(msbt_dup_doc, "Duplicate a socket descriptor while preserving shared Winsock state.");
 
-// ====================
-static int bt_adapter_present()
-{
-   int hwactive = 1;
-   SOCKADDR_BTH sa = { 0 };
-
-   int s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
-
-   sa.addressFamily = AF_BTH;
-   sa.port = BT_PORT_ANY;
-   if (s == INVALID_SOCKET)
-   {
-      closesocket(s);
-      return 0;
-   }
-
-   if (SOCKET_ERROR == bind(s, (LPSOCKADDR)&sa, sizeof(sa)))
-   {
-	   hwactive = 0;
-   }
-
-   closesocket(s);
-   return hwactive;
-}
-
+/* Device operations keep all Windows handles and result buffers local to the
+ * call. The automated software gate does not issue radio inquiries. */
 static PyObject *
-msbt_discover_devices(PyObject *self, PyObject *args, PyObject *kwds)
+msbt_discover_devices(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    BLUETOOTH_DEVICE_INFO device_info;
-    BLUETOOTH_DEVICE_SEARCH_PARAMS search_criteria;
-    HBLUETOOTH_DEVICE_FIND found_device;
-    BOOL next = TRUE;
-    PyObject * toreturn = NULL;
-    int duration = 8;
-    int flush_cache = 1;
-
-    static char *keywords[] = {"duration", "flush_cache", 0};
-    if(!PyArg_ParseTupleAndKeywords(args, kwds, "ii", keywords,
-                &duration, &flush_cache)) {
+    static char *keywords[] = {"duration", "flush_cache", NULL};
+    BLUETOOTH_DEVICE_INFO info = {0};
+    BLUETOOTH_DEVICE_SEARCH_PARAMS criteria = {0};
+    HBLUETOOTH_DEVICE_FIND find = NULL;
+    PyObject *result, *name, *item;
+    int duration = 8, flush_cache = 1;
+    BOOL more;
+    DWORD error = 0;
+    char address[18];
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|ip:discover_devices", keywords,
+                                    &duration, &flush_cache)) return NULL;
+    if (duration < (flush_cache ? 1 : 0) || duration > 48) {
+        PyErr_SetString(PyExc_ValueError, "inquiry duration must fit the Windows 1..48 multiplier range");
         return NULL;
     }
-    toreturn = PyList_New(0);
-    ZeroMemory(&device_info, sizeof(BLUETOOTH_DEVICE_INFO));
-    ZeroMemory(&search_criteria, sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS));
-
-    device_info.dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
-    search_criteria.dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS);
-    search_criteria.fReturnAuthenticated = TRUE;
-    search_criteria.fReturnRemembered = !flush_cache;
-    search_criteria.fReturnConnected = TRUE;
-    search_criteria.fReturnUnknown = TRUE;
-    search_criteria.fIssueInquiry = TRUE;
-    search_criteria.cTimeoutMultiplier = duration;
-    search_criteria.hRadio = NULL;
-
-    Py_BEGIN_ALLOW_THREADS;
-    found_device = BluetoothFindFirstDevice(&search_criteria, &device_info);
-    Py_END_ALLOW_THREADS;
-
-    _CHECK_OR_RAISE_WSA(found_device != NULL)
-
-    while(next) {
-        PyObject *tup = NULL;
-        PyObject *item_tuple = NULL;
-        char buf[40] = {0};
-        BTH_ADDR result = device_info.Address.ullLong;
-        ba2str( result, buf, _countof(buf) );
-
-        tup = PyTuple_New(3);
-        item_tuple = PyUnicode_FromString(buf);
-        PyTuple_SetItem( tup, 0, item_tuple );
-        item_tuple = PyUnicode_FromWideChar(device_info.szName, -1);
-        PyTuple_SetItem( tup, 1, item_tuple );
-        item_tuple = PyLong_FromLong(device_info.ulClassofDevice);
-        PyTuple_SetItem( tup, 2, item_tuple );
-        PyList_Append( toreturn, tup );
-        Py_DECREF( tup );
-        
-        Py_BEGIN_ALLOW_THREADS;
-        next = BluetoothFindNextDevice(found_device, &device_info);
-        Py_END_ALLOW_THREADS;
+    result = PyList_New(0);
+    if (result == NULL) return NULL;
+    info.dwSize = sizeof(info);
+    criteria.dwSize = sizeof(criteria);
+    criteria.fReturnAuthenticated = TRUE;
+    criteria.fReturnRemembered = !flush_cache;
+    criteria.fReturnConnected = TRUE;
+    criteria.fReturnUnknown = TRUE;
+    criteria.fIssueInquiry = flush_cache;
+    criteria.cTimeoutMultiplier = (UCHAR)duration;
+    Py_BEGIN_ALLOW_THREADS
+    find = BluetoothFindFirstDevice(&criteria, &info);
+    if (find == NULL) error = GetLastError();
+    Py_END_ALLOW_THREADS
+    if (find == NULL) {
+        if (error == ERROR_NO_MORE_ITEMS) return result;
+        Py_DECREF(result);
+        return msbt_error((int)error);
     }
-    return toreturn;
+    for (;;) {
+        ba2str(info.Address.ullLong, address, sizeof(address));
+        name = PyUnicode_FromWideChar(info.szName,
+                    (Py_ssize_t)wcsnlen_s(info.szName, _countof(info.szName)));
+        if (name == NULL) goto fail;
+        item = Py_BuildValue("sOk", address, name, info.ulClassofDevice);
+        Py_DECREF(name);
+        if (item == NULL) goto fail;
+        if (PyList_Append(result, item) < 0) {
+            Py_DECREF(item);
+            goto fail;
+        }
+        Py_DECREF(item);
+        Py_BEGIN_ALLOW_THREADS
+        more = BluetoothFindNextDevice(find, &info);
+        error = more ? ERROR_SUCCESS : GetLastError();
+        Py_END_ALLOW_THREADS
+        if (!more) {
+            if (error != ERROR_NO_MORE_ITEMS) {
+                msbt_error((int)error);
+                goto fail;
+            }
+            break;
+        }
+    }
+    BluetoothFindDeviceClose(find);
+    return result;
+fail:
+    BluetoothFindDeviceClose(find);
+    Py_DECREF(result);
+    return NULL;
 }
 PyDoc_STRVAR(msbt_discover_devices_doc,
-	"msbt_discover_devices(duration=8, flush_cache=True\n\\n\
-	Performs a device inquiry. The inquiry will last 1.28 * duration seconds.\
-	If flush_cache is True, then new inquiry will be performed,\
-	else cashed devices will be returned(plus paired devices).)");
-
+             "Discover devices, or return cached devices when flush_cache is false.");
 
 static PyObject *
-msbt_list_local(PyObject *self)
+msbt_list_local(PyObject *self, PyObject *unused)
 {
-    HANDLE m_radio = NULL;
-    HBLUETOOTH_RADIO_FIND m_bt = NULL;
-    BOOL next = TRUE;
-    BLUETOOTH_FIND_RADIO_PARAMS
-            find_radio = {sizeof(BLUETOOTH_FIND_RADIO_PARAMS)};
-    PyObject * toreturn = PyList_New(0);
-
-    Py_BEGIN_ALLOW_THREADS;
-    m_bt = BluetoothFindFirstRadio(&find_radio, &m_radio);
-    Py_END_ALLOW_THREADS;
-    _CHECK_OR_RAISE_WSA(m_bt != NULL);
-
-    while(next) {
-        PyObject *item = NULL;
-        char buf[40] = {0};
-        BLUETOOTH_RADIO_INFO m_bt_info = {sizeof(BLUETOOTH_RADIO_INFO), 0,};
-
-        // Then get the radio device info....
-        DWORD mbtinfo_ret = BluetoothGetRadioInfo(m_radio, &m_bt_info);
-        _CHECK_OR_RAISE_WSA(mbtinfo_ret == ERROR_SUCCESS);
-
-        ba2str(m_bt_info.address.ullLong, buf, _countof(buf));
-        item = PyUnicode_FromString(buf);
-        PyList_Append(toreturn, item);
-        Py_DECREF(item);
-
-        next = BluetoothFindNextRadio(&find_radio, &m_radio);
+    BLUETOOTH_FIND_RADIO_PARAMS parameters = {sizeof(parameters)};
+    HBLUETOOTH_RADIO_FIND find;
+    HANDLE radio = NULL;
+    BLUETOOTH_RADIO_INFO info;
+    PyObject *result = PyList_New(0), *item;
+    DWORD error = 0;
+    BOOL more;
+    char address[18];
+    if (result == NULL) return NULL;
+    Py_BEGIN_ALLOW_THREADS
+    find = BluetoothFindFirstRadio(&parameters, &radio);
+    if (find == NULL) error = GetLastError();
+    Py_END_ALLOW_THREADS
+    if (find == NULL) {
+        if (error == ERROR_NO_MORE_ITEMS) return result;
+        Py_DECREF(result);
+        return msbt_error((int)error);
     }
-
-    // No more radio, close the radio handle
-    _CHECK_OR_RAISE_WSA(BluetoothFindRadioClose(m_bt) == TRUE);
-
-    return toreturn;
+    for (;;) {
+        ZeroMemory(&info, sizeof(info));
+        info.dwSize = sizeof(info);
+        Py_BEGIN_ALLOW_THREADS
+        error = BluetoothGetRadioInfo(radio, &info);
+        CloseHandle(radio);
+        radio = NULL;
+        Py_END_ALLOW_THREADS
+        if (error != ERROR_SUCCESS) {
+            msbt_error((int)error);
+            goto fail;
+        }
+        ba2str(info.address.ullLong, address, sizeof(address));
+        item = PyUnicode_FromString(address);
+        if (item == NULL) goto fail;
+        if (PyList_Append(result, item) < 0) {
+            Py_DECREF(item);
+            goto fail;
+        }
+        Py_DECREF(item);
+        Py_BEGIN_ALLOW_THREADS
+        more = BluetoothFindNextRadio(find, &radio);
+        error = more ? ERROR_SUCCESS : GetLastError();
+        Py_END_ALLOW_THREADS
+        if (!more) {
+            if (error != ERROR_NO_MORE_ITEMS) {
+                msbt_error((int)error);
+                goto fail;
+            }
+            break;
+        }
+    }
+    BluetoothFindRadioClose(find);
+    return result;
+fail:
+    if (radio != NULL) CloseHandle(radio);
+    BluetoothFindRadioClose(find);
+    Py_DECREF(result);
+    return NULL;
 }
-PyDoc_STRVAR(msbt_list_local_doc,
-    "msbt_list_local - List local BT adapters addresses");
-
+PyDoc_STRVAR(msbt_list_local_doc, "Return local Bluetooth adapter addresses.");
 
 static PyObject *
 msbt_lookup_name(PyObject *self, PyObject *args)
 {
-    HANDLE rhandle = NULL;
-    BLUETOOTH_FIND_RADIO_PARAMS p = { sizeof(p) };
-    HBLUETOOTH_RADIO_FIND fhandle = NULL;
-    BLUETOOTH_DEVICE_INFO dinfo = { 0 };
-    wchar_t *addrstr = NULL;
-    SOCKADDR_BTH sa = { 0 };
-    int sa_len = sizeof(sa);
-    DWORD status;
-
-    if(!PyArg_ParseTuple(args,"u",&addrstr)) return 0;
-    
-    _CHECK_OR_RAISE_WSA( NO_ERROR == WSAStringToAddress( addrstr, \
-                AF_BTH, NULL, (LPSOCKADDR)&sa, &sa_len ) );
-
-//    printf("looking for first radio\n");
-    fhandle = BluetoothFindFirstRadio(&p, &rhandle);
-    _CHECK_OR_RAISE_WSA( NULL != fhandle );
-//    printf("found radio 0x%p\n", rhandle );
-
-    dinfo.dwSize = sizeof( dinfo );
-    dinfo.Address.ullLong = sa.btAddr;
-    status = BluetoothGetDeviceInfo( rhandle, &dinfo );
-
-    _CHECK_OR_RAISE_WSA( status == ERROR_SUCCESS );
-//    printf("name: %s\n", dinfo.szName );
-
-    _CHECK_OR_RAISE_WSA( TRUE == BluetoothFindRadioClose( fhandle ) );
-
-    return PyUnicode_FromWideChar( dinfo.szName, wcslen( dinfo.szName ) );
+    PyObject *text;
+    SOCKADDR_BTH address;
+    BLUETOOTH_FIND_RADIO_PARAMS parameters = {sizeof(parameters)};
+    BLUETOOTH_DEVICE_INFO info = {0};
+    HBLUETOOTH_RADIO_FIND find;
+    HANDLE radio = NULL;
+    DWORD error = 0;
+    if (!PyArg_ParseTuple(args, "O:lookup_name", &text)) return NULL;
+    if (!address_value(text, &address, 0)) return NULL;
+    info.dwSize = sizeof(info);
+    info.Address.ullLong = address.btAddr;
+    Py_BEGIN_ALLOW_THREADS
+    find = BluetoothFindFirstRadio(&parameters, &radio);
+    if (find == NULL) {
+        error = GetLastError();
+    } else {
+        error = BluetoothGetDeviceInfo(radio, &info);
+        CloseHandle(radio);
+        BluetoothFindRadioClose(find);
+    }
+    Py_END_ALLOW_THREADS
+    if (error != ERROR_SUCCESS) return msbt_error((int)error);
+    return PyUnicode_FromWideChar(info.szName,
+                  (Py_ssize_t)wcsnlen_s(info.szName, _countof(info.szName)));
 }
-PyDoc_STRVAR(msbt_lookup_name_doc, "TODO");
+PyDoc_STRVAR(msbt_lookup_name_doc, "Return the cached Windows device name for a Bluetooth address.");
 
-// ======================= SDP FUNCTIONS ======================
+static int
+record_object(PyObject *record, const char *key, PyObject *value)
+{
+    return PyDict_SetItemString(record, key, value);
+}
+
+static int
+record_wtext(PyObject *record, const char *key, const wchar_t *text)
+{
+    PyObject *value;
+    int status;
+    if (text == NULL) return record_object(record, key, Py_None);
+    value = PyUnicode_FromWideChar(text, -1);
+    if (value == NULL) return -1;
+    status = record_object(record, key, value);
+    Py_DECREF(value);
+    return status;
+}
+
+static int
+record_text(PyObject *record, const char *key, const char *text)
+{
+    PyObject *value = PyUnicode_FromString(text);
+    int status;
+    if (value == NULL) return -1;
+    status = record_object(record, key, value);
+    Py_DECREF(value);
+    return status;
+}
+
+static int
+local_address(wchar_t *text, size_t length)
+{
+    SOCKET descriptor;
+    SOCKADDR_BTH address = {0};
+    int size = sizeof(address), status, error = 0;
+    Py_BEGIN_ALLOW_THREADS
+    descriptor = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+    if (descriptor == INVALID_SOCKET) {
+        error = WSAGetLastError();
+    } else {
+        address.addressFamily = AF_BTH;
+        address.port = BT_PORT_ANY;
+        status = bind(descriptor, (SOCKADDR *)&address, sizeof(address));
+        if (status == SOCKET_ERROR) {
+            error = WSAGetLastError();
+        } else if (getsockname(descriptor, (SOCKADDR *)&address, &size) == SOCKET_ERROR) {
+            error = WSAGetLastError();
+        }
+        closesocket(descriptor);
+    }
+    Py_END_ALLOW_THREADS
+    if (error) {
+        msbt_error(error);
+        return 0;
+    }
+    ba2wstr(address.btAddr, text, length);
+    return 1;
+}
+
+static PyObject *
+service_record(WSAQUERYSETW *query, const wchar_t *host)
+{
+    PyObject *record = PyDict_New(), *value;
+    CSADDR_INFO *address;
+    const char *protocol = "UNKNOWN";
+    if (record == NULL) return NULL;
+    if (record_wtext(record, "host", host) < 0 ||
+            record_wtext(record, "name", query->lpszServiceInstanceName) < 0 ||
+            record_wtext(record, "description", query->lpszComment) < 0) goto fail;
+    if (record_object(record, "port", Py_None) < 0) goto fail;
+    address = query->dwNumberOfCsAddrs ? query->lpcsaBuffer : NULL;
+    if (address && address->RemoteAddr.lpSockaddr &&
+            address->RemoteAddr.iSockaddrLength >= sizeof(SOCKADDR_BTH) &&
+            address->RemoteAddr.lpSockaddr->sa_family == AF_BTH) {
+        if (address->iProtocol == BTHPROTO_RFCOMM) protocol = "RFCOMM";
+        else if (address->iProtocol == BTHPROTO_L2CAP) protocol = "L2CAP";
+        if (address->iProtocol == BTHPROTO_RFCOMM || address->iProtocol == BTHPROTO_L2CAP) {
+            value = PyLong_FromUnsignedLong(((SOCKADDR_BTH *)address->RemoteAddr.lpSockaddr)->port);
+            if (value == NULL) goto fail;
+            if (record_object(record, "port", value) < 0) {
+                Py_DECREF(value);
+                goto fail;
+            }
+            Py_DECREF(value);
+        }
+    }
+    if (record_text(record, "protocol", protocol) < 0) goto fail;
+    if (query->lpBlob == NULL ||
+            (query->lpBlob->cbSize && query->lpBlob->pBlobData == NULL)) {
+        msbt_error(ERROR_INVALID_DATA);
+        goto fail;
+    }
+    value = PyBytes_FromStringAndSize((const char *)query->lpBlob->pBlobData,
+                                    query->lpBlob->cbSize);
+    if (value == NULL) goto fail;
+    if (record_object(record, "rawrecord", value) < 0) {
+        Py_DECREF(value);
+        goto fail;
+    }
+    Py_DECREF(value);
+    return record;
+fail:
+    Py_DECREF(record);
+    return NULL;
+}
 
 static PyObject *
 msbt_find_service(PyObject *self, PyObject *args)
 {
-    wchar_t *addrwstr = NULL;
-    PyObject *addrpystr = NULL;
-    char *uuidstr = NULL;
-
-	// inquiry data structure
-	DWORD qs_len = sizeof( WSAQUERYSET );
-	WSAQUERYSET *qs = (WSAQUERYSET*) malloc( qs_len );
-
-	DWORD flags = LUP_FLUSHCACHE | LUP_RETURN_ALL;
-	HANDLE h;
-	int done = 0;
-    int status = 0;
-    PyObject *record = NULL;
-    PyObject *toreturn = NULL;
-    GUID uuid = { 0 };
-    wchar_t localAddressBuf[20] = { 0 };
-
-    // UUID is parsed on our side so it's fine to leave it as regular char *.
-    if(!PyArg_ParseTuple(args, "Us", &addrpystr, &uuidstr))
-        return 0;
-
-    addrwstr = PyUnicode_AsWideCharString(addrpystr, NULL);
-
-	ZeroMemory( qs, qs_len );
-	qs->dwSize = sizeof(WSAQUERYSET);
-	qs->dwNameSpace = NS_BTH;
-    qs->dwNumberOfCsAddrs = 0;
-    qs->lpszContext = localAddressBuf;
-
-    if( 0 == wcscmp( addrwstr, L"localhost" ) ) {
-        // find the Bluetooth address of the first local adapter. 
-#if 0
-        HANDLE rhandle = NULL;
-        BLUETOOTH_RADIO_INFO info;
-        BLUETOOTH_FIND_RADIO_PARAMS p = { sizeof(p) };
-        HBLUETOOTH_RADIO_FIND fhandle = NULL;
-
-        printf("looking for first radio\n");
-        fhandle = BluetoothFindFirstRadio(&p, &rhandle);
-        _CHECK_OR_RAISE_WSA( NULL != fhandle );
-
-        printf("first radio: 0x%p\n", rhandle);
-        _CHECK_OR_RAISE_WSA( \
-                TRUE == BluetoothFindRadioClose( fhandle ) );
-
-        printf("retrieving radio info on handle 0x%p\n", rhandle);
-        info.dwSize = sizeof(info);
-        // XXX why doesn't this work???
-        _CHECK_OR_RAISE_WSA( \
-            ERROR_SUCCESS != BluetoothGetRadioInfo( rhandle, &info ) );
-
-        ba2str( info.address.ullLong, localAddressBuf, _countof(localAddressBuf) );
-#else
-        // bind a temporary socket and get its Bluetooth address
-        SOCKADDR_BTH sa = { 0 };
-        int sa_len = sizeof(sa);
-        SOCKET tmpfd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
-
-        _CHECK_OR_RAISE_WSA( tmpfd >= 0 );
-        sa.addressFamily = AF_BTH;
-        sa.port = BT_PORT_ANY;
-        _CHECK_OR_RAISE_WSA(NO_ERROR == bind(tmpfd,(LPSOCKADDR)&sa,sa_len) );
-
-        _CHECK_OR_RAISE_WSA(NO_ERROR == getsockname(tmpfd, (LPSOCKADDR)&sa,\
-                    &sa_len ) );
-
-        ba2wstr(sa.btAddr, localAddressBuf, _countof(localAddressBuf) );
-        _CHECK_OR_RAISE_WSA(NO_ERROR == closesocket(tmpfd));
-#endif
-
+    PyObject *address_object, *result = NULL, *record;
+    const char *uuid_text;
+    GUID uuid;
+    wchar_t *wide = NULL, host[20];
+    SOCKADDR_BTH parsed_address;
+    WSAQUERYSETW initial = {0}, *query = NULL, *replacement;
+    DWORD capacity = sizeof(WSAQUERYSETW), required, flags = LUP_FLUSHCACHE | LUP_RETURN_ALL;
+    HANDLE lookup = NULL;
+    int status, error;
+    if (!PyArg_ParseTuple(args, "Us:find_service", &address_object, &uuid_text)) return NULL;
+    if (!str2uuid(uuid_text, &uuid)) return NULL;
+    wide = PyUnicode_AsWideCharString(address_object, NULL);
+    if (wide == NULL) return NULL;
+    if (wcscmp(wide, L"localhost") == 0) {
+        PyMem_Free(wide);
+        wide = NULL;
+        if (!local_address(host, _countof(host))) return NULL;
         flags |= LUP_RES_SERVICE;
     } else {
-        wcscpy_s(localAddressBuf, _countof(localAddressBuf), addrwstr);
-    }
-
-    PyMem_Free(addrwstr);
-
-    if( strlen(uuidstr) != 36 || uuidstr[8] != '-' || uuidstr[13] != '-' 
-            || uuidstr[18] != '-' || uuidstr[23] != '-' ) {
-        PyErr_SetString( PyExc_ValueError, "Invalid UUID!");
-        return 0;
-    }
-
-    str2uuid( uuidstr, &uuid );
-    qs->lpServiceClassId = &uuid;
-
-    Py_BEGIN_ALLOW_THREADS;
-    status = WSALookupServiceBegin( qs, flags, &h );
-    Py_END_ALLOW_THREADS;
-	if( SOCKET_ERROR == status) {
-        int err_code = WSAGetLastError();
-        if( WSASERVICE_NOT_FOUND == err_code ) {
-            // this device does not advertise any services.  return an
-            // empty list
-            free( qs );
-            return PyList_New(0);
-        } else {
-            // unexpected error.  raise an exception
-            Err_SetFromWSALastError( PyExc_IOError );
-            free(qs);
-            return 0;
+        if (!address_value(address_object, &parsed_address, 0)) {
+            PyMem_Free(wide);
+            return NULL;
         }
-	}
-
-    toreturn = PyList_New(0);
-
-	// iterate through the inquiry results
-	while(! done) {
-        Py_BEGIN_ALLOW_THREADS;
-        status = WSALookupServiceNext( h, flags, &qs_len, qs );
-        Py_END_ALLOW_THREADS;
-		if (NO_ERROR == status) {
-            int proto;
-            int port;
-            PyObject *rawrecord = NULL;
-            CSADDR_INFO *csinfo = NULL;
-
-            record = PyDict_New();
-            // set host name
-            dict_set_wstrings( record, L"host", localAddressBuf );
-
-            // set service name
-            dict_set_wstrings( record, L"name", qs->lpszServiceInstanceName );
-
-            // set description
-            dict_set_wstrings( record, L"description", qs->lpszComment );
-
-            // set protocol and port
-            csinfo = qs->lpcsaBuffer;
-            if( csinfo != NULL ) {
-                proto = csinfo->iProtocol;
-                port = ((SOCKADDR_BTH*)csinfo->RemoteAddr.lpSockaddr)->port;
-
-                dict_set_str_long(record, "port", port);
-                if( proto == BTHPROTO_RFCOMM ) {
-                    dict_set_strings(record, "protocol", "RFCOMM");
-                } else if( proto == BTHPROTO_L2CAP ) {
-                    dict_set_strings(record, "protocol", "L2CAP");
-                } else {
-                    dict_set_strings(record, "protocol", "UNKNOWN");
-                    dict_set_str_pyobj(record, "port", Py_None);
-                }
-            } else { 
-                dict_set_str_pyobj(record, "port", Py_None);
-                dict_set_strings(record, "protocol", "UNKNOWN");
+        ba2wstr(parsed_address.btAddr, host, _countof(host));
+        PyMem_Free(wide);
+        wide = NULL;
+    }
+    initial.dwSize = sizeof(initial);
+    initial.dwNameSpace = NS_BTH;
+    initial.lpServiceClassId = &uuid;
+    initial.lpszContext = host;
+    MSBT_SOCKET_CALL(status, WSALookupServiceBeginW(&initial, flags, &lookup), error);
+    if (status == SOCKET_ERROR) {
+        if (error == WSASERVICE_NOT_FOUND) return PyList_New(0);
+        return msbt_error(error);
+    }
+    result = PyList_New(0);
+    if (result == NULL) goto fail;
+    query = (WSAQUERYSETW *)malloc(capacity);
+    if (query == NULL) {
+        PyErr_NoMemory();
+        goto fail;
+    }
+    for (;;) {
+        ZeroMemory(query, capacity);
+        query->dwSize = sizeof(*query);
+        required = capacity;
+        MSBT_SOCKET_CALL(status, WSALookupServiceNextW(lookup, flags, &required, query), error);
+        if (status == SOCKET_ERROR) {
+            if (error == WSA_E_NO_MORE || error == WSAENOMORE) break;
+            if (error != WSAEFAULT || required <= capacity) {
+                msbt_error(error);
+                goto fail;
             }
-
-            // add the raw service record to be parsed in python
-            rawrecord = PyBytes_FromStringAndSize( qs->lpBlob->pBlobData, 
-                    qs->lpBlob->cbSize );
-            dict_set_str_pyobj(record, "rawrecord", rawrecord);
-            Py_DECREF(rawrecord);
-
-            PyList_Append( toreturn, record );
-            Py_DECREF( record );
-		} else {
-			int error = WSAGetLastError();
-			
-			if( error == WSAEFAULT ) {
-                // the qs data structure is too small.  allocate a bigger
-                // buffer and try again.
-				free( qs );
-				qs = (WSAQUERYSET*) malloc( qs_len );
-			} else if( error == WSA_E_NO_MORE ) {
-                // no more results.
-				done = 1;
-			} else {
-                // unexpected error.  raise an exception.
-                Err_SetFromWSALastError( PyExc_IOError );
-                Py_DECREF( toreturn );
-                return 0;
-			}
-		}
-	}
-    Py_BEGIN_ALLOW_THREADS;
-	WSALookupServiceEnd( h );
-    Py_END_ALLOW_THREADS;
-	free( qs );
-
-    return toreturn;
+            replacement = (WSAQUERYSETW *)realloc(query, required);
+            if (replacement == NULL) {
+                PyErr_NoMemory();
+                goto fail;
+            }
+            query = replacement;
+            capacity = required;
+            continue;
+        }
+        record = service_record(query, host);
+        if (record == NULL) goto fail;
+        if (PyList_Append(result, record) < 0) {
+            Py_DECREF(record);
+            goto fail;
+        }
+        Py_DECREF(record);
+    }
+    free(query);
+    MSBT_SOCKET_CALL(status, WSALookupServiceEnd(lookup), error);
+    if (status == SOCKET_ERROR) {
+        Py_DECREF(result);
+        return msbt_error(error);
+    }
+    return result;
+fail:
+    free(query);
+    WSALookupServiceEnd(lookup);
+    Py_XDECREF(result);
+    return NULL;
 }
-PyDoc_STRVAR(msbt_find_service_doc, "TODO");
+PyDoc_STRVAR(msbt_find_service_doc, "Query real Windows SDP service records for a Bluetooth address.");
 
 static PyObject *
 msbt_set_service_raw(PyObject *self, PyObject *args)
 {
-    int advertise = 0;
-    WSAQUERYSET qs = { 0 };
-    WSAESETSERVICEOP op;
-
-    char *record = NULL;
-    Py_ssize_t reclen = -1;
-    BTH_SET_SERVICE *si = NULL;
-    int silen = -1;
-    ULONG sdpVersion = BTH_SDP_VERSION;
-    BLOB blob = { 0 };
-    int status = -1;
-    PyObject *result = NULL;
-    HANDLE rh = 0;
-
-    if(!PyArg_ParseTuple(args, "s#i|i", &record, &reclen, &advertise, &rh))
-        return 0;
-
-    silen = sizeof(BTH_SET_SERVICE) + reclen - 1;
-    si = (BTH_SET_SERVICE*) malloc(silen);
-    ZeroMemory( si, silen );
-
-    si->pSdpVersion = &sdpVersion;
-    si->pRecordHandle = &rh;
-    si->fCodService = 0;
-    si->Reserved;
-    si->ulRecordLength = reclen;
-    memcpy( si->pRecord, record, reclen );
-    op = advertise ? RNRSERVICE_REGISTER : RNRSERVICE_DELETE;
-
-    qs.dwSize = sizeof(qs);
-    qs.lpBlob = &blob;
-    qs.dwNameSpace = NS_BTH;
-
-    blob.cbSize = silen;
-    blob.pBlobData = (BYTE*)si;
-
-    status = WSASetService( &qs, op, 0 );
-    free( si );
-
-    if( SOCKET_ERROR == status ) {
-        Err_SetFromWSALastError( PyExc_IOError );
-        return 0;
+    Py_buffer view;
+    PyObject *handle_object = Py_None, *record;
+    HANDLE handle = NULL;
+    BTH_SET_SERVICE *service;
+    ULONG version = BTH_SDP_VERSION;
+    WSAQUERYSETW query = {0};
+    BLOB blob = {0};
+    size_t size;
+    int advertise, status, error;
+    if (!PyArg_ParseTuple(args, "s*i|O:set_service_raw", &view, &advertise, &handle_object)) return NULL;
+    if (view.len <= 0 || (size_t)view.len > ULONG_MAX - (sizeof(BTH_SET_SERVICE) - 1)) {
+        PyBuffer_Release(&view);
+        PyErr_SetString(PyExc_ValueError, "SDP record size does not fit the Windows API");
+        return NULL;
     }
-
-    return PyLong_FromLong( (unsigned long) rh );
+    if (handle_object != Py_None) {
+        handle = PyLong_AsVoidPtr(handle_object);
+        if (handle == NULL && PyErr_Occurred()) {
+            PyBuffer_Release(&view);
+            return NULL;
+        }
+    }
+    size = sizeof(BTH_SET_SERVICE) + (size_t)view.len - 1;
+    record = owned_buffer(&view);
+    if (record == NULL) return NULL;
+    service = (BTH_SET_SERVICE *)calloc(1, size);
+    if (service == NULL) {
+        Py_DECREF(record);
+        return PyErr_NoMemory();
+    }
+    service->pSdpVersion = &version;
+    service->pRecordHandle = &handle;
+    service->ulRecordLength = (ULONG)PyBytes_GET_SIZE(record);
+    memcpy(service->pRecord, PyBytes_AS_STRING(record), PyBytes_GET_SIZE(record));
+    Py_DECREF(record);
+    blob.cbSize = (ULONG)size;
+    blob.pBlobData = (BYTE *)service;
+    query.dwSize = sizeof(query);
+    query.dwNameSpace = NS_BTH;
+    query.lpBlob = &blob;
+    MSBT_SOCKET_CALL(status, WSASetServiceW(&query,
+                     advertise ? RNRSERVICE_REGISTER : RNRSERVICE_DELETE, 0), error);
+    free(service);
+    if (status == SOCKET_ERROR) return msbt_error(error);
+    return PyLong_FromVoidPtr(handle);
 }
-PyDoc_STRVAR(msbt_set_service_raw_doc, "");
-
-
+PyDoc_STRVAR(msbt_set_service_raw_doc, "Register or remove an actual Windows SDP record.");
 
 static PyObject *
 msbt_set_service(PyObject *self, PyObject *args)
 {
-    int advertise = 0;
-    WSAQUERYSET qs = { 0 };
-    WSAESETSERVICEOP op;
-
-	SOCKADDR_BTH sa = { 0 };
-	int sa_len = sizeof(sa);
-    wchar_t *service_name = NULL;
-    wchar_t *service_desc = NULL;
-    char *service_class_id_str = NULL;
-	CSADDR_INFO sockInfo = { 0 };
-    GUID uuid = { 0 };
-    int sockfd;
-
-    if(!PyArg_ParseTuple(args, "iiuus", &sockfd, &advertise, &service_name, 
-                &service_desc, &service_class_id_str))
-        return 0;
-
-    op = advertise ? RNRSERVICE_REGISTER : RNRSERVICE_DELETE;
-
-    if( SOCKET_ERROR == getsockname( sockfd, (SOCKADDR*) &sa, &sa_len ) ) {
-        Err_SetFromWSALastError( PyExc_IOError );
-        return 0;
+    PyObject *descriptor_object, *name_object, *description_object;
+    const char *uuid_text;
+    SOCKET descriptor;
+    wchar_t *name, *description;
+    int advertise, length, status, error;
+    SOCKADDR_BTH address = {0};
+    CSADDR_INFO socket_info = {0};
+    WSAQUERYSETW query = {0};
+    GUID uuid;
+    if (!PyArg_ParseTuple(args, "OiUUs:set_service", &descriptor_object, &advertise,
+                         &name_object, &description_object, &uuid_text)) return NULL;
+    if (!str2uuid(uuid_text, &uuid) || !socket_value(descriptor_object, &descriptor)) return NULL;
+    name = PyUnicode_AsWideCharString(name_object, NULL);
+    if (name == NULL) return NULL;
+    description = PyUnicode_AsWideCharString(description_object, NULL);
+    if (description == NULL) {
+        PyMem_Free(name);
+        return NULL;
     }
-
-	sockInfo.iProtocol = BTHPROTO_RFCOMM;
-	sockInfo.iSocketType = SOCK_STREAM;
-	sockInfo.LocalAddr.lpSockaddr = (LPSOCKADDR) &sa;
-	sockInfo.LocalAddr.iSockaddrLength = sizeof(sa);
-	sockInfo.RemoteAddr.lpSockaddr = (LPSOCKADDR) &sa;
-	sockInfo.RemoteAddr.iSockaddrLength = sizeof(sa);
-
-    qs.dwSize = sizeof(qs);
-    qs.dwNameSpace = NS_BTH;
-    qs.lpcsaBuffer = &sockInfo;
-    qs.lpszServiceInstanceName = service_name;
-    qs.lpszComment = service_desc;
-    str2uuid( service_class_id_str, &uuid );
-    qs.lpServiceClassId = (LPGUID) &uuid;
-    qs.dwNumberOfCsAddrs = 1;
-
-    if( SOCKET_ERROR == WSASetService( &qs, op, 0 ) ) {
-        Err_SetFromWSALastError( PyExc_IOError );
-        return 0;
+    length = sizeof(address);
+    MSBT_SOCKET_CALL(status, getsockname(descriptor, (SOCKADDR *)&address, &length), error);
+    if (status != SOCKET_ERROR && address.addressFamily != AF_BTH) {
+        status = SOCKET_ERROR;
+        error = WSAEAFNOSUPPORT;
     }
+    if (status != SOCKET_ERROR) {
+        socket_info.iProtocol = BTHPROTO_RFCOMM;
+        socket_info.iSocketType = SOCK_STREAM;
+        socket_info.LocalAddr.lpSockaddr = (SOCKADDR *)&address;
+        socket_info.LocalAddr.iSockaddrLength = sizeof(address);
+        socket_info.RemoteAddr = socket_info.LocalAddr;
+        query.dwSize = sizeof(query);
+        query.dwNameSpace = NS_BTH;
+        query.dwNumberOfCsAddrs = 1;
+        query.lpcsaBuffer = &socket_info;
+        query.lpServiceClassId = &uuid;
+        query.lpszServiceInstanceName = name;
+        query.lpszComment = description;
+        MSBT_SOCKET_CALL(status, WSASetServiceW(&query,
+                         advertise ? RNRSERVICE_REGISTER : RNRSERVICE_DELETE, 0), error);
+    }
+    PyMem_Free(name);
+    PyMem_Free(description);
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_set_service_doc, "");
+PyDoc_STRVAR(msbt_set_service_doc, "Register or remove a named RFCOMM service using the Windows SDK.");
+
+/* A timeout updates two native options. Keep these short configuration
+ * transactions consistent without serializing blocking send/recv operations. */
+static SRWLOCK socket_config_lock = SRWLOCK_INIT;
 
 static PyObject *
 msbt_setblocking(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int block = -1;
-
-    if(!PyArg_ParseTuple(args, "ii", &sockfd, &block)) return 0;
-    block = !block; //set zero to non-zero and non-zero to zero
-    ioctlsocket( sockfd, FIONBIO, &block);
-
+    PyObject *descriptor_object;
+    SOCKET descriptor;
+    int block, status, error;
+    u_long nonblocking;
+    if (!PyArg_ParseTuple(args, "Oi:setblocking", &descriptor_object, &block)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    nonblocking = block ? 0 : 1;
+    Py_BEGIN_ALLOW_THREADS
+    AcquireSRWLockExclusive(&socket_config_lock);
+    status = ioctlsocket(descriptor, FIONBIO, &nonblocking);
+    error = WSAGetLastError();
+    ReleaseSRWLockExclusive(&socket_config_lock);
+    Py_END_ALLOW_THREADS
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_setblocking_doc, "");
+PyDoc_STRVAR(msbt_setblocking_doc, "Set the shared native socket blocking mode.");
 
 static PyObject *
 msbt_settimeout(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    double secondTimeout = -1;
-    DWORD timeout = -1;
-    int timeoutLen = sizeof(DWORD);
-
-    if(!PyArg_ParseTuple(args, "id", &sockfd, &secondTimeout)) return 0;
-
-    timeout = (DWORD) (secondTimeout * 1000);
-
-    if(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, 
-                timeoutLen) != 0) {
-        Err_SetFromWSALastError( PyExc_IOError );
-        return 0;
+    PyObject *descriptor_object;
+    SOCKET descriptor;
+    double seconds, milliseconds;
+    DWORD timeout;
+    int status, error = 0;
+    if (!PyArg_ParseTuple(args, "Od:settimeout", &descriptor_object, &seconds)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    if (!Py_IS_FINITE(seconds) || seconds < 0) {
+        PyErr_SetString(PyExc_ValueError, "timeout must be finite and non-negative");
+        return NULL;
     }
-
-    if(setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, 
-                timeoutLen) != 0) {
-        Err_SetFromWSALastError( PyExc_IOError );
-        return 0;
+    milliseconds = ceil(seconds * 1000.0);
+    if (milliseconds > UINT32_MAX) {
+        PyErr_SetString(PyExc_OverflowError, "timeout exceeds the Winsock millisecond range");
+        return NULL;
     }
-
+    timeout = (DWORD)milliseconds;
+    Py_BEGIN_ALLOW_THREADS
+    AcquireSRWLockExclusive(&socket_config_lock);
+    status = setsockopt(descriptor, SOL_SOCKET, SO_RCVTIMEO,
+                        (const char *)&timeout, sizeof(timeout));
+    if (status == SOCKET_ERROR) {
+        error = WSAGetLastError();
+    } else {
+        status = setsockopt(descriptor, SOL_SOCKET, SO_SNDTIMEO,
+                            (const char *)&timeout, sizeof(timeout));
+        if (status == SOCKET_ERROR) error = WSAGetLastError();
+    }
+    ReleaseSRWLockExclusive(&socket_config_lock);
+    Py_END_ALLOW_THREADS
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-PyDoc_STRVAR(msbt_settimeout_doc, "");
+PyDoc_STRVAR(msbt_settimeout_doc, "Set native receive/send timeouts; zero means no OS timeout.");
 
 static PyObject *
 msbt_gettimeout(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    DWORD recv_timeout = -1;
-    int recv_timeoutLen = sizeof(DWORD);
-    double timeout = -1;
-
-    if(!PyArg_ParseTuple(args, "i", &sockfd)) return 0;
-
-    if(getsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&recv_timeout, 
-                &recv_timeoutLen) != 0) {
-        Err_SetFromWSALastError( PyExc_IOError );
-        return 0;
-    }
-
-    timeout = (double)recv_timeout / 1000;
-
-    return PyFloat_FromDouble(timeout);
+    PyObject *descriptor_object;
+    SOCKET descriptor;
+    DWORD timeout = 0;
+    int length = sizeof(timeout), status, error;
+    if (!PyArg_ParseTuple(args, "O:gettimeout", &descriptor_object)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    Py_BEGIN_ALLOW_THREADS
+    AcquireSRWLockShared(&socket_config_lock);
+    status = getsockopt(descriptor, SOL_SOCKET, SO_RCVTIMEO,
+                        (char *)&timeout, &length);
+    error = WSAGetLastError();
+    ReleaseSRWLockShared(&socket_config_lock);
+    Py_END_ALLOW_THREADS
+    if (status == SOCKET_ERROR) return msbt_error(error);
+    return PyFloat_FromDouble((double)timeout / 1000.0);
 }
-PyDoc_STRVAR(msbt_gettimeout_doc, "");
-
-/* s.setsockopt() method.
-   With an integer third argument, sets an integer option.
-   With a string third argument, sets an option from a buffer;
-   use optional built-in module 'struct' to encode the string. */
+PyDoc_STRVAR(msbt_gettimeout_doc, "Return the native receive timeout in seconds.");
 
 static PyObject *
-msbt_setsockopt(PyObject *s, PyObject *args)
+msbt_setsockopt(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int level;
-    ULONG optname;
-    int res;
-    ULONG flag;
-
-    if (!PyArg_ParseTuple(args, "iiIi:setsockopt", &sockfd, &level, &optname,
-            &flag)) {
-        return 0;
+    PyObject *descriptor_object, *value, *index, *owned = NULL;
+    SOCKET descriptor;
+    unsigned int option;
+    long converted;
+    int level, integer, length, status, error;
+    const char *data;
+    Py_buffer view;
+    if (!PyArg_ParseTuple(args, "OiIO:setsockopt", &descriptor_object, &level, &option, &value)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    if (PyIndex_Check(value)) {
+        index = PyNumber_Index(value);
+        if (index == NULL) return NULL;
+        converted = PyLong_AsLong(index);
+        Py_DECREF(index);
+        if (converted == -1 && PyErr_Occurred()) return NULL;
+        integer = (int)converted;
+        data = (const char *)&integer;
+        length = sizeof(integer);
+    } else {
+        if (PyObject_GetBuffer(value, &view, PyBUF_SIMPLE) < 0) return NULL;
+        if (view.len > INT_MAX) {
+            PyBuffer_Release(&view);
+            PyErr_SetString(PyExc_OverflowError, "option buffer exceeds Winsock length range");
+            return NULL;
+        }
+        length = (int)view.len;
+        owned = owned_buffer(&view);
+        if (owned == NULL) return NULL;
+        data = PyBytes_AS_STRING(owned);
     }
-    res = setsockopt(sockfd, level, optname, (char*) &flag, sizeof(ULONG));
-    if (res < 0) {
-        Err_SetFromWSALastError(PyExc_IOError);
-        return 0;
-    }
+    Py_BEGIN_ALLOW_THREADS
+    AcquireSRWLockExclusive(&socket_config_lock);
+    status = setsockopt(descriptor, level, (int)option, data, length);
+    error = WSAGetLastError();
+    ReleaseSRWLockExclusive(&socket_config_lock);
+    Py_END_ALLOW_THREADS
+    Py_XDECREF(owned);
+    if (status == SOCKET_ERROR) return msbt_error(error);
     Py_RETURN_NONE;
 }
-
-PyDoc_STRVAR(msbt_setsockopt_doc,
-"setsockopt(level, option, value)\n\
-\n\
-Set a socket option.  See the Unix manual for level and option.\n\
-The value argument can either be an integer or a string.");
-
-
-/* s.getsockopt() method.
-   With two arguments, retrieves an integer option.
-   With a third integer argument, retrieves a string buffer of that size;
-   use optional built-in module 'struct' to decode the string. */
+PyDoc_STRVAR(msbt_setsockopt_doc, "Set an integer or buffer-valued native socket option.");
 
 static PyObject *
-msbt_getsockopt(PyObject *s, PyObject *args)
+msbt_getsockopt(PyObject *self, PyObject *args)
 {
-    int sockfd = -1;
-    int level;
-    ULONG optname;
-    int res;
-    ULONG flag;
-    int flagsize = sizeof flag;
-
-    if (!PyArg_ParseTuple(args, "iiI", &sockfd, &level, &optname))
-        return 0;
-
-    res = getsockopt(sockfd, level, optname, (void *) &flag, &flagsize);
-    if (res < 0) {
-        Err_SetFromWSALastError(PyExc_IOError);
-        return 0;
+    PyObject *descriptor_object, *result = NULL;
+    SOCKET descriptor;
+    unsigned int option;
+    int level, value = 0, length, status, error;
+    Py_ssize_t requested = 0;
+    char *data;
+    if (!PyArg_ParseTuple(args, "OiI|n:getsockopt", &descriptor_object, &level, &option, &requested)) return NULL;
+    if (!socket_value(descriptor_object, &descriptor)) return NULL;
+    if (requested < 0 || requested > INT_MAX) {
+        PyErr_SetString(PyExc_ValueError, "option buffer size must be between zero and INT_MAX");
+        return NULL;
     }
-    return PyLong_FromLong(flag);
+    if (requested) {
+        result = PyBytes_FromStringAndSize(NULL, requested);
+        if (result == NULL) return NULL;
+        data = PyBytes_AS_STRING(result);
+        length = (int)requested;
+    } else {
+        data = (char *)&value;
+        length = sizeof(value);
+    }
+    Py_BEGIN_ALLOW_THREADS
+    AcquireSRWLockShared(&socket_config_lock);
+    status = getsockopt(descriptor, level, (int)option, data, &length);
+    error = WSAGetLastError();
+    ReleaseSRWLockShared(&socket_config_lock);
+    Py_END_ALLOW_THREADS
+    if (status == SOCKET_ERROR) {
+        Py_XDECREF(result);
+        return msbt_error(error);
+    }
+    if (!requested) return PyLong_FromLong(value);
+    if (length < 0 || length > requested) {
+        Py_DECREF(result);
+        return msbt_error(WSAEFAULT);
+    }
+    if (length != requested && _PyBytes_Resize(&result, length) < 0) return NULL;
+    return result;
 }
-
-PyDoc_STRVAR(msbt_getsockopt_doc,
-"getsockopt(level, option[, buffersize]) -> value\n\
-\n\
-Get a socket option.  See the Unix manual for level and option.\n\
-If a nonzero buffersize argument is given, the return value is a\n\
-string of that length; otherwise it is an integer.");
-
+PyDoc_STRVAR(msbt_getsockopt_doc, "Get an integer option or owned option bytes.");
 
 // =======================  ADMINISTRATIVE =========================
 
@@ -1058,27 +1118,16 @@ static PyMethodDef msbt_methods[] = {
     { NULL, NULL }
 };
 
-PyDoc_STRVAR(msbt_doc, "TODO\n");
+PyDoc_STRVAR(msbt_doc, "Microsoft Bluetooth APIs with owned per-call resources.");
 
-#define ADD_INT_CONSTANT(m,a) PyModule_AddIntConstant(m, #a, a)
+#define ADD_INT_CONSTANT(m, a) do { \
+    if (PyModule_AddIntConstant(m, #a, a) < 0) return -1; \
+} while (0)
 
-PyMODINIT_FUNC
-PyInit__msbt(void)
+static int
+msbt_exec(PyObject *m)
 {
-    PyObject *m;
-
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "_msbt",
-        NULL,
-        -1,
-        msbt_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
-    m = PyModule_Create(&moduledef);
+    if (!ensure_winsock()) return -1;
 
     ADD_INT_CONSTANT(m, AF_BTH);
     ADD_INT_CONSTANT(m, SOCK_STREAM);
@@ -1092,5 +1141,30 @@ PyInit__msbt(void)
     ADD_INT_CONSTANT(m, SO_BTH_MTU_MAX);
     ADD_INT_CONSTANT(m, SO_BTH_MTU_MIN);
 
-    return m;
+    return 0;
+}
+
+/* No process-global Python objects: all Python results belong to the calling
+ * interpreter. Shared Winsock startup/configuration state has native locks;
+ * detached operations retain their own buffers and caller-owned descriptors. */
+static PyModuleDef_Slot msbt_slots[] = {
+    {Py_mod_exec, msbt_exec},
+#if PY_VERSION_HEX >= 0x030C0000
+    {Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED},
+#endif
+#if PY_VERSION_HEX >= 0x030D0000
+    {Py_mod_gil, Py_MOD_GIL_NOT_USED},
+#endif
+    {0, NULL}
+};
+
+static struct PyModuleDef msbt_module = {
+    PyModuleDef_HEAD_INIT,
+    "_msbt", msbt_doc, 0, msbt_methods, msbt_slots, NULL, NULL, NULL
+};
+
+PyMODINIT_FUNC
+PyInit__msbt(void)
+{
+    return PyModuleDef_Init(&msbt_module);
 }

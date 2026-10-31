@@ -1,6 +1,7 @@
-import sys
-import struct
+from __future__ import annotations
+
 import binascii
+from typing import Dict, List, Sequence, Tuple, Union
 
 L2CAP=0
 RFCOMM=3
@@ -176,228 +177,187 @@ L2CAP_UUID     = "0100"
 IAC_GIAC = 0x9e8b33
 IAC_LIAC = 0x9e8b00
 
-class BluetoothError (IOError):
+class BluetoothError(IOError):
     pass
 
-def is_valid_address (s):
-    """returns True if address is a valid Bluetooth address.
 
-    valid address are always strings of the form XX:XX:XX:XX:XX:XX
-    where X is a hexadecimal character.  For example,
-    01:23:45:67:89:AB is a valid address, but IN:VA:LI:DA:DD:RE is not.
-
-    """
-    try:
-        pairs = s.split (":")
-        if len (pairs) != 6: return False
-        if not all(0 <= int(b, 16) <= 255 for b in pairs): return False
-    except:
+def is_valid_address(s: object) -> bool:
+    """Return whether *s* contains six colon-separated hexadecimal octets."""
+    if not isinstance(s, str):
         return False
-    return True
+    pairs = s.split(":")
+    return len(pairs) == 6 and all(
+        len(pair) == 2 and all(c in "0123456789abcdefABCDEF" for c in pair)
+        for pair in pairs
+    )
 
-def is_valid_uuid (uuid):
-    """
-    is_valid_uuid (uuid) -> bool
 
-    returns True if uuid is a valid 128-bit UUID.
-
-    valid UUIDs are always strings taking one of the following forms:
-    XXXX
-    XXXXXXXX
-    XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-    where each X is a hexadecimal digit (case insensitive)
-
-    """
-    try:
-        if len (uuid) == 4:
-            if int (uuid, 16) < 0: return False
-        elif len (uuid) == 8:
-            if int (uuid, 16) < 0: return False
-        elif len (uuid) == 36:
-            pieces = uuid.split ("-")
-            if len (pieces) != 5 or \
-                    len (pieces[0]) != 8 or \
-                    len (pieces[1]) != 4 or \
-                    len (pieces[2]) != 4 or \
-                    len (pieces[3]) != 4 or \
-                    len (pieces[4]) != 12:
-                return False
-            [ int (p, 16) for p in pieces ]
-        else:
+def is_valid_uuid(uuid: object) -> bool:
+    """Accept the Bluetooth 16-bit, 32-bit and canonical 128-bit UUID forms."""
+    if not isinstance(uuid, str):
+        return False
+    if len(uuid) in (4, 8):
+        digits = uuid
+    elif len(uuid) == 36:
+        if tuple(map(len, uuid.split("-"))) != (8, 4, 4, 4, 12):
             return False
-    except ValueError: 
+        digits = uuid.replace("-", "")
+    else:
         return False
-    except TypeError:
-        return False
-    return True
+    return all(c in "0123456789abcdefABCDEF" for c in digits)
 
-def to_full_uuid (uuid):
-    """
-    converts a short 16-bit or 32-bit reserved UUID to a full 128-bit Bluetooth
-    UUID.
 
-    """
-    if not is_valid_uuid (uuid): raise ValueError ("invalid UUID")
-    if len (uuid) == 4:
+def to_full_uuid(uuid: str) -> str:
+    """Expand a reserved UUID into the Bluetooth base UUID."""
+    if not is_valid_uuid(uuid):
+        raise ValueError("invalid UUID")
+    if len(uuid) == 4:
         return "0000%s-0000-1000-8000-00805F9B34FB" % uuid
-    elif len (uuid) == 8:
+    if len(uuid) == 8:
         return "%s-0000-1000-8000-00805F9B34FB" % uuid
-    else:
-        return uuid
+    return uuid
 
-# =============== parsing and constructing raw SDP records ============
 
-def sdp_parse_size_desc (data):
-    dts = struct.unpack ("B", data[0:1])[0]
-    dtype, dsizedesc = dts >> 3, dts & 0x7
-    dstart = 1
-    if   dtype == 0:     dsize = 0
-    elif dsizedesc == 0: dsize = 1
-    elif dsizedesc == 1: dsize = 2
-    elif dsizedesc == 2: dsize = 4
-    elif dsizedesc == 3: dsize = 8
-    elif dsizedesc == 4: dsize = 16
-    elif dsizedesc == 5:
-        dsize = struct.unpack ("B", data[1:2])[0]
-        dstart += 1
-    elif dsizedesc == 6:
-        dsize = struct.unpack ("!H", data[1:3])[0]
-        dstart += 2
-    elif dsizedesc == 7:
-        dsize = struct.unpack ("!I", data[1:5])[0]
-        dstart += 4
+# SDP strings remain bytes when decoded, as in the original public helpers.
+# Sequence elements retain their descriptor names and recursive value shape.
+SDPValue = Union[None, bool, int, str, bytes, Sequence["SDPElement"]]
+SDPElement = Tuple[str, SDPValue]
 
+
+def sdp_parse_size_desc(data: bytes) -> Tuple[int, int, int]:
+    if not data:
+        raise ValueError("missing SDP type/size descriptor")
+    dtype, descriptor = data[0] >> 3, data[0] & 7
     if dtype > 8:
-        raise ValueError ("Invalid TypeSizeDescriptor byte %s %d, %d" \
-                % (binascii.hexlify (data[0:1]), dtype, dsizedesc))
-
-    return dtype, dsize, dstart
-
-def sdp_parse_uuid (data, size):
-    if size == 2:
-        return binascii.hexlify (data)
-    elif size == 4:
-        return binascii.hexlify (data)
-    elif size == 16:
-        return "%08X-%04X-%04X-%04X-%04X%08X" % struct.unpack ("!IHHHHI", data)
-    else: return ValueError ("invalid UUID size")
-
-def sdp_parse_int (data, size, signed):
-    fmts = { 1 : "!b" , 2 : "!h" , 4 : "!i" , 8 : "!q" , 16 : "!qq" }
-    fmt = fmts[size]
-    if not signed: fmt = fmt.upper ()
-    if fmt in [ "!qq", "!QQ" ]:
-        upp, low = struct.unpack ("!QQ", data)
-        result = ( upp << 64) | low
-        if signed:
-            result=- ((~ (result-1))&0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
-        return result
+        raise ValueError("invalid SDP data type")
+    start = 1
+    if dtype == 0:
+        size = 0
+    elif descriptor <= 4:
+        size = 1 << descriptor
     else:
-        return struct.unpack (fmt, data)[0]
+        width = 1 << (descriptor - 5)
+        start += width
+        if len(data) < start:
+            raise ValueError("truncated SDP size descriptor")
+        size = int.from_bytes(data[1:start], "big")
+    return dtype, size, start
 
-def sdp_parse_data_elementSequence (data):
-    result = []
+
+def sdp_parse_uuid(data: bytes, size: int) -> Union[bytes, str]:
+    if len(data) != size:
+        raise ValueError("truncated SDP UUID")
+    if size in (2, 4):
+        return binascii.hexlify(data)
+    if size == 16:
+        text = data.hex().upper()
+        return "%s-%s-%s-%s-%s" % (
+            text[:8], text[8:12], text[12:16], text[16:20], text[20:]
+        )
+    raise ValueError("invalid UUID size")
+
+
+def sdp_parse_int(data: bytes, size: int, signed: bool) -> int:
+    if size not in (1, 2, 4, 8, 16) or len(data) != size:
+        raise ValueError("invalid or truncated SDP integer")
+    return int.from_bytes(data, "big", signed=signed)
+
+
+def sdp_parse_data_elementSequence(data: bytes) -> List[SDPElement]:
+    result: List[SDPElement] = []
     pos = 0
-    datalen = len (data)
-    while pos < datalen:
-        rtype, rval, consumed = sdp_parse_data_element (data[pos:])
+    while pos < len(data):
+        kind, value, consumed = sdp_parse_data_element(data[pos:])
         pos += consumed
-        result.append ( (rtype, rval))
+        result.append((kind, value))
     return result
 
-def sdp_parse_data_element (data):
-    dtype, dsize, dstart = sdp_parse_size_desc (data)
-    elem = data[dstart:dstart+dsize]
 
+def sdp_parse_data_element(data: bytes) -> Tuple[str, SDPValue, int]:
+    dtype, size, start = sdp_parse_size_desc(data)
+    if len(data) - start < size:
+        raise ValueError("truncated SDP data element")
+    element = data[start:start + size]
+    value: SDPValue
     if dtype == 0:
-        rtype, rval = "Nil", None
-    elif dtype == 1:
-        rtype, rval = "UInt%d"% (dsize*8), sdp_parse_int (elem, dsize, False)
-    elif dtype == 2:
-        rtype, rval = "SInt%d"% (dsize*8), sdp_parse_int (elem, dsize, True)
+        kind, value = "Nil", None
+    elif dtype in (1, 2):
+        kind = ("UInt" if dtype == 1 else "SInt") + str(size * 8)
+        value = sdp_parse_int(element, size, dtype == 2)
     elif dtype == 3:
-        rtype, rval = "UUID", sdp_parse_uuid (elem, dsize)
+        kind, value = "UUID", sdp_parse_uuid(element, size)
     elif dtype == 4:
-        rtype, rval = "String", elem
+        kind, value = "String", element
     elif dtype == 5:
-        rtype, rval = "Bool", (struct.unpack ("B", elem)[0] != 0)
-    elif dtype == 6:
-        rtype, rval = "ElemSeq", sdp_parse_data_elementSequence (elem)
-    elif dtype == 7:
-        rtype, rval = "AltElemSeq", sdp_parse_data_elementSequence (elem)
-    elif dtype == 8:
-        rtype, rval = "URL", elem
+        if size != 1:
+            raise ValueError("an SDP Boolean occupies one byte")
+        kind, value = "Bool", bool(element[0])
+    elif dtype in (6, 7):
+        kind = "ElemSeq" if dtype == 6 else "AltElemSeq"
+        value = sdp_parse_data_elementSequence(element)
+    else:
+        kind, value = "URL", element
+    return kind, value, start + size
 
-    return rtype, rval, dstart+dsize
 
-def sdp_parse_raw_record (data):
-    dtype, dsize, dstart = sdp_parse_size_desc (data)
-    assert dtype == 6
-
-    pos = dstart
-    datalen = len (data)
-    record = {}
-    while pos < datalen:
-        type, attrid, consumed = sdp_parse_data_element (data[pos:])
-        assert type == "UInt16"
+def sdp_parse_raw_record(data: bytes) -> Dict[int, SDPValue]:
+    dtype, size, start = sdp_parse_size_desc(data)
+    if len(data) - start < size:
+        raise ValueError("truncated SDP record")
+    if dtype != 6:
+        raise ValueError("an SDP record must be an element sequence")
+    pos, end = start, start + size
+    record: Dict[int, SDPValue] = {}
+    while pos < end:
+        kind, attribute, consumed = sdp_parse_data_element(data[pos:end])
+        if kind != "UInt16" or not isinstance(attribute, int):
+            raise ValueError("an SDP attribute identifier must be UInt16")
         pos += consumed
-        type, attrval, consumed = sdp_parse_data_element (data[pos:])
+        _, value, consumed = sdp_parse_data_element(data[pos:end])
         pos += consumed
-        record[attrid] = attrval
+        record[attribute] = value
     return record
 
-def sdp_make_data_element (type, value):
-    def maketsd (tdesc, sdesc):
-        return struct.pack ("B", (tdesc << 3) | sdesc)
-    def maketsdl (tdesc, size):
-        if   size < (1<<8):  return struct.pack ("!BB", tdesc << 3 | 5, size)
-        elif size < (1<<16): return struct.pack ("!BH", tdesc << 3 | 6, size)
-        else:                return struct.pack ("!BI", tdesc << 3 | 7, size)
 
-    easyinttypes = { "UInt8"   : (1, 0, "!B"),  "UInt16"  : (1, 1, "!H"),
-                     "UInt32"  : (1, 2, "!I"),  "UInt64"  : (1, 3, "!Q"),
-                     "SInt8"   : (2, 0, "!b"),  "SInt16"  : (2, 1, "!h"),
-                     "SInt32"  : (2, 2, "!i"),  "SInt64"  : (2, 3, "!q"),
-                     }
+def sdp_make_data_element(type: str, value: SDPValue) -> bytes:
+    def fixed(descriptor: int, size: int) -> bytes:
+        return bytes([(descriptor << 3) | size])
 
-    if type == "Nil": 
-        return maketsd (0, 0)
-    elif type in easyinttypes:
-        tdesc, sdesc, fmt = easyinttypes[type]
-        return maketsd (tdesc, sdesc) + struct.pack (fmt, value)
-    elif type == "UInt128":
-        ts = maketsd (1, 4)
-        upper = ts >> 64
-        lower = (ts & 0xFFFFFFFFFFFFFFFF)
-        return ts + struct.pack ("!QQ", upper, lower)
-    elif type == "SInt128":
-        ts = maketsd (2, 4)
-        # FIXME
-        raise NotImplementedError ("128-bit signed int NYI!")
-    elif type == "UUID":
-        if len (value) == 4:
-            return maketsd (3, 1) + binascii.unhexlify (value)
-        elif len (value) == 8:
-            return maketsd (3, 2) + binascii.unhexlify (value)
-        elif len (value) == 36:
-            return maketsd (3, 4) + binascii.unhexlify (value.replace ("-",""))
-    elif type == "String":
-        return maketsdl (4, len (value)) + str.encode(value)
-    elif type == "Bool":
-        return maketsd (5,0) + (value and "\x01" or "\x00")
-    elif type == "ElemSeq":
-        packedseq = bytes()
-        for subtype, subval in value:
-            nextelem = sdp_make_data_element (subtype, subval)
-            packedseq = packedseq + nextelem
-        return maketsdl (6, len (packedseq)) + packedseq
-    elif type == "AltElemSeq":
-        packedseq = bytes()
-        for subtype, subval in value:
-            packedseq = packedseq + sdp_make_data_element (subtype, subval)
-        return maketsdl (7, len (packedseq)) + packedseq
-    elif type == "URL":
-        return maketsdl (8, len (value)) + value
-    else:
-        raise ValueError ("invalid type %s" % type)
+    def variable(descriptor: int, payload: bytes) -> bytes:
+        size = len(payload)
+        for width, size_descriptor in ((1, 5), (2, 6), (4, 7)):
+            if size < 1 << (width * 8):
+                return fixed(descriptor, size_descriptor) + size.to_bytes(width, "big") + payload
+        raise OverflowError("SDP element exceeds its 32-bit length range")
 
+    integer_types = {
+        "UInt8": (1, 0), "UInt16": (1, 1), "UInt32": (1, 2),
+        "UInt64": (1, 3), "UInt128": (1, 4),
+        "SInt8": (2, 0), "SInt16": (2, 1), "SInt32": (2, 2),
+        "SInt64": (2, 3), "SInt128": (2, 4),
+    }
+    if type == "Nil":
+        return fixed(0, 0)
+    if type in integer_types:
+        if not isinstance(value, int):
+            raise TypeError("an SDP integer requires an integer value")
+        descriptor, size = integer_types[type]
+        return fixed(descriptor, size) + value.to_bytes(1 << size, "big", signed=descriptor == 2)
+    if type == "UUID":
+        if not isinstance(value, str) or not is_valid_uuid(value):
+            raise ValueError("invalid SDP UUID")
+        payload = binascii.unhexlify(value.replace("-", ""))
+        return fixed(3, {2: 1, 4: 2, 16: 4}[len(payload)]) + payload
+    if type in ("String", "URL"):
+        if not isinstance(value, (str, bytes)):
+            raise TypeError("an SDP string requires text or bytes")
+        payload = value.encode("utf-8") if isinstance(value, str) else value
+        return variable(4 if type == "String" else 8, payload)
+    if type == "Bool":
+        return fixed(5, 0) + bytes([bool(value)])
+    if type in ("ElemSeq", "AltElemSeq"):
+        if value is None or isinstance(value, (int, str, bytes)):
+            raise TypeError("an SDP sequence requires descriptor/value pairs")
+        payload = b"".join(sdp_make_data_element(kind, item) for kind, item in tuple(value))
+        return variable(6 if type == "ElemSeq" else 7, payload)
+    raise ValueError("invalid SDP type %s" % type)

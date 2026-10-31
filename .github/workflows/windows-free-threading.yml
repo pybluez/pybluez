@@ -1,0 +1,23 @@
+name: Windows native free-threading
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  native-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: 3.15t
+      - name: Build and install the actual native extension
+        run: python -m pip install .
+      - name: Actual Winsock, ownership, concurrency and independent interpreters
+        run: python -I -B -m unittest discover -s tests -p "test_msbt_free_threading.py" -v
+      - name: Actual SDP binary encoders and parsers
+        run: python -I -B -m unittest discover -s tests -p "test_sdp_codec.py" -v
+      - run: python -m pip check
